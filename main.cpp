@@ -1,27 +1,49 @@
-/*******************************************************************************************
-*
-*   raylib [core] example - 3d camera mode
-*
-*   Example complexity rating: [★☆☆☆] 1/4
-*
-*   Example originally created with raylib 1.0, last time updated with raylib 1.0
-*
-*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
-*   BSD-like license that allows static linking with closed source software
-*
-*   Copyright (c) 2014-2025 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-
 #include "raylib.h"
+#include <iostream>
+#include <vector>
 
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
+
+struct TransformComponent {
+    Vector3 pos;
+    Vector3 rot;
+    Vector3 scale;
+};
+
+void RenderSystem(std::vector<TransformComponent> iter, Camera3D camera) {
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        BeginMode3D(camera);
+            // Draw each entity in the scene
+            for (TransformComponent comp: iter) {
+                DrawCube(comp.pos, 2.0f, 2.0f, 2.0f, RED);
+                DrawCubeWires(comp.pos, 2.0f, 2.0f, 2.0f, MAROON);
+            }
+            DrawGrid(10, 1.0f);
+        EndMode3D();
+        DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
+        DrawFPS(10, 10);
+    EndDrawing();
+}
+
+void MovementSystem(std::vector<TransformComponent> &iter) {
+    for (TransformComponent &comp: iter) {
+        if (IsKeyDown(KEY_W)) {
+            comp.pos.z -= 0.1;
+        }
+        if (IsKeyDown(KEY_S)) {
+            comp.pos.z += 0.1;
+        }
+        if (IsKeyDown(KEY_D)) {
+            comp.pos.x += 0.1;
+        }
+        if (IsKeyDown(KEY_A)) {
+            comp.pos.x -= 0.1;
+        }
+    }
+}
+
 int main(void)
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 450;
 
@@ -35,46 +57,22 @@ int main(void)
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
 
-    Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
+    TransformComponent transformComp = {
+         {0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {1.0f, 1.0f, 1.0f}
+    };
+    std::vector<TransformComponent> transformComps;
+    transformComps.push_back(transformComp);
 
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+    SetTargetFPS(60);
 
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose())
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            BeginMode3D(camera);
-
-                DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-                DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
-
-                DrawGrid(10, 1.0f);
-
-            EndMode3D();
-
-            DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
-
-            DrawFPS(10, 10);
-
-        EndDrawing();
-        //----------------------------------------------------------------------------------
+        MovementSystem(transformComps);
+        RenderSystem(transformComps, camera);
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    CloseWindow();
 
     return 0;
 }
