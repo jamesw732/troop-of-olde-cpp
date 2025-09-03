@@ -1,7 +1,7 @@
 #include "raylib.h"
+#include "flecs.h"
 #include <iostream>
 #include <vector>
-
 
 struct TransformComponent {
     Vector3 pos;
@@ -46,8 +46,9 @@ int main(void)
 {
     const int screenWidth = 800;
     const int screenHeight = 450;
-
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera mode");
+
+    flecs::world world;
 
     // Define the camera to look into our 3d world
     Camera3D camera = { 0 };
