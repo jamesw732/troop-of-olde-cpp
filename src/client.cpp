@@ -1,21 +1,26 @@
-#include "raylib.h"
-#include "raymath.h"
-#include "flecs.h"
+#include <array>
+#include <cstdint>
 #include <iostream>
+#include <bitset>
+
+#include "raylib-cpp.hpp"
+#include "flecs.h"
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
 const float MOVE_UPDATE_RATE = 1.0 / 20.0;
 
-typedef Vector3 Velocity;
+typedef std::array<std::int8_t, 2> KeyboardMovement; // x z
+typedef raylib::Vector3 Velocity;
 
 struct Transformation {
-    Vector3 pos;
-    Vector3 rot;
-    Vector3 scale;
+    raylib::Vector3 pos;
+    raylib::Vector3 rot;
+    raylib::Vector3 scale;
 };
 
 class InputHandler {
+    // Should this just be a system that operates on only the player character?
     public:
     ENetHost* client;
     ENetPeer* peer;
@@ -26,27 +31,24 @@ class InputHandler {
         : client(_client), peer(_peer), world(_world), character(_character) {}
 
     void process_movement_inputs() {
-        Velocity w_vel = Vector3Scale(Velocity({0.0f, 0.0f, -0.25f}), IsKeyDown(KEY_W));
-        Velocity s_vel = Vector3Scale(Velocity({0.0f, 0.0f, 0.25f}), IsKeyDown(KEY_S));
-        Velocity d_vel = Vector3Scale(Velocity({0.25f, 0.0f, 0.0f}), IsKeyDown(KEY_D));
-        Velocity a_vel = Vector3Scale(Velocity({-0.25f, 0.0f, 0.0f}), IsKeyDown(KEY_A));
-        character.set<Velocity>(
-            Vector3Add(w_vel,
-                Vector3Add(s_vel,
-                    Vector3Add(d_vel, a_vel)
-                )
-            )
-        );
-        if (!Vector3Equals(character.get<Velocity>(), Vector3Zero())) {
-            std::string msg = "I'm trying to move!";
-            ENetPacket* packet = enet_packet_create(msg.c_str(), msg.length() + 1, 0);
-            // ENetPacket* packet = enet_packet_create("I'm trying to move!", strlen("I'm trying to move!") + 1, 0);
-            enet_peer_send(peer, 0, packet);
+        KeyboardMovement km{0, 0};
+        if (IsKeyDown(KEY_W)) {
+            km[1]--;
         }
+        if (IsKeyDown(KEY_S)) {
+            km[1]++;
+        }
+        if (IsKeyDown(KEY_A)) {
+            km[0]--;
+        }
+        if (IsKeyDown(KEY_D)) {
+            km[0]++;
+        }
+        character.set<KeyboardMovement>(km);
     }
 };
 
-std::string vector3_to_string(Vector3& v) {
+std::string vector3_to_string(raylib::Vector3& v) {
     return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
 }
 
@@ -60,45 +62,11 @@ int main(void)
 
     // Initialize camera attributes
     Camera3D camera = { 0 };
-    camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };  // Camera position
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };      // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+    camera.position = raylib::Vector3(0.0f, 10.0f, 10.0f);
+    camera.target = raylib::Vector3(0.0f, 0.0f, 0.0f);      // Camera looking at point
+    camera.up = raylib::Vector3(0.0f, 1.0f, 0.0f);
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
-
-    // Initialize ECS world and systems
-    flecs::world world;
-
-    auto move_sys = world.system<Transformation, Velocity>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Transformation& t, Velocity& v) {
-                t.pos = Vector3Add(t.pos, v);
-                // std::cout << vector3_to_string(v) << std::endl;
-            }
-        );
-    auto render_sys = world.system<Transformation>()
-        .each([&camera](flecs::iter& it, size_t, Transformation& t) {
-                BeginMode3D(camera);
-                    DrawCube(t.pos, 2.0f, 2.0f, 2.0f, RED);
-                    DrawCubeWires(t.pos, 2.0f, 2.0f, 2.0f, MAROON);
-                EndMode3D();
-            }
-        );
-
-
-    // TEMPORARY: Initialize player character
-    // TODO: Character should be created by server
-    Transformation transformComp = {
-         {0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {1.0f, 1.0f, 1.0f}
-    };
-
-    auto e = world.entity("character");
-    e.add<Transformation>();
-    e.set<Transformation>(transformComp);
-    e.add<Velocity>();
-    e.set<Velocity>({0.0f, 0.0f, 0.0f});
 
     // Initialize ENet client
     if (enet_initialize() != 0) {
@@ -137,6 +105,48 @@ int main(void)
         enet_peer_reset(peer);
         std::cout << "Connection to Troop of Olde server failed." << std::endl;
     }
+
+    // Initialize ECS world and systems
+    flecs::world world;
+
+    auto move_sys = world.system<Transformation, KeyboardMovement>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&peer](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
+                // CHANGE
+                raylib::Vector3 velocity((float) km[0], 0, (float) km[1]);
+                velocity = velocity.Normalize();
+                velocity = velocity * 0.25;
+
+                t.pos += velocity;
+
+                ENetPacket* packet = enet_packet_create(km.data(), km.size() * sizeof(std::int8_t), 0);
+                enet_peer_send(peer, 0, packet);
+            }
+        );
+    auto render_sys = world.system<Transformation>()
+        .each([&camera](flecs::iter& it, size_t, Transformation& t) {
+                BeginMode3D(camera);
+                    DrawCube(t.pos, 2.0f, 2.0f, 2.0f, RED);
+                    DrawCubeWires(t.pos, 2.0f, 2.0f, 2.0f, MAROON);
+                EndMode3D();
+            }
+        );
+
+    // TEMPORARY: Initialize player character
+    // TODO: Character should be created by server
+    Transformation transformComp = {
+         {0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {1.0f, 1.0f, 1.0f}
+    };
+
+    auto e = world.entity("character");
+    e.add<Transformation>();
+    e.set<Transformation>(transformComp);
+    e.add<Velocity>();
+    e.set<Velocity>({0.0f, 0.0f, 0.0f});
+    e.add<KeyboardMovement>();
+    e.set<KeyboardMovement>({0, 0});
 
     // Initialize input handler
     InputHandler input_handler(client, peer, world, e);

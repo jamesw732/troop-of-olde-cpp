@@ -1,22 +1,30 @@
-#include "raylib.h"
+#include <cstdint>
+#include <iostream>
+#include <array>
+#include <bitset>
+
+#include "raylib-cpp.hpp"
 #include "flecs.h"
 #define ENET_IMPLEMENTATION
 #include "enet.h"
-#include <iostream>
 
 const float MOVE_UPDATE_RATE = 1.0 / 20.0;
 
+typedef raylib::Vector3 Velocity;
+typedef std::array<std::int8_t, 2> KeyboardMovement; // x z
+
 struct Transformation {
-    Vector3 pos;
-    Vector3 rot;
-    Vector3 scale;
+    raylib::Vector3 pos;
+    raylib::Vector3 rot;
+    raylib::Vector3 scale;
 };
+
+std::string vector3_to_string(raylib::Vector3& v) {
+    return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
+}
 
 int main(void)
 {
-    // Initialize ECS world and systems
-    flecs::world world;
-
     // Create ENet server
     if (enet_initialize() != 0) {
         std::cout << "An error occurred while initializing ENET." << std::endl;
@@ -36,6 +44,33 @@ int main(void)
     }
     std::cout << "Started a server..." << std::endl;
     ENetEvent event;
+    // Initialize ECS world and systems
+    flecs::world world;
+
+    auto move_sys = world.system<Transformation, KeyboardMovement>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
+                raylib::Vector3 velocity((float) km[0], 0, (float) km[1]);
+                velocity = velocity.Normalize();
+                velocity = velocity * 0.25;
+
+                t.pos += velocity;
+            }
+        );
+
+    // TEMPORARY: Initialize player character
+    // TODO: Character should be created by server
+    Transformation transformComp = {
+         {0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {1.0f, 1.0f, 1.0f}
+    };
+
+    auto e = world.entity("character");
+    e.add<Transformation>();
+    e.set<Transformation>(transformComp);
+    e.add<KeyboardMovement>();
+    e.set<KeyboardMovement>({0, 0});
 
     // Main game loop
     while (true)
@@ -54,19 +89,21 @@ int main(void)
                     event.peer->data = (void*) "Client";
                     break;
 
-                case ENET_EVENT_TYPE_RECEIVE:
-                    std::cout << "A packet of length "
-                        << event.packet->dataLength
-                        << " containing "
-                        << event.packet->data
-                        << " was received from "
-                        << (char*) event.peer->data
-                        << " on channel "
-                        << event.channelID
-                        << std::endl;
+                case ENET_EVENT_TYPE_RECEIVE: {
+                    std::int8_t* data = reinterpret_cast<int8_t*>(event.packet->data);
+                    KeyboardMovement km;
+                    km[0] = data[0];
+                    km[1] = data[1];
+                    e.set<KeyboardMovement>(km);
+                    // std::cout << "Received movement input:"
+                    //     << (int) km[0]
+                    //     << ", "
+                    //     << (int) km[1]
+                    //     << std::endl;
                     /* Clean up the packet now that we're done using it. */
                     enet_packet_destroy (event.packet);
                     break;
+                }
 
                 case ENET_EVENT_TYPE_DISCONNECT:
                     printf("%s disconnected.\n", (char*) event.peer->data);
@@ -85,6 +122,9 @@ int main(void)
             }
         }
         world.progress(dt);
+        // Transformation trans = e.get<Transformation>();
+        // raylib::Vector3 pos = trans.pos;
+        // std::cout << vector3_to_string(pos) << std::endl;
     }
 
     return 0;
