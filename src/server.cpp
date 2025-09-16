@@ -8,20 +8,11 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-const float MOVE_UPDATE_RATE = 1.0 / 20.0;
+#include "server/systems/movement_system.hpp"
+#include "shared/components/physics.hpp"
+#include "shared/const.hpp"
+#include "shared/util.hpp"
 
-typedef raylib::Vector3 Velocity;
-typedef std::array<std::int8_t, 2> KeyboardMovement; // x z
-
-struct Transformation {
-    raylib::Vector3 pos;
-    raylib::Vector3 rot;
-    raylib::Vector3 scale;
-};
-
-std::string vector3_to_string(raylib::Vector3& v) {
-    return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
-}
 
 int main(void)
 {
@@ -50,11 +41,7 @@ int main(void)
     auto move_sys = world.system<Transformation, KeyboardMovement>()
         .interval(MOVE_UPDATE_RATE)
         .each([](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
-                raylib::Vector3 velocity((float) km[0], 0, (float) km[1]);
-                velocity = velocity.Normalize();
-                velocity = velocity * 0.25;
-
-                t.pos += velocity;
+                movement_system(t, km);
             }
         );
 

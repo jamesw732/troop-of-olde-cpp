@@ -8,49 +8,13 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-const float MOVE_UPDATE_RATE = 1.0 / 20.0;
+#include "client/input_handler.hpp"
+#include "client/systems/movement_system.hpp"
+#include "client/systems/render_system.hpp"
+#include "shared/components/physics.hpp"
+#include "shared/const.hpp"
+#include "shared/util.hpp"
 
-typedef std::array<std::int8_t, 2> KeyboardMovement; // x z
-typedef raylib::Vector3 Velocity;
-
-struct Transformation {
-    raylib::Vector3 pos;
-    raylib::Vector3 rot;
-    raylib::Vector3 scale;
-};
-
-class InputHandler {
-    // Should this just be a system that operates on only the player character?
-    public:
-    ENetHost* client;
-    ENetPeer* peer;
-    flecs::world& world;
-    flecs::entity& character;
-
-    InputHandler(ENetHost* _client, ENetPeer* _peer, flecs::world& _world, flecs::entity& _character)
-        : client(_client), peer(_peer), world(_world), character(_character) {}
-
-    void process_movement_inputs() {
-        KeyboardMovement km{0, 0};
-        if (IsKeyDown(KEY_W)) {
-            km[1]--;
-        }
-        if (IsKeyDown(KEY_S)) {
-            km[1]++;
-        }
-        if (IsKeyDown(KEY_A)) {
-            km[0]--;
-        }
-        if (IsKeyDown(KEY_D)) {
-            km[0]++;
-        }
-        character.set<KeyboardMovement>(km);
-    }
-};
-
-std::string vector3_to_string(raylib::Vector3& v) {
-    return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
-}
 
 int main(void)
 {
@@ -112,23 +76,12 @@ int main(void)
     auto move_sys = world.system<Transformation, KeyboardMovement>()
         .interval(MOVE_UPDATE_RATE)
         .each([&peer](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
-                // CHANGE
-                raylib::Vector3 velocity((float) km[0], 0, (float) km[1]);
-                velocity = velocity.Normalize();
-                velocity = velocity * 0.25;
-
-                t.pos += velocity;
-
-                ENetPacket* packet = enet_packet_create(km.data(), km.size() * sizeof(std::int8_t), 0);
-                enet_peer_send(peer, 0, packet);
+                movement_system(peer, t, km);
             }
         );
     auto render_sys = world.system<Transformation>()
         .each([&camera](flecs::iter& it, size_t, Transformation& t) {
-                BeginMode3D(camera);
-                    DrawCube(t.pos, 2.0f, 2.0f, 2.0f, RED);
-                    DrawCubeWires(t.pos, 2.0f, 2.0f, 2.0f, MAROON);
-                EndMode3D();
+                render_system(camera, t);
             }
         );
 
