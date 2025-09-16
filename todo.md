@@ -19,11 +19,11 @@ pure functions.
 
 0. Rename KeyboardMovement to MovementInput, this will eventually encode keyboard movement, keyboard
 rotation, and mouse rotation (the latter two aren't even implemented client-side). These will be
-stored in a MovementInputBuffer for redundant input networking, but this is unnecessary right now.
+stored in a MovementInputBuffer for redundant input networking, but this is unnecessary right now. (Done)
 1. Movement inputs system: mutates the singleton MovementInput with the current keyboard (and eventually
-mouse) input state.
+mouse) input state. (Done)
 2. Movement system: reads from the singleton MovementInput and player character's position
-(and eventually rotation, and server offsets) 
+(and eventually rotation, and server offsets). (Was already done)
 3. Movement networking system: reads from the singleton MovementInput to send inputs to server
 
 

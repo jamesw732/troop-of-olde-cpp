@@ -73,18 +73,6 @@ int main(void)
     // Initialize ECS world and systems
     flecs::world world;
 
-    auto move_sys = world.system<Transformation, MovementInput>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&peer](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
-                movement_system(peer, t, input);
-            }
-        );
-    auto render_sys = world.system<Transformation>()
-        .each([&camera](flecs::iter& it, size_t, Transformation& t) {
-                render_system(camera, t);
-            }
-        );
-
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
     Transformation transformComp = {
@@ -102,7 +90,25 @@ int main(void)
     e.set<MovementInput>({0, 0});
 
     // Initialize input handler
-    InputHandler input_handler(client, peer, world, e);
+    InputHandler input_handler;
+
+    auto move_input_sys = world.system<MovementInput>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&input_handler](flecs::iter& it, size_t, MovementInput& input) {
+            input = input_handler.process_movement_inputs();
+            }
+        );
+    auto move_sys = world.system<Transformation, MovementInput>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&peer](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
+                movement_system(peer, t, input);
+            }
+        );
+    auto render_sys = world.system<Transformation>()
+        .each([&camera](flecs::iter& it, size_t, Transformation& t) {
+                render_system(camera, t);
+            }
+        );
 
     // Main game loop
     while (!WindowShouldClose())
@@ -111,8 +117,6 @@ int main(void)
         while (enet_host_service(client, &event, 0) > 0) {
 
         }
-        // Handle inputs
-        input_handler.process_movement_inputs();
         // Progress all ECS timers
         world.progress(dt);
         // Do rendering
