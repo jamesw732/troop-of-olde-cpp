@@ -5,4 +5,4 @@
 #include "shared/components/physics.hpp"
 
 
-void movement_system(ENetPeer* peer, Transformation& t, MovementInput& input);
+void movement_system(Transformation& t, MovementInput& input);

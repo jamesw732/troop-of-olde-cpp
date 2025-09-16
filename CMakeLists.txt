@@ -19,6 +19,7 @@ target_include_directories(shared PUBLIC ${CMAKE_SOURCE_DIR}/src)
 add_library(client-lib
     ${CLIENT_DIR}/systems/movement_system.cpp
     ${CLIENT_DIR}/systems/render_system.cpp
+    ${CLIENT_DIR}/systems/movement_networking_system.cpp
 )
 target_link_libraries(client-lib PUBLIC shared)
 target_include_directories(client-lib PUBLIC ${CMAKE_SOURCE_DIR}/src)

@@ -9,6 +9,7 @@
 #include "enet.h"
 
 #include "client/input_handler.hpp"
+#include "client/systems/movement_networking_system.hpp"
 #include "client/systems/movement_system.hpp"
 #include "client/systems/render_system.hpp"
 #include "shared/components/physics.hpp"
@@ -100,8 +101,14 @@ int main(void)
         );
     auto move_sys = world.system<Transformation, MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&peer](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
-                movement_system(peer, t, input);
+        .each([](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
+                movement_system(t, input);
+            }
+        );
+    auto move_networking_sys = world.system<MovementInput>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([peer](flecs::iter& it, size_t, MovementInput& input) {
+                movement_networking_system(peer, input);
             }
         );
     auto render_sys = world.system<Transformation>()
