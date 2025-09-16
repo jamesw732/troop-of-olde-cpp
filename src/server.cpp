@@ -38,10 +38,10 @@ int main(void)
     // Initialize ECS world and systems
     flecs::world world;
 
-    auto move_sys = world.system<Transformation, KeyboardMovement>()
+    auto move_sys = world.system<Transformation, MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
-                movement_system(t, km);
+        .each([](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
+                movement_system(t, input);
             }
         );
 
@@ -56,8 +56,8 @@ int main(void)
     auto e = world.entity("character");
     e.add<Transformation>();
     e.set<Transformation>(transformComp);
-    e.add<KeyboardMovement>();
-    e.set<KeyboardMovement>({0, 0});
+    e.add<MovementInput>();
+    e.set<MovementInput>({0, 0});
 
     // Main game loop
     while (true)
@@ -78,14 +78,14 @@ int main(void)
 
                 case ENET_EVENT_TYPE_RECEIVE: {
                     std::int8_t* data = reinterpret_cast<int8_t*>(event.packet->data);
-                    KeyboardMovement km;
-                    km[0] = data[0];
-                    km[1] = data[1];
-                    e.set<KeyboardMovement>(km);
+                    MovementInput input;
+                    input[0] = data[0];
+                    input[1] = data[1];
+                    e.set<MovementInput>(input);
                     // std::cout << "Received movement input:"
-                    //     << (int) km[0]
+                    //     << (int) input[0]
                     //     << ", "
-                    //     << (int) km[1]
+                    //     << (int) input[1]
                     //     << std::endl;
                     /* Clean up the packet now that we're done using it. */
                     enet_packet_destroy (event.packet);

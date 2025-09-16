@@ -19,19 +19,19 @@ class InputHandler {
         : client(_client), peer(_peer), world(_world), character(_character) {}
 
     void process_movement_inputs() {
-        KeyboardMovement km{0, 0};
+        MovementInput input{0, 0};
         if (IsKeyDown(KEY_W)) {
-            km[1]--;
+            input[1]--;
         }
         if (IsKeyDown(KEY_S)) {
-            km[1]++;
+            input[1]++;
         }
         if (IsKeyDown(KEY_A)) {
-            km[0]--;
+            input[0]--;
         }
         if (IsKeyDown(KEY_D)) {
-            km[0]++;
+            input[0]++;
         }
-        character.set<KeyboardMovement>(km);
+        character.set<MovementInput>(input);
     }
 };

@@ -4,7 +4,7 @@
 
 #include "raylib-cpp.hpp"
 
-typedef std::array<std::int8_t, 2> KeyboardMovement; // x z
+typedef std::array<std::int8_t, 2> MovementInput; // x z
 typedef raylib::Vector3 Velocity;
 
 struct Transformation {

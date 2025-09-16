@@ -73,10 +73,10 @@ int main(void)
     // Initialize ECS world and systems
     flecs::world world;
 
-    auto move_sys = world.system<Transformation, KeyboardMovement>()
+    auto move_sys = world.system<Transformation, MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&peer](flecs::iter& it, size_t, Transformation& t, KeyboardMovement& km) {
-                movement_system(peer, t, km);
+        .each([&peer](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
+                movement_system(peer, t, input);
             }
         );
     auto render_sys = world.system<Transformation>()
@@ -98,8 +98,8 @@ int main(void)
     e.set<Transformation>(transformComp);
     e.add<Velocity>();
     e.set<Velocity>({0.0f, 0.0f, 0.0f});
-    e.add<KeyboardMovement>();
-    e.set<KeyboardMovement>({0, 0});
+    e.add<MovementInput>();
+    e.set<MovementInput>({0, 0});
 
     // Initialize input handler
     InputHandler input_handler(client, peer, world, e);
