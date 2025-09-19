@@ -93,26 +93,35 @@ int main(void)
     // Initialize input handler
     InputHandler input_handler;
 
+    // Initialize movement systems
+    uint16_t movement_tick = 0;
+    auto move_tick_sys = world.system()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&movement_tick]() {
+                movement_tick++;
+            }
+        );
     auto move_input_sys = world.system<MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_handler](flecs::iter& it, size_t, MovementInput& input) {
+        .each([&input_handler](MovementInput& input) {
             input = input_handler.process_movement_inputs();
             }
         );
     auto move_sys = world.system<Transformation, MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
+        .each([](Transformation& t, MovementInput& input) {
                 movement_system(t, input);
             }
         );
     auto move_networking_sys = world.system<MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([peer](flecs::iter& it, size_t, MovementInput& input) {
+        .each([&peer](MovementInput& input) {
                 movement_networking_system(peer, input);
             }
         );
+    // Initialize render system
     auto render_sys = world.system<Transformation>()
-        .each([&camera](flecs::iter& it, size_t, Transformation& t) {
+        .each([&camera](Transformation& t) {
                 render_system(camera, t);
             }
         );
