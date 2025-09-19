@@ -122,7 +122,31 @@ int main(void)
     {
         float dt = GetFrameTime();
         while (enet_host_service(client, &event, 0) > 0) {
-
+            switch (event.type) {
+                case ENET_EVENT_TYPE_CONNECT: {
+                    break;
+                }
+                case ENET_EVENT_TYPE_RECEIVE: {
+                    raylib::Vector3 pos;
+                    uint8_t* buf = event.packet->data;
+                    memcpy(&pos.x, buf, sizeof(float));
+                    memcpy(&pos.y, buf + sizeof(float), sizeof(float));
+                    memcpy(&pos.z, buf + 2 * sizeof(float), sizeof(float));
+                    std::cout << "Received position "
+                        << vector3_to_string(pos)
+                        << " from server."
+                        << std::endl;
+                }
+                case ENET_EVENT_TYPE_DISCONNECT: {
+                    break;
+                }
+                case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT: {
+                    break;
+                }
+                case ENET_EVENT_TYPE_NONE: {
+                    break;
+                }
+            }
         }
         // Progress all ECS timers
         world.progress(dt);

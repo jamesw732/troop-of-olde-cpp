@@ -2,13 +2,16 @@
 #include <iostream>
 #include <array>
 #include <bitset>
+#include <string>
 
 #include "raylib-cpp.hpp"
 #include "flecs.h"
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
+#include "server/components/networking.hpp"
 #include "server/systems/movement_system.hpp"
+#include "server/systems/movement_networking_system.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
@@ -44,20 +47,12 @@ int main(void)
                 movement_system(t, input);
             }
         );
-
-    // TEMPORARY: Initialize player character
-    // TODO: Character should be created by server
-    Transformation transformComp = {
-         {0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {1.0f, 1.0f, 1.0f}
-    };
-
-    auto e = world.entity("character");
-    e.add<Transformation>();
-    e.set<Transformation>(transformComp);
-    e.add<MovementInput>();
-    e.set<MovementInput>({0, 0});
+    auto move_networking_sys = world.system<Connection, Transformation>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([](flecs::iter& it, size_t, Connection& conn, Transformation& t) {
+                movement_networking_system(conn.peer, t);
+            }
+        );
 
     // Main game loop
     while (true)
@@ -66,41 +61,64 @@ int main(void)
         // Process networking events
         while (enet_host_service(server, &event, 0) > 0) {
             switch (event.type) {
-                case ENET_EVENT_TYPE_CONNECT:
+                case ENET_EVENT_TYPE_CONNECT: {
                     std::cout << "A new client connected from "
                         <<  event.peer->address.host.__in6_u.__u6_addr8
                         << ":"
                         << event.peer->address.port
                         << "." << std::endl;
-                    /* Store any relevant client information here. */
-                    event.peer->data = (void*) "Client";
+                    auto e = world.entity();
+                    e.add<Transformation>();
+                    e.set<Transformation>({
+                         {0.0f, 0.0f, 0.0f},
+                         {0.0f, 0.0f, 0.0f},
+                         {1.0f, 1.0f, 1.0f}
+                    });
+                    e.add<MovementInput>();
+                    e.set<MovementInput>({0, 0});
+                    e.add<Connection>();
+                    e.set<Connection>({event.peer});
+                    event.peer->data = (void*) e.raw_id();
                     break;
+                }
 
                 case ENET_EVENT_TYPE_RECEIVE: {
+                  /* 
+                   * Handle movement input from client, doesn't handle any other packets
+                   * Assumes movement inputs are evenly spaced, once per movement tick,
+                   * and always arrive in order
+                   * Eventually, these will be fed into a movement input buffer
+                   */
+                    auto id = (ecs_entity_t)(uintptr_t) event.peer->data;
+                    flecs::entity e(world, id);
                     std::int8_t* data = reinterpret_cast<int8_t*>(event.packet->data);
                     MovementInput input;
                     input[0] = data[0];
                     input[1] = data[1];
                     e.set<MovementInput>(input);
-                    // std::cout << "Received movement input:"
-                    //     << (int) input[0]
-                    //     << ", "
-                    //     << (int) input[1]
-                    //     << std::endl;
+                    std::cout << "Received movement input:"
+                        << (int) input[0]
+                        << ", "
+                        << (int) input[1]
+                        << std::endl;
                     /* Clean up the packet now that we're done using it. */
                     enet_packet_destroy (event.packet);
                     break;
                 }
 
                 case ENET_EVENT_TYPE_DISCONNECT:
-                    printf("%s disconnected.\n", (char*) event.peer->data);
-                    /* Reset the peer's client information. */
+                    std::cout << "Client with Entity id "
+                        << (ecs_entity_t)(uintptr_t) event.peer->data
+                        << " disconnected."
+                        << std::endl;
                     event.peer->data = NULL;
                     break;
 
                 case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
-                    printf("%s disconnected due to timeout.\n", (char*) event.peer->data);
-                    /* Reset the peer's client information. */
+                    std::cout << "Client with Entity id "
+                        << (ecs_entity_t)(uintptr_t) event.peer->data
+                        << " disconnected due to timeout."
+                        << std::endl;
                     event.peer->data = NULL;
                     break;
 

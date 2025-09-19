@@ -28,6 +28,7 @@ target_include_directories(client-lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
 # Create server library
 add_library(server-lib
     ${SERVER_DIR}/systems/movement_system.cpp
+    ${SERVER_DIR}/systems/movement_networking_system.cpp
 )
 target_link_libraries(server-lib PUBLIC shared)
 target_include_directories(server-lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
