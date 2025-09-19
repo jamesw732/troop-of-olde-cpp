@@ -40,10 +40,16 @@ target_link_libraries(client PRIVATE
     client-lib shared
 )
 
-
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
     server-lib shared
+)
+
+# Create test_all executable, link with dependencies
+add_executable(test_client src/test_client.cpp)
+target_link_libraries(test_client PRIVATE
+    raylib m pthread dl rt GL X11 flecs_static
+    client-lib shared
 )

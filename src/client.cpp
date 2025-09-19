@@ -8,7 +8,9 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
+#include "client/components/player.hpp"
 #include "client/input_handler.hpp"
+#include "client/input_buffer.hpp"
 #include "client/systems/movement_networking_system.hpp"
 #include "client/systems/movement_system.hpp"
 #include "client/systems/render_system.hpp"
@@ -82,16 +84,19 @@ int main(void)
          {1.0f, 1.0f, 1.0f}
     };
 
-    auto e = world.entity("character");
-    e.add<Transformation>();
-    e.set<Transformation>(transformComp);
-    e.add<Velocity>();
-    e.set<Velocity>({0.0f, 0.0f, 0.0f});
-    e.add<MovementInput>();
-    e.set<MovementInput>({0, 0});
+    auto player_e = world.entity("character");
+    player_e.add<Transformation>();
+    player_e.set<Transformation>(transformComp);
+    player_e.add<Velocity>();
+    player_e.set<Velocity>({0.0f, 0.0f, 0.0f});
+    player_e.add<MovementInput>();
+    player_e.set<MovementInput>({0, 0});
+    player_e.add<LocalPlayer>();
 
     // Initialize input handler
     InputHandler input_handler;
+    // Initialize input buffer
+    InputBuffer input_buffer;
 
     // Initialize movement systems
     uint16_t movement_tick = 0;
@@ -101,21 +106,22 @@ int main(void)
                 movement_tick++;
             }
         );
-    auto move_input_sys = world.system<MovementInput>()
+    auto move_input_sys = world.system<MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_handler](MovementInput& input) {
+        .each([&input_handler, &input_buffer](MovementInput& input, LocalPlayer) {
             input = input_handler.process_movement_inputs();
+            input_buffer.push(input);
             }
         );
-    auto move_sys = world.system<Transformation, MovementInput>()
+    auto move_sys = world.system<Transformation, MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](Transformation& t, MovementInput& input) {
+        .each([](Transformation& t, MovementInput& input, LocalPlayer) {
                 movement_system(t, input);
             }
         );
-    auto move_networking_sys = world.system<MovementInput>()
+    auto move_networking_sys = world.system<MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&peer](MovementInput& input) {
+        .each([&peer](MovementInput& input, LocalPlayer) {
                 movement_networking_system(peer, input);
             }
         );
