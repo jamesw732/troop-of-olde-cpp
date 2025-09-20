@@ -7,31 +7,20 @@ set(CLIENT_DIR ${CMAKE_SOURCE_DIR}/src/client)
 set(SERVER_DIR ${CMAKE_SOURCE_DIR}/src/server)
 
 
-# Create shared interface library
-add_library(shared
-    ${SHARED_DIR}/util.cpp
+# # Create shared interface library
+add_library(shared INTERFACE ${SHARED_DIR})
+
+# # Create client library
+add_library(client-lib INTERFACE ${CLIENT_DIR})
+target_include_directories(client-lib INTERFACE
+    ${CMAKE_SOURCE_DIR}/src
 )
-set_target_properties(shared PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(shared PUBLIC ${CMAKE_SOURCE_DIR}/src)
-
-
-# Create client library
-add_library(client-lib
-    ${CLIENT_DIR}/systems/movement_system.cpp
-    ${CLIENT_DIR}/systems/render_system.cpp
-    ${CLIENT_DIR}/systems/movement_networking_system.cpp
-)
-target_link_libraries(client-lib PUBLIC shared)
-target_include_directories(client-lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
-
 
 # Create server library
-add_library(server-lib
-    ${SERVER_DIR}/systems/movement_system.cpp
-    ${SERVER_DIR}/systems/movement_networking_system.cpp
+add_library(server-lib INTERFACE ${SERVER_DIR})
+target_include_directories(server-lib INTERFACE
+    ${CMAKE_SOURCE_DIR}/src
 )
-target_link_libraries(server-lib PUBLIC shared)
-target_include_directories(server-lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)

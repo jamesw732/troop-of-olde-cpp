@@ -8,6 +8,7 @@
 
 class InputBuffer {
     public:
+        uint16_t active_tick = 0;
         // Start with rollover so that server can ack tick 0
         uint16_t ack_tick = -1;
         std::queue<MovementInput> buffer;
@@ -23,6 +24,7 @@ class InputBuffer {
             /*
              * Inclusively and idempotently flush input buffer up to new_ack_tick
              * new_ack_tick is the most recently acknowledged tick number by the server
+             * store new_ack_tick + 1 in active_tick
              */
             int16_t num_to_flush = (int16_t) (new_ack_tick - ack_tick);
             if (num_to_flush < 0 || num_to_flush > buffer.size()) {
@@ -31,6 +33,7 @@ class InputBuffer {
             for (int i = 0; i < num_to_flush; i++) {
                 buffer.pop();
             }
+            active_tick = new_ack_tick + 1;
             ack_tick = new_ack_tick;
         }
 };
