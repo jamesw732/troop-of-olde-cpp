@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <queue>
+#include <deque>
 #include <iostream>
 
 #include "shared/components/inputs.hpp"
@@ -11,13 +11,24 @@ class InputBuffer {
         uint16_t active_tick = 0;
         // Start with rollover so that server can ack tick 0
         uint16_t ack_tick = -1;
-        std::queue<MovementInput> buffer;
+        // std::queue<MovementInput> buffer;
+        std::deque<MovementInput> buffer;
 
         void push(MovementInput input) {
             /*
              * Push a copy of the given MovementInput into the buffer
              */
-            buffer.push(input);
+            buffer.push_back(input);
+        }
+
+        MovementInput pop() {
+            MovementInput elem = buffer.front();
+            buffer.pop_front();
+            return elem;
+        }
+
+        const bool empty() {
+            return buffer.empty();
         }
 
         void flushUpTo(uint16_t new_ack_tick) {
@@ -31,7 +42,7 @@ class InputBuffer {
                 return;
             }
             for (int i = 0; i < num_to_flush; i++) {
-                buffer.pop();
+                buffer.pop_front();
             }
             active_tick = new_ack_tick + 1;
             ack_tick = new_ack_tick;
