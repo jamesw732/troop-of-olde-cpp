@@ -1,4 +1,5 @@
 #include <array>
+#include <bitsery/deserializer.h>
 #include <cstdint>
 #include <iostream>
 #include <bitset>
@@ -17,6 +18,8 @@
 #include "shared/components/physics.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
+#include "shared/serialize/helpers.hpp"
+#include "shared/serialize/serialize_vector3.hpp"
 
 
 int main(void)
@@ -143,10 +146,14 @@ int main(void)
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
                     raylib::Vector3 pos;
-                    uint8_t* buf = event.packet->data;
-                    memcpy(&pos.x, buf, sizeof(float));
-                    memcpy(&pos.y, buf + sizeof(float), sizeof(float));
-                    memcpy(&pos.z, buf + 2 * sizeof(float), sizeof(float));
+                    Buffer buffer;
+                    auto state = bitsery::quickDeserialization(
+                        InputAdapter{
+                            event.packet->data,
+                            event.packet->dataLength
+                        },
+                        pos
+                    );
                     std::cout << "Received position "
                         << vector3_to_string(pos)
                         << " from server."
