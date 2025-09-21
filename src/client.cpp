@@ -81,15 +81,10 @@ int main(void)
 
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
-    Transformation transformComp = {
-         {0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {1.0f, 1.0f, 1.0f}
-    };
-
+    Position posComp{0.0f, 0.0f, 0.0f};
     auto player_e = world.entity("character");
-    player_e.add<Transformation>();
-    player_e.set<Transformation>(transformComp);
+    player_e.add<Position>();
+    player_e.set<Position>(posComp);
     player_e.add<Velocity>();
     player_e.set<Velocity>({0.0f, 0.0f, 0.0f});
     player_e.add<MovementInput>();
@@ -116,10 +111,10 @@ int main(void)
             input_buffer.push(input);
             }
         );
-    auto move_sys = world.system<Transformation, MovementInput, LocalPlayer>()
+    auto move_sys = world.system<Position, MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](Transformation& t, MovementInput& input, LocalPlayer) {
-                movement_system(t, input);
+        .each([](Position& pos, MovementInput& input, LocalPlayer) {
+                movement_system(pos, input);
             }
         );
     auto move_networking_sys = world.system<MovementInput, LocalPlayer>()
@@ -129,9 +124,9 @@ int main(void)
             }
         );
     // Initialize render system
-    auto render_sys = world.system<Transformation>()
-        .each([&camera](Transformation& t) {
-                render_system(camera, t);
+    auto render_sys = world.system<Position>()
+        .each([&camera](Position& pos) {
+                render_system(camera, pos);
             }
         );
 

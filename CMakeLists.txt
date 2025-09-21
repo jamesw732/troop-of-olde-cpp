@@ -9,6 +9,9 @@ set(SERVER_DIR ${CMAKE_SOURCE_DIR}/src/server)
 
 # # Create shared interface library
 add_library(shared INTERFACE ${SHARED_DIR})
+target_include_directories(shared INTERFACE
+    ${CMAKE_SOURCE_DIR}/src
+)
 
 # # Create client library
 add_library(client-lib INTERFACE ${CLIENT_DIR})

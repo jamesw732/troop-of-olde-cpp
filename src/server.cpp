@@ -13,6 +13,7 @@
 #include "server/systems/movement_system.hpp"
 #include "server/systems/movement_networking_system.hpp"
 #include "shared/components/physics.hpp"
+#include "shared/components/inputs.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
 
@@ -41,16 +42,16 @@ int main(void)
     // Initialize ECS world and systems
     flecs::world world;
 
-    auto move_sys = world.system<Transformation, MovementInput>()
+    auto move_sys = world.system<Position, MovementInput>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Transformation& t, MovementInput& input) {
-                movement_system(t, input);
+        .each([](flecs::iter& it, size_t, Position& pos, MovementInput& input) {
+                movement_system(pos, input);
             }
         );
-    auto move_networking_sys = world.system<Connection, Transformation>()
+    auto move_networking_sys = world.system<Connection, Position>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Connection& conn, Transformation& t) {
-                movement_networking_system(conn.peer, t);
+        .each([](flecs::iter& it, size_t, Connection& conn, Position& pos) {
+                movement_networking_system(conn.peer, pos);
             }
         );
 
@@ -68,12 +69,8 @@ int main(void)
                         << event.peer->address.port
                         << "." << std::endl;
                     auto e = world.entity();
-                    e.add<Transformation>();
-                    e.set<Transformation>({
-                         {0.0f, 0.0f, 0.0f},
-                         {0.0f, 0.0f, 0.0f},
-                         {1.0f, 1.0f, 1.0f}
-                    });
+                    e.add<Position>();
+                    e.set<Position>({0.0f, 0.0f, 0.0f,});
                     e.add<MovementInput>();
                     e.set<MovementInput>({0, 0});
                     e.add<Connection>();

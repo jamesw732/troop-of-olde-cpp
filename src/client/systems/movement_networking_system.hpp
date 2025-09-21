@@ -2,6 +2,7 @@
 #include "enet.h"
 
 #include "shared/components/physics.hpp"
+#include "shared/components/inputs.hpp"
 
 
 inline void movement_networking_system(ENetPeer* peer, MovementInput& input) {

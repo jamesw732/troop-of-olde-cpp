@@ -3,7 +3,7 @@
 #include <queue>
 #include <iostream>
 
-#include "shared/components/physics.hpp"
+#include "shared/components/inputs.hpp"
 
 
 class InputBuffer {

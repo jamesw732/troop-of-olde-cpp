@@ -4,7 +4,7 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "shared/components/physics.hpp"
+#include "shared/components/inputs.hpp"
 
 
 class InputHandler {

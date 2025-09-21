@@ -5,8 +5,7 @@
 #include "shared/serialize/serialize_vector3.hpp"
 
 
-inline void movement_networking_system(ENetPeer* peer, Transformation t) {
-    raylib::Vector3 pos = t.pos;
+inline void movement_networking_system(ENetPeer* peer, Position& pos) {
     // Serialize position
     Buffer buffer;
     size_t size = bitsery::quickSerialization(OutputAdapter{buffer}, pos);
