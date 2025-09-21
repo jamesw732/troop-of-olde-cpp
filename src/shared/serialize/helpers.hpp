@@ -2,6 +2,7 @@
 #include <bitsery/adapter/buffer.h>
 #include <bitsery/traits/vector.h>
 #include <bitsery/traits/string.h>
+#include <bitsery/traits/array.h>
 
 using Buffer = std::vector<uint8_t>;
 using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;

@@ -1,5 +1,7 @@
 # Right now:
 
+## Remove typedef delusion
+
 ## Movement networking
 Algorithm:
 Client stores its current movement tick (increments at 20hz), the currently acknowledged movement tick

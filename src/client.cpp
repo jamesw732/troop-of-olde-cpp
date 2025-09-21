@@ -117,10 +117,10 @@ int main(void)
                 movement_system(pos, input);
             }
         );
-    auto move_networking_sys = world.system<MovementInput, LocalPlayer>()
+    auto move_networking_sys = world.system()
         .interval(MOVE_UPDATE_RATE)
-        .each([&peer](MovementInput& input, LocalPlayer) {
-                movement_networking_system(peer, input);
+        .each([&peer, &input_buffer, &movement_tick]() {
+                movement_networking_system(peer, input_buffer, movement_tick);
             }
         );
     // Initialize render system
