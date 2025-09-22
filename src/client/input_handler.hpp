@@ -12,16 +12,16 @@ class InputHandler {
     MovementInput process_movement_inputs() {
         MovementInput input{0, 0};
         if (IsKeyDown(KEY_W)) {
-            input[1]--;
+            input.z--;
         }
         if (IsKeyDown(KEY_S)) {
-            input[1]++;
+            input.z++;
         }
         if (IsKeyDown(KEY_A)) {
-            input[0]--;
+            input.x--;
         }
         if (IsKeyDown(KEY_D)) {
-            input[0]++;
+            input.x++;
         }
         return input;
     }

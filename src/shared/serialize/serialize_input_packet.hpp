@@ -2,12 +2,13 @@
 #include "helpers.hpp"
 #include "shared/components/inputs.hpp"
 
+
 template <typename S>
 void serialize(S& s, std::vector<MovementInput>& v) {
-    s.container(v, 100, [](S& s, std::array<int8_t, 2>& arr) {
-        s.container1b(arr);
+    s.container(v, 100, [](S& s, MovementInput& input) {
+        s.value1b(input.x);
+        s.value1b(input.z);
     });
-
 }
 
 template<typename S>

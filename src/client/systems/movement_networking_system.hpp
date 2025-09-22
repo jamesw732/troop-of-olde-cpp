@@ -14,6 +14,7 @@ inline void movement_networking_system(ENetPeer* peer, InputBuffer& input_buffer
     InputPacket input_data;
     input_data.tick = tick;
     for (MovementInput input: input_buffer.buffer) {
+        // std::cout << (int) input.x << ", " << (int) input.z << std::endl;
         input_data.inputs.push_back(input);
     }
     Buffer data_buffer;
@@ -30,7 +31,7 @@ inline void movement_networking_system(ENetPeer* peer, InputBuffer& input_buffer
     //     enet_peer_send(peer, 0, packet);
     // }
     // Test serialize
-    // InputPacket res;
+   // InputPacket res;
     // auto state = bitsery::quickDeserialization(
     //     InputAdapter{
     //         data_buffer.data(),
@@ -38,4 +39,9 @@ inline void movement_networking_system(ENetPeer* peer, InputBuffer& input_buffer
     //     },
     //     res
     // );
+    // std::cout << "Sending inputs: ";
+    // for (MovementInput input: res.inputs) {
+    //     std::cout << (int) input.x << ", " << (int) input.z << " ";
+    // }
+    // std::cout << std::endl;
 }

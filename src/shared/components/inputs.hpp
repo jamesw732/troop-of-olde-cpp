@@ -4,7 +4,10 @@
 #include <vector>
 
 
-typedef std::array<std::int8_t, 2> MovementInput;
+struct MovementInput {
+    int8_t x;
+    int8_t z;
+};
 
 struct InputPacket {
     uint16_t tick;

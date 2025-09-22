@@ -18,7 +18,7 @@ inline void movement_system(Position& pos, ClientMoveTick& tick, InputPacket& pa
     for (std::vector<MovementInput>::iterator it = packet.inputs.begin() + start_idx;
             it != packet.inputs.end(); ++it) {
         auto input = *it;
-        raylib::Vector3 velocity((float) input[0], 0, (float) input[1]);
+        raylib::Vector3 velocity((float) input.x, 0, (float) input.z);
         velocity = velocity.Normalize();
         velocity = velocity * 0.25;
 

@@ -19,15 +19,15 @@ void test_input_buffer() {
 
     buffer.flushUpTo(0);
     front = buffer.buffer.front();
-    assert(front[0] == 1 && front[1] == 0);
+    assert(front.x == 1 && front.z == 0);
 
     buffer.flushUpTo(0);
     front = buffer.buffer.front();
-    assert(front[0] == 1 && front[1] == 0);
+    assert(front.x == 1 && front.z == 0);
 
     buffer.flushUpTo(2);
     front = buffer.buffer.front();
-    assert(front[0] == 0 && front[1] == -1);
+    assert(front.x == 0 && front.z == -1);
 
     buffer.flushUpTo(3);
     assert(buffer.buffer.empty());

@@ -109,9 +109,9 @@ int main(void)
                         << " movement inputs up to tick "
                         << tick
                         << ". Most recent: "
-                        << (int) input[0]
+                        << (int) input.x
                         << ", "
-                        << (int) input[1]
+                        << (int) input.z
                         << std::endl;
                     /* Clean up the packet now that we're done using it. */
                     enet_packet_destroy (event.packet);

@@ -8,7 +8,7 @@
 
 
 inline void movement_system(Position& pos, MovementInput& input) {
-    raylib::Vector3 velocity((float) input[0], 0, (float) input[1]);
+    raylib::Vector3 velocity((float) input.x, 0, (float) input.z);
     velocity = velocity.Normalize();
     velocity = velocity * 0.25;
 
