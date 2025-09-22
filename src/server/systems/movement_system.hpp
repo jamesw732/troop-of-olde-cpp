@@ -27,7 +27,7 @@ inline void movement_system(Position& pos, ClientMoveTick& ack_tick, InputPacket
         velocity = velocity.Normalize();
         velocity = velocity * 0.25;
 
-        pos += velocity;
+        pos.val += velocity;
     }
     ack_tick.val = packet.tick;
 }

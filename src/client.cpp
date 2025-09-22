@@ -20,6 +20,7 @@
 #include "shared/util.hpp"
 #include "shared/serialize/helpers.hpp"
 #include "shared/serialize/serialize_vector3.hpp"
+#include "shared/serialize/serialize_physics.hpp"
 
 
 int main(void)
@@ -81,12 +82,10 @@ int main(void)
 
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
-    Position posComp{0.0f, 0.0f, 0.0f};
+    Position posComp{{0.0f, 0.0f, 0.0f}};
     auto player_e = world.entity("character");
     player_e.add<Position>();
     player_e.set<Position>(posComp);
-    player_e.add<Velocity>();
-    player_e.set<Velocity>({0.0f, 0.0f, 0.0f});
     player_e.add<MovementInput>();
     player_e.set<MovementInput>({0, 0});
     player_e.add<LocalPlayer>();

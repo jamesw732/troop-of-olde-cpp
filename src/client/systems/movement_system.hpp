@@ -12,5 +12,5 @@ inline void movement_system(Position& pos, MovementInput& input) {
     velocity = velocity.Normalize();
     velocity = velocity * 0.25;
 
-    pos += velocity;
+    pos.val += velocity;
 }

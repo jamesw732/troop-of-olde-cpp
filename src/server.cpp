@@ -18,6 +18,7 @@
 #include "shared/const.hpp"
 #include "shared/serialize/serialize_input_packet.hpp"
 #include "shared/util.hpp"
+#include "shared/serialize/serialize_physics.hpp"
 
 
 int main(void)
@@ -72,7 +73,7 @@ int main(void)
                         << "." << std::endl;
                     auto e = world.entity();
                     e.add<Position>();
-                    e.set<Position>({0.0f, 0.0f, 0.0f,});
+                    e.set<Position>({{0.0f, 0.0f, 0.0f,}});
                     e.add<InputPacket>();
                     e.set<InputPacket>({0, {}});
                     e.add<Connection>();
