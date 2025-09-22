@@ -78,7 +78,7 @@ int main(void)
                     e.add<Connection>();
                     e.set<Connection>({event.peer});
                     e.add<ClientMoveTick>();
-                    e.set<ClientMoveTick>(0);
+                    e.set<ClientMoveTick>({0});
                     event.peer->data = (void*) e.raw_id();
                     break;
                 }

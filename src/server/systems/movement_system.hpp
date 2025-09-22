@@ -8,10 +8,15 @@
 #include "shared/components/ticks.hpp"
 
 
-inline void movement_system(Position& pos, ClientMoveTick& tick, InputPacket& packet) {
+inline void movement_system(Position& pos, ClientMoveTick& ack_tick, InputPacket& packet) {
+    /*
+     * pos: Position of this character
+     * ack_tick: the previously acknowledged tick
+     * packet: the received movement data, containing a tick and a sequence of MovementInputs
+     */
     uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
-    std::cout << "Processing " << packet.tick - tick << " movement inputs" << std::endl;
-    int dif = (int) (tick - start_tick);
+    std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
+    int dif = (int) (ack_tick.val - start_tick);
     // Precondition: received tick is at most 1 more than stored tick
     // If not satisfied, process whole buffer and hope for the best
     int start_idx = std::max(0, dif + 1);
@@ -24,5 +29,5 @@ inline void movement_system(Position& pos, ClientMoveTick& tick, InputPacket& pa
 
         pos += velocity;
     }
-    tick = packet.tick;
+    ack_tick.val = packet.tick;
 }

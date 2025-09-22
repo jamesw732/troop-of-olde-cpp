@@ -1,4 +1,6 @@
 #pragma once
 #include <cstdint>
 
-typedef uint16_t ClientMoveTick;
+struct ClientMoveTick {
+    uint16_t val;
+};
