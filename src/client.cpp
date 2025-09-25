@@ -139,18 +139,19 @@ int main(void)
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
-                    raylib::Vector3 pos;
+                    ServerMovementUpdate move_update;
                     Buffer buffer;
                     auto state = bitsery::quickDeserialization(
                         InputAdapter{
                             event.packet->data,
                             event.packet->dataLength
                         },
-                        pos
+                        move_update
                     );
                     std::cout << "Received position "
-                        << vector3_to_string(pos)
-                        << " from server."
+                        << vector3_to_string(move_update.pos)
+                        << " from server for tick "
+                        << (int) move_update.tick
                         << std::endl;
                 }
                 case ENET_EVENT_TYPE_DISCONNECT: {

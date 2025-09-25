@@ -16,3 +16,9 @@ void serialize(S& s, MovementInputPacket& input_packet) {
     s.value2b(input_packet.tick);
     serialize(s, input_packet.inputs);
 }
+
+template<typename S>
+void serialize(S& s, ServerMovementUpdate& move_update) {
+    s.value2b(move_update.tick);
+    serialize(s, move_update.pos);
+}

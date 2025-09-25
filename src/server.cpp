@@ -51,10 +51,10 @@ int main(void)
                 movement_system(pos, tick, packet);
             }
         );
-    auto move_networking_sys = world.system<Connection, Position>()
+    auto move_networking_sys = world.system<Connection, Position, ClientMoveTick>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Connection& conn, Position& pos) {
-                movement_networking_system(conn.peer, pos);
+        .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
+                movement_networking_system(conn.peer, pos, tick);
             }
         );
 
