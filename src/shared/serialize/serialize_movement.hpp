@@ -19,6 +19,6 @@ void serialize(S& s, MovementInputPacket& input_packet) {
 
 template<typename S>
 void serialize(S& s, ServerMovementUpdate& move_update) {
-    s.value2b(move_update.tick);
+    s.value2b(move_update.ack_tick);
     serialize(s, move_update.pos);
 }

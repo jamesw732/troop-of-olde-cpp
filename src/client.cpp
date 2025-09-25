@@ -151,7 +151,7 @@ int main(void)
                     std::cout << "Received position "
                         << vector3_to_string(move_update.pos)
                         << " from server for tick "
-                        << (int) move_update.tick
+                        << (int) move_update.ack_tick
                         << std::endl;
                 }
                 case ENET_EVENT_TYPE_DISCONNECT: {

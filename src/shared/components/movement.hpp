@@ -18,14 +18,16 @@ struct MovementInput {
  * This is serialized and sent to the server.
  */
 struct MovementInputPacket {
+    // The current movement tick, last movement tick in the buffer
     uint16_t tick;
+    // All movement inputs in the buffer
     std::vector<MovementInput> inputs;
 };
 
 /*
- * Contains the server's next acknowledged tick and the corresponding position
+ * Contains the server's currently acknowledged tick and the corresponding position
  */
 struct ServerMovementUpdate {
-    uint16_t tick;
+    uint16_t ack_tick;
     raylib::Vector3 pos;
 };
