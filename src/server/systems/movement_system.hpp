@@ -4,11 +4,11 @@
 #include "raylib-cpp.hpp"
 
 #include "shared/components/physics.hpp"
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 #include "shared/components/ticks.hpp"
 
 
-inline void movement_system(Position& pos, ClientMoveTick& ack_tick, InputPacket& packet) {
+inline void movement_system(Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
     /*
      * pos: Position of this character
      * ack_tick: the previously acknowledged tick

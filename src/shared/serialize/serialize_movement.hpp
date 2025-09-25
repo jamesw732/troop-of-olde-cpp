@@ -1,6 +1,6 @@
 #pragma once
 #include "helpers.hpp"
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 
 
 template <typename S>
@@ -12,7 +12,7 @@ void serialize(S& s, std::vector<MovementInput>& v) {
 }
 
 template<typename S>
-void serialize(S& s, InputPacket& input_packet) {
+void serialize(S& s, MovementInputPacket& input_packet) {
     s.value2b(input_packet.tick);
     serialize(s, input_packet.inputs);
 }

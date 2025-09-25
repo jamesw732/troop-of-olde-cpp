@@ -9,7 +9,7 @@ struct MovementInput {
     int8_t z;
 };
 
-struct InputPacket {
+struct MovementInputPacket {
     uint16_t tick;
     std::vector<MovementInput> inputs;
 };

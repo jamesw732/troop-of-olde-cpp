@@ -3,7 +3,7 @@
 #include <deque>
 #include <iostream>
 
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 
 
 class InputBuffer {

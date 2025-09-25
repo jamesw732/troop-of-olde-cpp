@@ -4,7 +4,7 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 
 
 class InputHandler {

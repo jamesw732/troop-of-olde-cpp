@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "client/input_buffer.hpp"
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 
 void test_input_buffer() {
     InputBuffer buffer;

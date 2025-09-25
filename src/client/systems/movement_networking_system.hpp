@@ -4,14 +4,14 @@
 #include "enet.h"
 
 #include "client/input_buffer.hpp"
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 #include "shared/serialize/helpers.hpp"
-#include "shared/serialize/serialize_input_packet.hpp"
+#include "shared/serialize/serialize_movement.hpp"
 
 
 inline void movement_networking_system(ENetPeer* peer, InputBuffer& input_buffer, uint16_t& tick) {
     // Construct movement input packet from input buffer and send to server
-    InputPacket input_data;
+    MovementInputPacket input_data;
     input_data.tick = tick;
     for (MovementInput input: input_buffer.buffer) {
         // std::cout << (int) input.x << ", " << (int) input.z << std::endl;

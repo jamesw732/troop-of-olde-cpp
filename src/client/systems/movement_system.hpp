@@ -3,7 +3,7 @@
 #include "enet.h"
 
 #include "shared/components/physics.hpp"
-#include "shared/components/inputs.hpp"
+#include "shared/components/movement.hpp"
 
 
 
