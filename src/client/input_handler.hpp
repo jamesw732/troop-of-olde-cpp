@@ -9,7 +9,7 @@
 
 class InputHandler {
     public:
-    MovementInput process_movement_inputs() {
+    MovementInput get_movement_input() {
         MovementInput input{0, 0};
         if (IsKeyDown(KEY_W)) {
             input.z--;

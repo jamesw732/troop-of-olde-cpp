@@ -5,7 +5,7 @@
 
 template <typename S>
 void serialize(S& s, std::vector<MovementInput>& v) {
-    s.container(v, 100, [](S& s, MovementInput& input) {
+    s.container(v, 500, [](S& s, MovementInput& input) {
         s.value1b(input.x);
         s.value1b(input.z);
     });

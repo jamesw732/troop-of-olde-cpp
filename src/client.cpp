@@ -17,10 +17,11 @@
 #include "client/systems/render_system.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/const.hpp"
-#include "shared/util.hpp"
+#include "shared/helpers/movement.hpp"
 #include "shared/serialize/helpers.hpp"
 #include "shared/serialize/serialize_vector3.hpp"
 #include "shared/serialize/serialize_physics.hpp"
+#include "shared/util.hpp"
 
 
 int main(void)
@@ -89,25 +90,40 @@ int main(void)
     player_e.add<MovementInput>();
     player_e.set<MovementInput>({0, 0});
     player_e.add<LocalPlayer>();
+    player_e.add<ServerMovementUpdate>();
+    player_e.set<ServerMovementUpdate>({static_cast<uint16_t>(-1), {0,0, 0}});
 
     // Initialize input handler
     InputHandler input_handler;
     // Initialize input buffer
     InputBuffer input_buffer;
-
-    // Initialize movement systems
+    // Create movement tick
     uint16_t movement_tick = 0;
-    auto move_tick_sys = world.system()
+
+    auto move_rec_sys = world.system<Position, ServerMovementUpdate, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&movement_tick]() {
-                movement_tick++;
+        .each([&input_buffer](Position& pos, ServerMovementUpdate& move_update, LocalPlayer) {
+                // If old tick, skip reconciliation
+                if ((int16_t) (move_update.ack_tick - input_buffer.ack_tick) <= 0) {
+                    std::cout << "Skipping client-side reconciliation" << std::endl;
+                    return;
+                }
+                // If new tick, perform client-side reconciliation
+                std::cout << "Performing client-side reconciliation" << std::endl;
+                input_buffer.flushUpTo(move_update.ack_tick);
+                Position new_pos{move_update.pos};
+                for (MovementInput input: input_buffer.buffer) {
+                    std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
+                    process_movement_input(new_pos, input);
+                }
+                pos.val = new_pos.val;
             }
         );
     auto move_input_sys = world.system<MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_handler, &input_buffer](MovementInput& input, LocalPlayer) {
-            input = input_handler.process_movement_inputs();
-            input_buffer.push(input);
+                input = input_handler.get_movement_input();
+                input_buffer.push(input);
             }
         );
     auto move_sys = world.system<Position, MovementInput, LocalPlayer>()
@@ -120,6 +136,13 @@ int main(void)
         .interval(MOVE_UPDATE_RATE)
         .each([&peer, &input_buffer, &movement_tick]() {
                 movement_networking_system(peer, input_buffer, movement_tick);
+            }
+        );
+    // Initialize movement systems
+    auto move_tick_sys = world.system()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&movement_tick]() {
+                movement_tick++;
             }
         );
     // Initialize render system
@@ -148,6 +171,7 @@ int main(void)
                         },
                         move_update
                     );
+                    player_e.set<ServerMovementUpdate>(move_update);
                     std::cout << "Received position "
                         << vector3_to_string(move_update.pos)
                         << " from server for tick "

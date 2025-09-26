@@ -1,4 +1,6 @@
 #pragma once
+#include <random>
+
 #include "enet.h"
 
 #include "shared/components/physics.hpp"
@@ -15,4 +17,11 @@ inline void movement_networking_system(ENetPeer* peer, Position& pos, ClientMove
     // Create packet and send to client
     ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
     enet_peer_send(peer, 0, packet);
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<> distrib(1, 100);
+    // int randomNumber = distrib(gen);
+    // if (randomNumber < 50) {
+    //     enet_peer_send(peer, 0, packet);
+    // }
 }

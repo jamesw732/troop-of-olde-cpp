@@ -47,3 +47,14 @@ hardcoded to connect to it. So to launch the client and server, simply run (in s
 ```
 ./client
 ```
+
+## Testing with simulated networking conditions
+On Linux, the following command can be used to simulate network conditions (100ms latency, 20ms jitter,
+1% packet loss):
+```
+sudo tc qdisc add dev lo root netem delay 100ms 20ms loss 1%
+```
+To reset:
+```
+sudo tc qdisc del dev lo root
+```
