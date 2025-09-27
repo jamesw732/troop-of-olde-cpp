@@ -8,7 +8,6 @@
 #include "client/components/player.hpp"
 #include "client/systems/movement_system.hpp"
 #include "client/systems/movement_networking_system.hpp"
-#include "client/systems/render_system.hpp"
 #include "shared/helpers/movement.hpp"
 #include "shared/components/movement.hpp"
 #include "shared/components/physics.hpp"
@@ -76,14 +75,6 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .interval(MOVE_UPDATE_RATE)
         .each([&movement_tick]() {
                 movement_tick++;
-            }
-        );
-}
-
-inline flecs::system register_render_system(flecs::world& world, raylib::Camera3D& camera) {
-    return world.system<Position>("RenderSystem")
-        .each([&camera](Position& pos) {
-                render_system(camera, pos);
             }
         );
 }
