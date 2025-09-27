@@ -1,3 +1,4 @@
+#include <Functions.hpp>
 #include <array>
 #include <bitsery/deserializer.h>
 #include <cstdint>
@@ -10,11 +11,10 @@
 #include "enet.h"
 
 #include "client/components/player.hpp"
+#include "client/fonts.hpp"
 #include "client/input_handler.hpp"
 #include "client/input_buffer.hpp"
-#include "client/systems/movement_networking_system.hpp"
-#include "client/systems/movement_system.hpp"
-#include "client/systems/render_system.hpp"
+#include "client/systems.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/const.hpp"
 #include "shared/helpers/movement.hpp"
@@ -31,9 +31,11 @@ int main(void)
     const int screenHeight = 450;
     SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Troop of Olde");
+    raylib::Font cascadiaMono = raylib::LoadFont(cascadiaMonoPath);
 
     // Initialize camera attributes
-    Camera3D camera = { 0 };
+    raylib::Camera3D camera;
+    // Camera3D camera = { 0 };
     camera.position = raylib::Vector3(0.0f, 10.0f, 10.0f);
     camera.target = raylib::Vector3(0.0f, 0.0f, 0.0f);      // Camera looking at point
     camera.up = raylib::Vector3(0.0f, 1.0f, 0.0f);
@@ -93,64 +95,16 @@ int main(void)
     player_e.add<ServerMovementUpdate>();
     player_e.set<ServerMovementUpdate>({static_cast<uint16_t>(-1), {0,0, 0}});
 
-    // Initialize input handler
     InputHandler input_handler;
-    // Initialize input buffer
     InputBuffer input_buffer;
-    // Create movement tick
     uint16_t movement_tick = 0;
 
-    auto move_rec_sys = world.system<Position, ServerMovementUpdate, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](Position& pos, ServerMovementUpdate& move_update, LocalPlayer) {
-                // If old tick, skip reconciliation
-                if ((int16_t) (move_update.ack_tick - input_buffer.ack_tick) <= 0) {
-                    std::cout << "Skipping client-side reconciliation" << std::endl;
-                    return;
-                }
-                // If new tick, perform client-side reconciliation
-                std::cout << "Performing client-side reconciliation" << std::endl;
-                input_buffer.flushUpTo(move_update.ack_tick);
-                Position new_pos{move_update.pos};
-                for (MovementInput input: input_buffer.buffer) {
-                    std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                    process_movement_input(new_pos, input);
-                }
-                pos.val = new_pos.val;
-            }
-        );
-    auto move_input_sys = world.system<MovementInput, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_handler, &input_buffer](MovementInput& input, LocalPlayer) {
-                input = input_handler.get_movement_input();
-                input_buffer.push(input);
-            }
-        );
-    auto move_sys = world.system<Position, MovementInput, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([](Position& pos, MovementInput& input, LocalPlayer) {
-                movement_system(pos, input);
-            }
-        );
-    auto move_networking_sys = world.system()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&peer, &input_buffer, &movement_tick]() {
-                movement_networking_system(peer, input_buffer, movement_tick);
-            }
-        );
-    // Initialize movement systems
-    auto move_tick_sys = world.system()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&movement_tick]() {
-                movement_tick++;
-            }
-        );
-    // Initialize render system
-    auto render_sys = world.system<Position>()
-        .each([&camera](Position& pos) {
-                render_system(camera, pos);
-            }
-        );
+    register_movement_reconcile_system(world, input_buffer);
+    register_movement_input_system(world, input_handler, input_buffer);
+    register_movement_system(world);
+    register_movement_networking_system(world, peer, input_buffer, movement_tick);
+    register_movement_tick_system(world, movement_tick);
+    auto render_sys = register_render_system(world, camera);
 
     // Main game loop
     while (!WindowShouldClose())
@@ -198,7 +152,13 @@ int main(void)
             BeginMode3D(camera);
                 DrawGrid(10, 1.0f);
             EndMode3D();
-            DrawText("Welcome to the third dimension!", 10, 40, 20, DARKGRAY);
+            std::string key_indicator = "    ";
+            if (IsKeyDown(KEY_W)) key_indicator[0] = 'W';
+            if (IsKeyDown(KEY_A)) key_indicator[1] = 'A';
+            if (IsKeyDown(KEY_S)) key_indicator[2] = 'S';
+            if (IsKeyDown(KEY_D)) key_indicator[3] = 'D';
+            raylib::DrawTextEx(cascadiaMono, key_indicator, {10, 40}, 20, 2, DARKGRAY);
+            // cascadiaMono.DrawText(key_indicator, {10, 40}, 20, 2, DARKGRAY);
             DrawFPS(10, 10);
             // Draw each entity in the scene
             render_sys.run();

@@ -45,3 +45,10 @@ target_link_libraries(test_client PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
     client-lib shared
 )
+
+
+# Copy fonts to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
+
+# Optionally define a relative runtime path
+add_compile_definitions(FONT_DIR="assets/fonts")
