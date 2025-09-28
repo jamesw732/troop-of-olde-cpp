@@ -24,6 +24,7 @@ inline void register_movement_target_system(flecs::world& world) {
         .each([] (Position& target_pos, PrevPosition& prev_pos, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = target_pos.val;
+            std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
             }
         );
 }
@@ -38,14 +39,13 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                     return;
                 }
                 // If new tick, perform client-side reconciliation
-                std::cout << "Performing client-side reconciliation" << std::endl;
                 input_buffer.flushUpTo(move_update.ack_tick);
-                // TargetPosition new_pos{move_update.pos};
+                TargetPosition new_pos{move_update.pos};
                 for (MovementInput input: input_buffer.buffer) {
                     std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                    process_movement_input(target_pos.val, input);
+                    process_movement_input(new_pos.val, input);
                 }
-                // pos.val = new_pos.val;
+                target_pos.val = new_pos.val;
             }
         );
 }
@@ -69,7 +69,8 @@ inline void register_movement_system(flecs::world& world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](TargetPosition& pos, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, input);
-                std::cout << vector3_to_string(pos.val) << std::endl;
+                std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
+                std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
             }
         );
 }
@@ -114,6 +115,7 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .interval(MOVE_UPDATE_RATE)
         .each([&movement_tick]() {
                 movement_tick++;
+                std::cout << "Begin tick " << (int) movement_tick << std::endl;
             }
         );
 }

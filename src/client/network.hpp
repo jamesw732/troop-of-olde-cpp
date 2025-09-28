@@ -76,7 +76,7 @@ class Network {
 
     void process_recv_event() {
         flecs::entity player_e = world.lookup("LocalPlayer");
-        ServerMovementUpdate move_update = player_e.get_mut<ServerMovementUpdate>();
+        ServerMovementUpdate& move_update = player_e.get_mut<ServerMovementUpdate>();
         Buffer buffer;
         auto state = bitsery::quickDeserialization(
             InputAdapter{
