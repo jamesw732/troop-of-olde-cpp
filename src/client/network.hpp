@@ -1,7 +1,8 @@
 #include <iostream>
 
-#include "client/systems/movement_systems.hpp"
 #include "enet.h"
+
+#include "client/systems/movement_systems.hpp"
 #include "shared/components/movement.hpp"
 #include "shared/util.hpp"
 

@@ -10,15 +10,15 @@
 #include "enet.h"
 
 #include "server/components/networking.hpp"
-#include "server/systems/movement_system.hpp"
-#include "server/systems/movement_networking_system.hpp"
+#include "server/systems/movement_systems.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/movement.hpp"
 #include "shared/components/ticks.hpp"
 #include "shared/const.hpp"
-#include "shared/serialize/serialize_movement.hpp"
 #include "shared/util.hpp"
+#include "shared/serialize/serialize_movement.hpp"
 #include "shared/serialize/serialize_physics.hpp"
+#include "shared/serialize/helpers.hpp"
 
 
 int main(void)
@@ -45,18 +45,8 @@ int main(void)
     // Initialize ECS world and systems
     flecs::world world;
 
-    auto move_sys = world.system<Position, ClientMoveTick, MovementInputPacket>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([](Position& pos, ClientMoveTick& tick, MovementInputPacket& packet) {
-                movement_system(pos, tick, packet);
-            }
-        );
-    auto move_networking_sys = world.system<Connection, Position, ClientMoveTick>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
-                movement_networking_system(conn.peer, pos, tick);
-            }
-        );
+    register_movement_system(world);
+    register_movement_networking_system(world);
 
     // Main game loop
     while (true)
@@ -140,9 +130,6 @@ int main(void)
             }
         }
         world.progress(dt);
-        // Transformation trans = e.get<Transformation>();
-        // raylib::Vector3 pos = trans.pos;
-        // std::cout << vector3_to_string(pos) << std::endl;
     }
 
     return 0;
