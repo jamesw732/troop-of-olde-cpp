@@ -2,5 +2,5 @@
 #include <cstdint>
 
 struct ClientMoveTick {
-    uint16_t val;
+    uint16_t val = 0;
 };

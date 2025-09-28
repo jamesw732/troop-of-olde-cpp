@@ -50,33 +50,35 @@ int main(void)
 
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
-    Position posComp{{0.0f, 0.0f, 0.0f}};
     auto player_e = world.entity("LocalPlayer");
     player_e.add<Position>();
-    player_e.set<Position>(posComp);
+    player_e.add<TargetPosition>();
+    player_e.add<PrevPosition>();
+    player_e.add<LerpTimer>();
     player_e.add<MovementInput>();
-    player_e.set<MovementInput>({0, 0});
     player_e.add<LocalPlayer>();
     player_e.add<ServerMovementUpdate>();
-    player_e.set<ServerMovementUpdate>({static_cast<uint16_t>(-1), {0,0, 0}});
 
     InputHandler input_handler;
     InputBuffer input_buffer;
     uint16_t movement_tick = 0;
+    float dt;
 
+    register_movement_target_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world);
     register_movement_networking_system(world, network.peer, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
+    auto move_lerp_sys = register_movement_lerp_system(world, dt);
     auto render_sys = register_render_system(world, camera);
 
     // Main game loop
     while (!WindowShouldClose())
     {
-        float dt = GetFrameTime();
+        dt = GetFrameTime();
         network.process_events();
-        // Progress all ECS timers
+        // Progress all fixed-timestep ECS timers
         world.progress(dt);
         // Do rendering
         BeginDrawing();

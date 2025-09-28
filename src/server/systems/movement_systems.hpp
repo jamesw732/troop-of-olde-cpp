@@ -12,7 +12,7 @@
 
 
 inline void register_movement_system(flecs::world world) {
-    auto move_sys = world.system<Position, ClientMoveTick, MovementInputPacket>()
+    world.system<Position, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
@@ -36,7 +36,7 @@ inline void register_movement_system(flecs::world world) {
 }
 
 inline void register_movement_networking_system(flecs::world world) {
-    auto move_networking_sys = world.system<Connection, Position, ClientMoveTick>()
+    world.system<Connection, Position, ClientMoveTick>()
         .interval(MOVE_UPDATE_RATE)
         .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
             ServerMovementUpdate move_update{tick.val, pos.val};

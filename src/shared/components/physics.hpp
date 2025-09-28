@@ -3,5 +3,5 @@
 
 
 struct Position {
-    raylib::Vector3 val;
+    raylib::Vector3 val{0, 0, 0};
 };

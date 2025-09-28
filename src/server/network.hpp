@@ -83,13 +83,10 @@ class Network {
     void create_character() {
         auto e = world.entity();
         e.add<Position>();
-        e.set<Position>({{0.0f, 0.0f, 0.0f,}});
         e.add<MovementInputPacket>();
-        e.set<MovementInputPacket>({0, {}});
         e.add<Connection>();
         e.set<Connection>({event.peer});
         e.add<ClientMoveTick>();
-        e.set<ClientMoveTick>({0});
         event.peer->data = (void*) e.raw_id();
     }
 
