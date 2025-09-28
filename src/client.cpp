@@ -64,6 +64,7 @@ int main(void)
     uint16_t movement_tick = 0;
     float dt;
 
+    auto ManualPhase = world.entity("ManualPhase");
     register_movement_target_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
@@ -71,7 +72,7 @@ int main(void)
     register_movement_networking_system(world, network.peer, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     auto move_lerp_sys = register_movement_lerp_system(world, dt);
-    auto render_sys = register_render_system(world, camera);
+    auto render_sys = register_render_system(world, camera, ManualPhase);
 
     // Main game loop
     while (!WindowShouldClose())
