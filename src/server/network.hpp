@@ -4,7 +4,7 @@
 #include "enet.h"
 #include "flecs.h"
 #include "server/components/networking.hpp"
-#include "shared/components/movement.hpp"
+#include "shared/components/packets.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/ticks.hpp"
 #include "shared/serialize/helpers.hpp"

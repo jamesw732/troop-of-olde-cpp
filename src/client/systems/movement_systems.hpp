@@ -9,11 +9,11 @@
 #include "client/components/physics.hpp"
 #include "shared/helpers/movement.hpp"
 #include "shared/components/movement.hpp"
+#include "shared/components/packets.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/ticks.hpp"
 #include "shared/const.hpp"
-#include "shared/serialize/helpers.hpp"
-#include "shared/serialize/serialize_movement.hpp"
+#include "shared/serialize/serialize.hpp"
 #include "shared/util.hpp"
 
 
@@ -30,9 +30,9 @@ inline void register_movement_target_system(flecs::world& world) {
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<TargetPosition, ServerMovementUpdate, LocalPlayer>()
+    world.system<TargetPosition, MovementUpdatePacket, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](TargetPosition& target_pos, ServerMovementUpdate& move_update, LocalPlayer) {
+        .each([&input_buffer](TargetPosition& target_pos, MovementUpdatePacket& move_update, LocalPlayer) {
                 // If old tick, skip reconciliation
                 if ((int16_t) (move_update.ack_tick - input_buffer.ack_tick) <= 0) {
                     std::cout << "Skipping client-side reconciliation" << std::endl;
@@ -88,7 +88,7 @@ inline void register_movement_networking_system(flecs::world& world, ENetPeer* p
                 input_data.inputs.push_back(input);
             }
             Buffer data_buffer;
-            size_t size = bitsery::quickSerialization(OutputAdapter{data_buffer}, input_data);
+            size_t size = serialize(input_data, data_buffer);
             ENetPacket* packet = enet_packet_create(data_buffer.data(), size, 0);
             enet_peer_send(peer, 0, packet);
 

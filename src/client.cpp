@@ -57,7 +57,7 @@ int main(void)
     player_e.add<LerpTimer>();
     player_e.add<MovementInput>();
     player_e.add<LocalPlayer>();
-    player_e.add<ServerMovementUpdate>();
+    player_e.add<MovementUpdatePacket>();
 
     InputHandler input_handler;
     InputBuffer input_buffer;

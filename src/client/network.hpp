@@ -3,7 +3,7 @@
 #include "enet.h"
 
 #include "client/systems/movement_systems.hpp"
-#include "shared/components/movement.hpp"
+#include "shared/components/packets.hpp"
 #include "shared/util.hpp"
 
 
@@ -76,7 +76,7 @@ class Network {
 
     void process_recv_event() {
         flecs::entity player_e = world.lookup("LocalPlayer");
-        ServerMovementUpdate& move_update = player_e.get_mut<ServerMovementUpdate>();
+        MovementUpdatePacket& move_update = player_e.get_mut<MovementUpdatePacket>();
         Buffer buffer;
         auto state = bitsery::quickDeserialization(
             InputAdapter{

@@ -4,11 +4,11 @@
 #include <flecs.h>
 
 #include "server/components/networking.hpp"
-#include "shared/components/movement.hpp"
+#include "shared/components/packets.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/ticks.hpp"
 #include "shared/const.hpp"
-#include "shared/serialize/helpers.hpp"
+#include "shared/serialize/serialize.hpp"
 
 
 inline void register_movement_system(flecs::world world) {
@@ -39,10 +39,10 @@ inline void register_movement_networking_system(flecs::world world) {
     world.system<Connection, Position, ClientMoveTick>()
         .interval(MOVE_UPDATE_RATE)
         .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
-            ServerMovementUpdate move_update{tick.val, pos.val};
+            MovementUpdatePacket move_update{tick.val, pos.val};
             // Serialize position
             Buffer buffer;
-            size_t size = bitsery::quickSerialization(OutputAdapter{buffer}, move_update);
+            size_t size = serialize(move_update, buffer);
             // Create packet and send to client
             ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
             enet_peer_send(conn.peer, 0, packet);
