@@ -41,8 +41,7 @@ inline void register_movement_networking_system(flecs::world world) {
         .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
             MovementUpdatePacket move_update{tick.val, pos.val};
             // Serialize position
-            Buffer buffer;
-            size_t size = serialize(move_update, buffer);
+            auto [buffer, size] = serialize(move_update);
             // Create packet and send to client
             ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
             enet_peer_send(conn.peer, 0, packet);

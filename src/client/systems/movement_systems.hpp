@@ -87,9 +87,8 @@ inline void register_movement_networking_system(flecs::world& world, ENetPeer* p
                 // std::cout << (int) input.x << ", " << (int) input.z << std::endl;
                 input_data.inputs.push_back(input);
             }
-            Buffer data_buffer;
-            size_t size = serialize(input_data, data_buffer);
-            ENetPacket* packet = enet_packet_create(data_buffer.data(), size, 0);
+            auto [buffer, size] = serialize(input_data);
+            ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
             enet_peer_send(peer, 0, packet);
 
             // Test serialize
