@@ -76,19 +76,6 @@ class Network {
 
     void process_recv_event() {
         flecs::entity player_e = world.lookup("LocalPlayer");
-        MovementUpdatePacket& move_update = player_e.get_mut<MovementUpdatePacket>();
-        Buffer buffer;
-        auto state = bitsery::quickDeserialization(
-            InputAdapter{
-                event.packet->data,
-                event.packet->dataLength
-            },
-            move_update
-        );
-        std::cout << "Received position "
-            << vector3_to_string(move_update.pos)
-            << " from server for tick "
-            << (int) move_update.ack_tick
-            << std::endl;
+        handle_packet(player_e, event.packet->data, event.packet->dataLength);
     }
 };

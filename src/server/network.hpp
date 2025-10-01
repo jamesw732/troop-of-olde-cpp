@@ -8,6 +8,7 @@
 #include "shared/components/physics.hpp"
 #include "shared/components/ticks.hpp"
 #include "shared/serialize/helpers.hpp"
+#include "shared/serialize/serialize.hpp"
 
 class Network {
   public:
@@ -60,7 +61,7 @@ class Network {
 
                 case ENET_EVENT_TYPE_DISCONNECT:
                     std::cout << "Client with Entity id "
-                        << (ecs_entity_t)(uintptr_t) event.peer->data
+                        << cast_raw_id(event.peer->data)
                         << " disconnected."
                         << std::endl;
                     event.peer->data = NULL;
@@ -68,7 +69,7 @@ class Network {
 
                 case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
                     std::cout << "Client with Entity id "
-                        << (ecs_entity_t)(uintptr_t) event.peer->data
+                        << cast_raw_id(event.peer->data)
                         << " disconnected due to timeout."
                         << std::endl;
                     event.peer->data = NULL;
@@ -91,30 +92,14 @@ class Network {
     }
 
     void process_recv_event() {
-        MovementInputPacket input_packet;
-        Buffer buffer;
-        auto state = bitsery::quickDeserialization(
-            InputAdapter{
-                event.packet->data,
-                event.packet->dataLength
-            },
-            input_packet
-        );
-        auto id = (ecs_entity_t)(uintptr_t) event.peer->data;
+        auto id = cast_raw_id(event.peer->data);
         flecs::entity e(world, id);
-        MovementInput input = input_packet.inputs.back();
-        e.set<MovementInputPacket>(input_packet);
-        uint16_t tick = input_packet.tick;
-        std::cout << "Received "
-            << input_packet.inputs.size()
-            << " movement inputs up to tick "
-            << tick
-            << ". Most recent: "
-            << (int) input.x
-            << ", "
-            << (int) input.z
-            << std::endl;
+        handle_packet(e, event.packet->data, event.packet->dataLength);
         /* Clean up the packet now that we're done using it. */
         enet_packet_destroy(event.packet);
+    }
+
+    ecs_entity_t cast_raw_id(void* raw_id) {
+        return (ecs_entity_t)(uintptr_t) raw_id;
     }
 };
