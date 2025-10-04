@@ -4,11 +4,15 @@
 
 #include "raylib-cpp.hpp"
 
+#include "shared/components/network.hpp"
+#include "shared/components/names.hpp"
 #include "movement.hpp"
 
 enum class PacketType : uint8_t {
     MovementInput,
-    MovementUpdate
+    MovementUpdate,
+    ClientLoginPacket,
+    PlayerSpawnPacket
 };
 
 /*
@@ -30,4 +34,15 @@ struct MovementUpdatePacket {
     static constexpr PacketType id = PacketType::MovementUpdate;
     uint16_t ack_tick = -1;
     raylib::Vector3 pos{0, 0, 0};
+};
+
+struct ClientLoginPacket {
+    static constexpr PacketType id = PacketType::ClientLoginPacket;
+    DisplayName name;
+};
+
+struct PlayerSpawnPacket {
+    static constexpr PacketType id = PacketType::PlayerSpawnPacket;
+    NetworkId network_id;
+    DisplayName name;
 };

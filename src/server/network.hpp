@@ -4,6 +4,7 @@
 #include "enet.h"
 #include "flecs.h"
 #include "server/components/networking.hpp"
+#include "shared/components/network.hpp"
 #include "shared/components/packets.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/ticks.hpp"
@@ -17,6 +18,7 @@ class Network {
     ENetAddress address = {0};
     ENetEvent event;
     flecs::world world;
+    uint32_t network_id_counter = 0;
 
     Network(flecs::world& w) : world(w) {};
 
@@ -85,9 +87,10 @@ class Network {
         auto e = world.entity();
         e.add<Position>();
         e.add<MovementInputPacket>();
-        e.add<Connection>();
         e.set<Connection>({event.peer});
         e.add<ClientMoveTick>();
+        e.set<NetworkId>({network_id_counter});
+        network_id_counter++;
         event.peer->data = (void*) e.raw_id();
     }
 

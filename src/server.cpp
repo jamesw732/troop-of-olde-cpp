@@ -12,6 +12,7 @@
 #include "server/components/networking.hpp"
 #include "server/network.hpp"
 #include "server/systems/movement_systems.hpp"
+#include "server/systems/login_systems.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/components/movement.hpp"
 #include "shared/components/ticks.hpp"
@@ -30,6 +31,7 @@ int main(void)
         return 1;
     }
 
+    register_login_system(world);
     register_movement_system(world);
     register_movement_networking_system(world);
 

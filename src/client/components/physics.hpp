@@ -1,3 +1,4 @@
+#pragma once
 #include "raylib-cpp.hpp"
 
 struct PrevPosition {

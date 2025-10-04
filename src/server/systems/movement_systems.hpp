@@ -16,7 +16,7 @@ inline void register_movement_system(flecs::world world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
-            std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
+            // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
             int dif = (int) (ack_tick.val - start_tick);
             // Precondition: received tick is at most 1 more than stored tick
             // If not satisfied, process whole buffer and hope for the best

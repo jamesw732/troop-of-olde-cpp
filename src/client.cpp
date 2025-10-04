@@ -17,6 +17,7 @@
 #include "client/network.hpp"
 #include "client/systems/movement_systems.hpp"
 #include "client/systems/render_systems.hpp"
+#include "client/systems/spawn_systems.hpp"
 #include "shared/components/physics.hpp"
 #include "shared/const.hpp"
 #include "shared/helpers/movement.hpp"
@@ -45,19 +46,12 @@ int main(void)
     raylib::Font cascadiaMono = raylib::LoadFont(cascadiaMonoPath);
 
     flecs::world world;
+    world.entity("LocalPlayer");
     Network network(world);
     network.connect();
 
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
-    auto player_e = world.entity("LocalPlayer");
-    player_e.add<Position>();
-    player_e.add<TargetPosition>();
-    player_e.add<PrevPosition>();
-    player_e.add<LerpTimer>();
-    player_e.add<MovementInput>();
-    player_e.add<LocalPlayer>();
-    player_e.add<MovementUpdatePacket>();
 
     InputHandler input_handler;
     InputBuffer input_buffer;
@@ -65,6 +59,7 @@ int main(void)
     float dt;
 
     auto ManualPhase = world.entity("ManualPhase");
+    register_player_spawn_system(world);
     register_movement_target_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);

@@ -77,9 +77,9 @@ inline void register_movement_system(flecs::world& world) {
 
 inline void register_movement_networking_system(flecs::world& world, ENetPeer* peer, InputBuffer& input_buffer,
         uint16_t& tick) {
-    world.system()
+    world.system<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([peer, &input_buffer, &tick]() {
+        .each([peer, &input_buffer, &tick](LocalPlayer) {
             // Construct movement input packet from input buffer and send to server
             MovementInputPacket input_data;
             input_data.tick = tick;
@@ -110,11 +110,11 @@ inline void register_movement_networking_system(flecs::world& world, ENetPeer* p
 }
 
 inline void register_movement_tick_system(flecs::world& world, uint16_t& movement_tick) {
-    world.system()
+    world.system<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&movement_tick]() {
+        .each([&movement_tick](LocalPlayer) {
                 movement_tick++;
-                std::cout << "Begin tick " << (int) movement_tick << std::endl;
+                // std::cout << "Begin tick " << (int) movement_tick << std::endl;
             }
         );
 }

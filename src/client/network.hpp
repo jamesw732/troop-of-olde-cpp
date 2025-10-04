@@ -4,6 +4,7 @@
 
 #include "client/systems/movement_systems.hpp"
 #include "shared/components/packets.hpp"
+#include "shared/serialize/serialize_login.hpp"
 #include "shared/util.hpp"
 
 
@@ -45,6 +46,10 @@ class Network {
         if (enet_host_service(client, &event, 5000) > 0 &&
             event.type == ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Connection to Troop of Olde server succeeded." << std::endl;
+            ClientLoginPacket login{{"Player"}};
+            auto [buffer, size] = serialize(login);
+            ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+            enet_peer_send(peer, 1, packet);
         } else {
             enet_peer_reset(peer);
             std::cout << "Connection to Troop of Olde server failed." << std::endl;
@@ -55,6 +60,7 @@ class Network {
         while (enet_host_service(client, &event, 0) > 0) {
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT: {
+                    // Don't do anything here, do logic in connect function
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
