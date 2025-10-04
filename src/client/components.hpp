@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib-cpp.hpp"
 
+struct LocalPlayer {};
+
 struct PrevPosition {
     raylib::Vector3 val{0, 0, 0};
 };

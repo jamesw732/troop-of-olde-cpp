@@ -10,20 +10,17 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "client/components/player.hpp"
+#include "client/components.hpp"
 #include "client/fonts.hpp"
-#include "client/input_handler.hpp"
-#include "client/input_buffer.hpp"
+#include "client/input.hpp"
 #include "client/network.hpp"
-#include "client/systems/movement_systems.hpp"
-#include "client/systems/render_systems.hpp"
-#include "client/systems/spawn_systems.hpp"
-#include "shared/components/physics.hpp"
+#include "client/movement.hpp"
+#include "client/render.hpp"
+#include "client/spawn.hpp"
+#include "shared/components.hpp"
 #include "shared/const.hpp"
-#include "shared/helpers/movement.hpp"
-#include "shared/serialize/helpers.hpp"
-#include "shared/serialize/serialize_vector3.hpp"
-#include "shared/serialize/serialize_physics.hpp"
+#include "shared/movement.hpp"
+#include "shared/serialize.hpp"
 #include "shared/util.hpp"
 
 

@@ -3,14 +3,21 @@
 #include <tuple>
 
 #include "flecs.h"
+#include <bitsery/bitsery.h>
+#include <bitsery/adapter/buffer.h>
+#include <bitsery/traits/vector.h>
+#include <bitsery/traits/string.h>
+#include <bitsery/traits/array.h>
 
-#include "helpers.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/serialize/serialize_login.hpp"
-#include "shared/serialize/serialize_movement.hpp"
-#include "shared/serialize/serialize_physics.hpp"
-#include "shared/serialize/serialize_vector3.hpp"
 #include "shared/util.hpp"
+#include "shared/components.hpp"
+#include "shared/packets.hpp"
+
+using Buffer = std::vector<uint8_t>;
+using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
+using InputAdapter = bitsery::InputBufferAdapter<uint8_t*>;
+
+static_assert(sizeof(float) == 4, "Floats must be 4 bytes");
 
 
 template<typename T>
@@ -82,3 +89,58 @@ inline void handle_packet(flecs::entity entity, const uint8_t* buffer, size_t si
         }
     }
 }
+
+
+template <typename S>
+void serialize (S& s, raylib::Vector3& v) {
+    s.value4b(v.x);
+    s.value4b(v.y);
+    s.value4b(v.z);
+}
+
+template <typename S>
+void serialize(S& s, Position& pos) {
+    serialize(s, pos.val);
+}
+
+template<typename S>
+void serialize(S& s, ClientLoginPacket login) {
+    s.object(login.name);
+}
+
+template<typename S>
+void serialize(S& s, PlayerSpawnPacket spawn) {
+    s.object(spawn.network_id);
+    s.object(spawn.name);
+}
+
+template<typename S>
+void serialize(S& s, NetworkId network_id) {
+    s.value4b(network_id.id);
+}
+
+template <typename S>
+void serialize(S& s, std::vector<MovementInput>& v) {
+    s.container(v, 500, [](S& s, MovementInput& input) {
+        s.value1b(input.x);
+        s.value1b(input.z);
+    });
+}
+
+template<typename S>
+void serialize(S& s, MovementInputPacket& input_packet) {
+    s.value2b(input_packet.tick);
+    serialize(s, input_packet.inputs);
+}
+
+template<typename S>
+void serialize(S& s, MovementUpdatePacket& move_update) {
+    s.value2b(move_update.ack_tick);
+    serialize(s, move_update.pos);
+}
+
+template<typename S>
+void serialize(S& s, DisplayName name) {
+    s.text1b(name.name, 32);
+}
+

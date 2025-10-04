@@ -4,9 +4,7 @@
 
 #include "raylib-cpp.hpp"
 
-#include "shared/components/network.hpp"
-#include "shared/components/names.hpp"
-#include "movement.hpp"
+#include "shared/components.hpp"
 
 enum class PacketType : uint8_t {
     MovementInput,

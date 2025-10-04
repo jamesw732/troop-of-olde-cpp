@@ -3,17 +3,12 @@
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
-#include "client/input_buffer.hpp"
-#include "client/input_handler.hpp"
-#include "client/components/player.hpp"
-#include "client/components/physics.hpp"
-#include "shared/helpers/movement.hpp"
-#include "shared/components/movement.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/components/physics.hpp"
-#include "shared/components/ticks.hpp"
+#include "client/input.hpp"
+#include "client/components.hpp"
+#include "shared/movement.hpp"
+#include "shared/components.hpp"
 #include "shared/const.hpp"
-#include "shared/serialize/serialize.hpp"
+#include "shared/serialize.hpp"
 #include "shared/util.hpp"
 
 

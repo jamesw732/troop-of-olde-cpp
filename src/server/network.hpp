@@ -3,13 +3,10 @@
 
 #include "enet.h"
 #include "flecs.h"
-#include "server/components/networking.hpp"
-#include "shared/components/network.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/components/physics.hpp"
-#include "shared/components/ticks.hpp"
-#include "shared/serialize/helpers.hpp"
-#include "shared/serialize/serialize.hpp"
+#include "server/components.hpp"
+#include "shared/components.hpp"
+#include "shared/packets.hpp"
+#include "shared/serialize.hpp"
 
 class Network {
   public:

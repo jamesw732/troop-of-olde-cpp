@@ -3,12 +3,9 @@
 
 #include "flecs.h"
 
-#include "client/components/player.hpp"
-#include "client/components/physics.hpp"
-#include "shared/components/movement.hpp"
-#include "shared/components/names.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/components/physics.hpp"
+#include "client/components.hpp"
+#include "shared/components.hpp"
+#include "shared/packets.hpp"
 
 
 inline void register_player_spawn_system(flecs::world& world) {

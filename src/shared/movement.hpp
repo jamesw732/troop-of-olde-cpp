@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib-cpp.hpp"
 
-#include "shared/components/movement.hpp"
+#include "shared/components.hpp"
 
 
 inline void process_movement_input(raylib::Vector3& pos, MovementInput input) {

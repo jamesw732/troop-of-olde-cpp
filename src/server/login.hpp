@@ -1,10 +1,9 @@
 #include "enet.h"
 #include "flecs.h"
 
-#include "server/components/networking.hpp"
-#include "shared/components/network.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/serialize/serialize.hpp"
+#include "server/components.hpp"
+#include "shared/packets.hpp"
+#include "shared/serialize.hpp"
 
 inline void register_login_system(flecs::world world) {
     world.system<Connection, NetworkId>()

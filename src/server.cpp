@@ -9,18 +9,14 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "server/components/networking.hpp"
+#include "server/components.hpp"
 #include "server/network.hpp"
-#include "server/systems/movement_systems.hpp"
-#include "server/systems/login_systems.hpp"
-#include "shared/components/physics.hpp"
-#include "shared/components/movement.hpp"
-#include "shared/components/ticks.hpp"
+#include "server/movement.hpp"
+#include "server/login.hpp"
+#include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
-#include "shared/serialize/serialize_movement.hpp"
-#include "shared/serialize/serialize_physics.hpp"
-#include "shared/serialize/helpers.hpp"
+#include "shared/serialize.hpp"
 
 
 int main(void)

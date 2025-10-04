@@ -2,9 +2,9 @@
 
 #include "enet.h"
 
-#include "client/systems/movement_systems.hpp"
-#include "shared/components/packets.hpp"
-#include "shared/serialize/serialize_login.hpp"
+#include "client/movement.hpp"
+#include "shared/components.hpp"
+#include "shared/serialize.hpp"
 #include "shared/util.hpp"
 
 
