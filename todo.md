@@ -1,7 +1,7 @@
 # Right now:
 
-
+## Allow multiple players to load into world at once
 
 # Coming soon:
 
-## Rework serialize layout. Maybe have a serialize_common.hpp file for common structs?
+## Implement character rotation

@@ -47,7 +47,7 @@ class Network {
                     std::cout << "A new client connected from "
                         <<  event.peer->address.host.__in6_u.__u6_addr8
                         << ":"
-                        << event.peer->address.port
+                        << (int) event.peer->address.port
                         << "." << std::endl;
                     create_character();
                     break;

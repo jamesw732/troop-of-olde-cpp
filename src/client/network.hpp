@@ -43,16 +43,17 @@ class Network {
             std::cout << "No available peers for initiating an ENet connection." << std::endl;
             exit(EXIT_FAILURE);
         }
-        if (enet_host_service(client, &event, 5000) > 0 &&
-            event.type == ENET_EVENT_TYPE_CONNECT) {
+        if (enet_host_service(client, &event, 10000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Connection to Troop of Olde server succeeded." << std::endl;
             ClientLoginPacket login{{"Player"}};
             auto [buffer, size] = serialize(login);
-            ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+            ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
             enet_peer_send(peer, 1, packet);
+            enet_host_flush(client);
         } else {
             enet_peer_reset(peer);
             std::cout << "Connection to Troop of Olde server failed." << std::endl;
+            exit(1);
         }
     }
 

@@ -37,6 +37,7 @@ int main(void)
         float dt = GetFrameTime();
         network.process_events();
         world.progress(dt);
+        enet_host_flush(network.server);
     }
 
     return 0;

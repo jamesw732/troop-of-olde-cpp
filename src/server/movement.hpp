@@ -10,7 +10,7 @@
 #include "shared/serialize.hpp"
 
 
-inline void register_movement_system(flecs::world world) {
+inline void register_movement_system(flecs::world& world) {
     world.system<Position, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
@@ -34,7 +34,7 @@ inline void register_movement_system(flecs::world world) {
         );
 }
 
-inline void register_movement_networking_system(flecs::world world) {
+inline void register_movement_networking_system(flecs::world& world) {
     world.system<Connection, Position, ClientMoveTick>()
         .interval(MOVE_UPDATE_RATE)
         .each([](flecs::iter& it, size_t, Connection& conn, Position& pos, ClientMoveTick& tick) {
