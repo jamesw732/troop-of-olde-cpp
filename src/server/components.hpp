@@ -4,3 +4,5 @@
 struct Connection {
     ENetPeer* peer;
 };
+
+struct NeedsSpawnBatch {};

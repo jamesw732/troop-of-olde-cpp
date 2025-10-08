@@ -32,7 +32,6 @@ int main(void)
 
     register_movement_system(world);
     register_movement_networking_system(world);
-    register_login_system(world);
     register_batch_spawn_system(world);
 
     // Main game loop

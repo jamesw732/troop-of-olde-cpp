@@ -2,23 +2,14 @@
 #include "flecs.h"
 
 #include "server/components.hpp"
+#include "server/network.hpp"
 #include "shared/packets.hpp"
 #include "shared/serialize.hpp"
-#include "server/network.hpp"
 
-
-inline void register_login_system(flecs::world& world) {
-    world.system<ClientLoginPacket>()
-        .each([&world] (flecs::entity e, ClientLoginPacket& packet) {
-            // std::cout << "Performing login system" << std::endl;
-            e.set<DisplayName>(packet.name);
-            }
-        );
-}
 
 inline void register_batch_spawn_system(flecs::world& world) {
     world.system<Connection, NetworkId>()
-        .with<ClientLoginPacket>()
+        .with<NeedsSpawnBatch>()
         .each([&world] (flecs::entity e, Connection& conn, NetworkId& local_player_id) {
                 // std::cout << "Making spawn batch" << std::endl;
                 std::vector<PlayerSpawnState> spawn_states;
@@ -38,7 +29,7 @@ inline void register_batch_spawn_system(flecs::world& world) {
                 ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
                 enet_peer_send(conn.peer, 1, packet);
                 // Remove login packet from entity
-                e.remove<ClientLoginPacket>();
+                e.remove<NeedsSpawnBatch>();
             }
         );
 }
