@@ -9,6 +9,7 @@
 #include <bitsery/traits/string.h>
 #include <bitsery/traits/array.h>
 
+#include "shared/const.hpp"
 #include "shared/util.hpp"
 #include "shared/components.hpp"
 #include "shared/packets.hpp"
@@ -44,15 +45,15 @@ inline void handle_packet(flecs::entity entity, const uint8_t* buffer, size_t si
 
             MovementInput input = input_packet.inputs.back();
             uint16_t tick = input_packet.tick;
-            std::cout << "Received "
-                << input_packet.inputs.size()
-                << " movement inputs up to tick "
-                << tick
-                << ". Most recent: "
-                << (int) input.x
-                << ", "
-                << (int) input.z
-                << std::endl;
+            // std::cout << "Received "
+            //     << input_packet.inputs.size()
+            //     << " movement inputs up to tick "
+            //     << tick
+            //     << ". Most recent: "
+            //     << (int) input.x
+            //     << ", "
+            //     << (int) input.z
+            //     << std::endl;
             break;
         }
 
@@ -64,30 +65,41 @@ inline void handle_packet(flecs::entity entity, const uint8_t* buffer, size_t si
             // MovementUpdatePacket& move_update = entity.get_mut<MovementUpdatePacket>();
             des.object(*move_update);
 
-            std::cout << "Received position "
-                << vector3_to_string(move_update->pos)
-                << " from server for tick "
-                << (int) move_update->ack_tick
-                << std::endl;
+            // std::cout << "Received position "
+            //     << vector3_to_string(move_update->pos)
+            //     << " from server for tick "
+            //     << (int) move_update->ack_tick
+            //     << std::endl;
             break;
         }
 
         case PacketType::ClientLoginPacket: {
-            std::cout << "Received login packet" << std::endl;
+            // std::cout << "Received login packet" << std::endl;
             entity.add<ClientLoginPacket>();
             ClientLoginPacket& login = entity.get_mut<ClientLoginPacket>();
             des.object(login);
             break;
         }
 
-        case PacketType::PlayerSpawnPacket: {
-            std::cout << "Received spawn packet" << std::endl;
-            entity.add<PlayerSpawnPacket>();
-            PlayerSpawnPacket& spawn = entity.get_mut<PlayerSpawnPacket>();
-            des.object(spawn);
+        case PacketType::SpawnBatchPacket: {
+            // std::cout << "Received spawns packet" << std::endl;
+            entity.add<SpawnBatchPacket>();
+            SpawnBatchPacket& spawn_batch = entity.get_mut<SpawnBatchPacket>();
+            des.object(spawn_batch);
             break;
         }
     }
+}
+
+template<typename T>
+T deserialize(const uint8_t* buffer, size_t size) {
+    bitsery::Deserializer<InputAdapter> des{InputAdapter{buffer, size}};
+    PacketType pkt_type;
+    std::cout << "Packet type: " << (int) pkt_type << std::endl;
+    des.value1b(pkt_type);
+    T obj;
+    des.object(obj);
+    return obj;
 }
 
 
@@ -104,18 +116,25 @@ void serialize(S& s, Position& pos) {
 }
 
 template<typename S>
-void serialize(S& s, ClientLoginPacket login) {
+void serialize(S& s, ClientLoginPacket& login) {
     s.object(login.name);
 }
 
 template<typename S>
-void serialize(S& s, PlayerSpawnPacket spawn) {
-    s.object(spawn.network_id);
-    s.object(spawn.name);
+void serialize(S& s, PlayerSpawnState& spawn_state) {
+    s.object(spawn_state.network_id);
+    s.object(spawn_state.name);
+    s.object(spawn_state.pos);
 }
 
 template<typename S>
-void serialize(S& s, NetworkId network_id) {
+void serialize(S& s, SpawnBatchPacket& spawns) {
+    s.object(spawns.local_player_id);
+    s.container(spawns.spawn_states, MAX_CLIENTS);
+}
+
+template<typename S>
+void serialize(S& s, NetworkId& network_id) {
     s.value4b(network_id.id);
 }
 
@@ -140,7 +159,7 @@ void serialize(S& s, MovementUpdatePacket& move_update) {
 }
 
 template<typename S>
-void serialize(S& s, DisplayName name) {
+void serialize(S& s, DisplayName& name) {
     s.text1b(name.name, 32);
 }
 

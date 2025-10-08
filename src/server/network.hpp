@@ -7,6 +7,7 @@
 #include "shared/components.hpp"
 #include "shared/packets.hpp"
 #include "shared/serialize.hpp"
+#include "shared/const.hpp"
 
 class Network {
   public:
@@ -27,7 +28,6 @@ class Network {
         }
         address.host = ENET_HOST_ANY;
         address.port = 7777;
-        #define MAX_CLIENTS 32
         server = enet_host_create(&address, MAX_CLIENTS, 2, 0, 0);
 
         if (server == NULL) {
@@ -86,6 +86,7 @@ class Network {
         e.add<MovementInputPacket>();
         e.set<Connection>({event.peer});
         e.add<ClientMoveTick>();
+        e.add<DisplayName>();
         e.set<NetworkId>({network_id_counter});
         network_id_counter++;
         event.peer->data = (void*) e.raw_id();

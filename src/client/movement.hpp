@@ -19,7 +19,7 @@ inline void register_movement_target_system(flecs::world& world) {
         .each([] (Position& target_pos, PrevPosition& prev_pos, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = target_pos.val;
-            std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
+            // std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
             }
         );
 }
@@ -30,14 +30,14 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
         .each([&input_buffer](TargetPosition& target_pos, MovementUpdatePacket& move_update, LocalPlayer) {
                 // If old tick, skip reconciliation
                 if ((int16_t) (move_update.ack_tick - input_buffer.ack_tick) <= 0) {
-                    std::cout << "Skipping client-side reconciliation" << std::endl;
+                    // std::cout << "Skipping client-side reconciliation" << std::endl;
                     return;
                 }
                 // If new tick, perform client-side reconciliation
                 input_buffer.flushUpTo(move_update.ack_tick);
                 TargetPosition new_pos{move_update.pos};
                 for (MovementInput input: input_buffer.buffer) {
-                    std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
+                    // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
                     process_movement_input(new_pos.val, input);
                 }
                 target_pos.val = new_pos.val;
@@ -64,8 +64,8 @@ inline void register_movement_system(flecs::world& world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](TargetPosition& pos, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, input);
-                std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
+                // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
+                // std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
             }
         );
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+
 #include "raylib-cpp.hpp"
 
 struct DisplayName {
@@ -23,3 +24,10 @@ struct Position {
 struct ClientMoveTick {
     uint16_t val = 0;
 };
+
+struct PlayerSpawnState {
+    NetworkId network_id;
+    DisplayName name;
+    Position pos{{0, 0, 0}};
+};
+

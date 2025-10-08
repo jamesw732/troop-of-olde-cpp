@@ -20,6 +20,7 @@
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/movement.hpp"
+#include "shared/register.hpp"
 #include "shared/serialize.hpp"
 #include "shared/util.hpp"
 
@@ -55,8 +56,10 @@ int main(void)
     uint16_t movement_tick = 0;
     float dt;
 
+    register_components(world);
+
     auto ManualPhase = world.entity("ManualPhase");
-    register_player_spawn_system(world);
+    register_batch_spawn_system(world);
     register_movement_target_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);

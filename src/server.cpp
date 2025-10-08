@@ -16,6 +16,7 @@
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
+#include "shared/register.hpp"
 #include "shared/serialize.hpp"
 
 
@@ -27,9 +28,12 @@ int main(void)
         return 1;
     }
 
-    register_login_system(world);
+    register_components(world);
+
     register_movement_system(world);
     register_movement_networking_system(world);
+    register_login_system(world);
+    register_batch_spawn_system(world);
 
     // Main game loop
     while (true)
