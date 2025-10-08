@@ -3,6 +3,7 @@
 #include "enet.h"
 
 #include "client/movement.hpp"
+#include "client/character.hpp"
 #include "shared/components.hpp"
 #include "shared/serialize.hpp"
 #include "shared/util.hpp"
@@ -65,7 +66,7 @@ class Network {
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
-                    process_recv_event();
+                    handle_packet();
                     break;
                 }
                 case ENET_EVENT_TYPE_DISCONNECT: {
@@ -81,8 +82,53 @@ class Network {
         }
     }
 
-    void process_recv_event() {
-        flecs::entity player_e = world.lookup("LocalPlayer");
-        handle_packet(player_e, event.packet->data, event.packet->dataLength);
+    void handle_packet() {
+        uint8_t* buffer = event.packet->data;
+        size_t size = event.packet->dataLength;
+        bitsery::Deserializer<InputAdapter> des{InputAdapter{buffer, size}};
+        PacketType pkt_type;
+        des.value1b(pkt_type);
+        switch (pkt_type) {
+            case PacketType::MovementUpdate: {
+                auto entity = world.lookup("LocalPlayer");
+                auto* move_update = entity.try_get_mut<MovementUpdatePacket>();
+                if (!move_update) {
+                    return;
+                }
+                des.object(*move_update);
+
+                // std::cout << "Received position "
+                //     << vector3_to_string(move_update->pos)
+                //     << " from server for tick "
+                //     << (int) move_update->ack_tick
+                //     << std::endl;
+                break;
+            }
+
+            case PacketType::SpawnBatchPacket: {
+                // std::cout << "Received spawns packet" << std::endl;
+                SpawnBatchPacket spawn_batch;
+                des.object(spawn_batch);
+                for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
+                    flecs::entity entity;
+                    if (spawn_state.network_id.id == spawn_batch.local_player_id.id) {
+                        entity = create_local_player(world);
+                    }
+                    else {
+                        entity = create_remote_player(world);
+                    }
+                    entity.set<Position>(spawn_state.pos);
+                    entity.set<TargetPosition>(TargetPosition{spawn_state.pos.val});
+                    entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
+                    entity.set<NetworkId>(spawn_state.network_id);
+                    entity.set<DisplayName>(spawn_state.name);
+                }
+                break;
+            }
+
+            default: {
+                break;
+            }
+        }
     }
 };

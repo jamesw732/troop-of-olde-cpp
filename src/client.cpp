@@ -16,7 +16,6 @@
 #include "client/network.hpp"
 #include "client/movement.hpp"
 #include "client/render.hpp"
-#include "client/spawn.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/movement.hpp"
@@ -59,7 +58,6 @@ int main(void)
     register_components(world);
 
     auto ManualPhase = world.entity("ManualPhase");
-    register_batch_spawn_system(world);
     register_movement_target_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);

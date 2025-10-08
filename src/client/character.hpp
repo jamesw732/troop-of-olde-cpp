@@ -1,0 +1,31 @@
+#include "flecs.h"
+
+#include "client/components.hpp"
+#include "shared/components.hpp"
+#include "shared/packets.hpp"
+
+inline flecs::entity create_local_player(flecs::world world) {
+    auto entity = world.entity("LocalPlayer");
+    entity.add<LocalPlayer>();
+    entity.add<Position>();
+    entity.add<DisplayName>();
+    entity.add<NetworkId>();
+    entity.add<TargetPosition>();
+    entity.add<PrevPosition>();
+    entity.add<LerpTimer>();
+    entity.add<MovementUpdatePacket>();
+    entity.add<MovementInput>();
+    return entity;
+}
+
+inline flecs::entity create_remote_player(flecs::world world) {
+    auto entity = world.entity();
+    entity.add<Position>();
+    entity.add<DisplayName>();
+    entity.add<NetworkId>();
+    entity.add<TargetPosition>();
+    entity.add<PrevPosition>();
+    entity.add<LerpTimer>();
+    entity.add<MovementUpdatePacket>();
+    return entity;
+}
