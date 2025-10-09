@@ -3,7 +3,7 @@
 
 #include "enet.h"
 #include "flecs.h"
-#include "server/character.hpp"
+#include "server/entities.hpp"
 #include "server/components.hpp"
 #include "shared/components.hpp"
 #include "shared/packets.hpp"

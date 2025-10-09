@@ -10,7 +10,8 @@ enum class PacketType : uint8_t {
     MovementInput,
     MovementUpdate,
     ClientLoginPacket,
-    SpawnBatchPacket
+    SpawnBatchPacket,
+    PlayerSpawnPacket
 };
 
 /*
@@ -43,4 +44,9 @@ struct SpawnBatchPacket {
     static constexpr PacketType id = PacketType::SpawnBatchPacket;
     NetworkId local_player_id;
     std::vector<PlayerSpawnState> spawn_states;
+};
+
+struct PlayerSpawnPacket {
+    static constexpr PacketType id = PacketType::PlayerSpawnPacket;
+    PlayerSpawnState spawn_state;
 };

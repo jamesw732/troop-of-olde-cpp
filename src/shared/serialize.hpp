@@ -49,7 +49,36 @@ T deserialize(const uint8_t* buffer, size_t size) {
     return obj;
 }
 
+// Packets
+template<typename S>
+void serialize(S& s, ClientLoginPacket& login) {
+    s.object(login.name);
+}
 
+template<typename S>
+void serialize(S& s, SpawnBatchPacket& spawns) {
+    s.object(spawns.local_player_id);
+    s.container(spawns.spawn_states, MAX_CLIENTS);
+}
+
+template<typename S>
+void serialize(S& s, MovementInputPacket& input_packet) {
+    s.value2b(input_packet.tick);
+    serialize(s, input_packet.inputs);
+}
+
+template<typename S>
+void serialize(S& s, MovementUpdatePacket& move_update) {
+    s.value2b(move_update.ack_tick);
+    serialize(s, move_update.pos);
+}
+
+template<typename S>
+void serialize(S& s, PlayerSpawnPacket spawn_packet) {
+    s.object(spawn_packet.spawn_state);
+}
+
+// Components
 template <typename S>
 void serialize (S& s, raylib::Vector3& v) {
     s.value4b(v.x);
@@ -63,21 +92,10 @@ void serialize(S& s, Position& pos) {
 }
 
 template<typename S>
-void serialize(S& s, ClientLoginPacket& login) {
-    s.object(login.name);
-}
-
-template<typename S>
 void serialize(S& s, PlayerSpawnState& spawn_state) {
     s.object(spawn_state.network_id);
     s.object(spawn_state.name);
     s.object(spawn_state.pos);
-}
-
-template<typename S>
-void serialize(S& s, SpawnBatchPacket& spawns) {
-    s.object(spawns.local_player_id);
-    s.container(spawns.spawn_states, MAX_CLIENTS);
 }
 
 template<typename S>
@@ -91,18 +109,6 @@ void serialize(S& s, std::vector<MovementInput>& v) {
         s.value1b(input.x);
         s.value1b(input.z);
     });
-}
-
-template<typename S>
-void serialize(S& s, MovementInputPacket& input_packet) {
-    s.value2b(input_packet.tick);
-    serialize(s, input_packet.inputs);
-}
-
-template<typename S>
-void serialize(S& s, MovementUpdatePacket& move_update) {
-    s.value2b(move_update.ack_tick);
-    serialize(s, move_update.pos);
 }
 
 template<typename S>

@@ -6,3 +6,4 @@ struct Connection {
 };
 
 struct NeedsSpawnBatch {};
+struct NeedsSpawnBroadcast {};

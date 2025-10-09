@@ -12,5 +12,6 @@ inline flecs::entity create_character(flecs::world world) {
     entity.add<ClientMoveTick>();
     entity.add<DisplayName>();
     entity.add<NetworkId>();
+    entity.add<NeedsSpawnBroadcast>();
     return entity;
 }

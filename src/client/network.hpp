@@ -3,7 +3,7 @@
 #include "enet.h"
 
 #include "client/movement.hpp"
-#include "client/character.hpp"
+#include "client/entities.hpp"
 #include "shared/components.hpp"
 #include "shared/serialize.hpp"
 #include "shared/util.hpp"
@@ -124,6 +124,18 @@ class Network {
                     entity.set<DisplayName>(spawn_state.name);
                 }
                 break;
+            }
+
+            case PacketType::PlayerSpawnPacket: {
+                PlayerSpawnPacket spawn_packet;
+                des.object(spawn_packet);
+                PlayerSpawnState spawn_state = spawn_packet.spawn_state;
+                flecs::entity entity = create_remote_player(world);
+                entity.set<Position>(spawn_state.pos);
+                entity.set<TargetPosition>(TargetPosition{spawn_state.pos.val});
+                entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
+                entity.set<NetworkId>(spawn_state.network_id);
+                entity.set<DisplayName>(spawn_state.name);
             }
 
             default: {

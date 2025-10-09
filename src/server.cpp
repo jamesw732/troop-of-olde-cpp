@@ -33,6 +33,7 @@ int main(void)
     register_movement_system(world);
     register_movement_networking_system(world);
     register_batch_spawn_system(world);
+    register_spawn_broadcast_system(world);
 
     // Main game loop
     while (true)
