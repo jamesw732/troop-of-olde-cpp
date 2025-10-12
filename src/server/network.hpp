@@ -58,21 +58,31 @@ class Network {
                     break;
                 }
 
-                case ENET_EVENT_TYPE_DISCONNECT:
+                case ENET_EVENT_TYPE_DISCONNECT: {
                     std::cout << "Client with Entity id "
                         << cast_raw_id(event.peer->data)
                         << " disconnected."
                         << std::endl;
+                    auto id = cast_raw_id(event.peer->data);
+                    flecs::entity entity(world, id);
+                    entity.add<Disconnected>();
+                    send_disconnect_packet(entity.get<NetworkId>());
                     event.peer->data = NULL;
                     break;
+                }
 
-                case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
+                case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT: {
                     std::cout << "Client with Entity id "
                         << cast_raw_id(event.peer->data)
                         << " disconnected due to timeout."
                         << std::endl;
+                    auto id = cast_raw_id(event.peer->data);
+                    flecs::entity entity(world, id);
+                    entity.add<Disconnected>();
+                    send_disconnect_packet(entity.get<NetworkId>());
                     event.peer->data = NULL;
                     break;
+                }
 
                 case ENET_EVENT_TYPE_NONE:
                     break;
@@ -87,7 +97,7 @@ class Network {
         PacketType pkt_type;
         des.value1b(pkt_type);
         switch (pkt_type) {
-            case PacketType::MovementInput: {
+            case PacketType::MovementInputPacket: {
                 auto id = cast_raw_id(event.peer->data);
                 flecs::entity entity(world, id);
                 MovementInputPacket input_packet;
@@ -131,5 +141,21 @@ class Network {
 
     ecs_entity_t cast_raw_id(void* raw_id) {
         return (ecs_entity_t)(uintptr_t) raw_id;
+    }
+
+    void send_disconnect_packet(const NetworkId& network_id) {
+        DisconnectPacket dc_packet{network_id};
+        world.query<Connection, NetworkId>()
+            .each([&dc_packet, &network_id] (Connection& conn, NetworkId& tgt_network_id) {
+                if (network_id.id == tgt_network_id.id) {
+                    return;
+                }
+                std::cout << "Sending disconnect packet" << '\n';
+                auto [buffer, size] = serialize(dc_packet);
+                // Create packet and send to client
+                ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+                enet_peer_send(conn.peer, 0, packet);
+            }
+        );
     }
 };

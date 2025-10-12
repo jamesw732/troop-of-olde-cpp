@@ -11,6 +11,7 @@
 #include "enet.h"
 
 #include "client/components.hpp"
+#include "client/disconnect.hpp"
 #include "client/fonts.hpp"
 #include "client/input.hpp"
 #include "client/network.hpp"
@@ -65,6 +66,7 @@ int main(void)
     register_movement_system(world);
     register_movement_networking_system(world, network.peer, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
+    register_disconnect_system(world, network.netid_to_entity);
     auto move_lerp_sys = register_movement_lerp_system(world, dt);
     auto render_sys = register_render_system(world, camera, ManualPhase);
 
@@ -97,6 +99,7 @@ int main(void)
         enet_host_flush(network.client);
     }
     CloseWindow();
+    network.disconnect();
 
     return 0;
 }

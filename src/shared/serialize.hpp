@@ -27,6 +27,7 @@ template<typename T>
 inline std::tuple<Buffer, size_t> serialize(const T& obj) {
     Buffer buffer;
     bitsery::Serializer<OutputAdapter> ser{OutputAdapter{buffer}};
+    // std::cout << (int) T::id << '\n';
     ser.value1b(T::id);
     ser.object(obj);
     ser.adapter().flush();
@@ -75,6 +76,11 @@ void serialize(S& s, PlayerSpawnPacket& spawn_packet) {
 template<typename S>
 void serialize(S& s, MovementUpdateBatchPacket& batch) {
     s.container(batch.move_updates, MAX_CLIENTS);
+}
+
+template<typename S>
+void serialize(S& s, DisconnectPacket& dc_packet) {
+    serialize(s, dc_packet.network_id);
 }
 
 // Components

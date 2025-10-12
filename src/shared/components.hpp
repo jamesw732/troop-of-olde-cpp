@@ -49,3 +49,5 @@ struct MovementUpdate {
     ClientMoveTick ack_tick;
     Position pos;
 };
+
+struct Disconnected {};

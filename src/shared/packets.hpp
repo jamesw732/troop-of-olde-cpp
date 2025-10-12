@@ -7,12 +7,13 @@
 #include "shared/components.hpp"
 
 enum class PacketType : uint8_t {
-    MovementInput,
+    MovementInputPacket,
     MovementUpdate,
     ClientLoginPacket,
     SpawnBatchPacket,
     PlayerSpawnPacket,
-    MovementUpdateBatchPacket
+    MovementUpdateBatchPacket,
+    DisconnectPacket
 };
 
 /*
@@ -20,7 +21,7 @@ enum class PacketType : uint8_t {
  * This is serialized and sent to the server.
  */
 struct MovementInputPacket {
-    static constexpr PacketType id = PacketType::MovementInput;
+    static constexpr PacketType id = PacketType::MovementInputPacket;
     // The current movement tick, last movement tick in the buffer
     uint16_t tick = 0;
     // All movement inputs in the buffer
@@ -46,4 +47,9 @@ struct PlayerSpawnPacket {
 struct MovementUpdateBatchPacket {
     static constexpr PacketType id = PacketType::MovementUpdateBatchPacket;
     std::vector<MovementUpdate> move_updates;
+};
+
+struct DisconnectPacket {
+    static constexpr PacketType id = PacketType::DisconnectPacket;
+    NetworkId network_id;
 };

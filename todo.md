@@ -1,7 +1,5 @@
 # Right now:
 
-### Handle disconnects/logout
-
 
 # Coming soon:
 

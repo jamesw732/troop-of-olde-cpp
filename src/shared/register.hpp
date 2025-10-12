@@ -12,6 +12,7 @@ inline void register_components(flecs::world world) {
     world.component<ClientMoveTick>();
     world.component<PlayerSpawnState>();
     world.component<MovementUpdate>();
+    world.component<Disconnected>();
     // Add packets
     world.component<ClientLoginPacket>();
     world.component<SpawnBatchPacket>();

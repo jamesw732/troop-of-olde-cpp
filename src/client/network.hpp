@@ -135,16 +135,49 @@ class Network {
                 // for (auto pair: netid_to_entity) {
                 //     std::cout <<  pair.first.id << ", " << pair.second << '\n';
                 // }
+                break;
             }
 
             case PacketType::MovementUpdateBatchPacket: {
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
                 world.set<MovementUpdateBatchPacket>(batch);
+                break;
+            }
+
+            case PacketType::DisconnectPacket: {
+                std::cout << "Received disconnect packet" << '\n';
+                DisconnectPacket dc_packet;
+                des.object(dc_packet);
+                std::cout << dc_packet.network_id.id << '\n';
+                auto netid_entity = netid_to_entity.find(dc_packet.network_id);
+                if (netid_entity == netid_to_entity.end()) {
+                    break;
+                }
+                flecs::entity entity = netid_entity->second;
+                entity.add<Disconnected>();
+                break;
             }
 
             default: {
                 break;
+            }
+        }
+    }
+
+    void disconnect() {
+        enet_peer_disconnect(peer, 0);
+        while (enet_host_service(client, &event, 0) > 0) {
+            switch (event.type) {
+                case ENET_EVENT_TYPE_DISCONNECT: {
+                    return;
+                }
+                case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT: {
+                    return;
+                }
+                default: {
+                    break;
+                }
             }
         }
     }

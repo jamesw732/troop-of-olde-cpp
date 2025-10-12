@@ -10,6 +10,7 @@
 #include "enet.h"
 
 #include "server/components.hpp"
+#include "server/disconnect.hpp"
 #include "server/network.hpp"
 #include "server/movement.hpp"
 #include "server/login.hpp"
@@ -38,6 +39,8 @@ int main(void)
 
     register_batch_spawn_system(world);
     register_spawn_broadcast_system(world);
+    register_disconnect_system(world);
+
 
     // Main game loop
     while (true)
