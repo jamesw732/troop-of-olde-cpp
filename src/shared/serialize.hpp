@@ -68,12 +68,6 @@ void serialize(S& s, MovementInputPacket& input_packet) {
 }
 
 template<typename S>
-void serialize(S& s, MovementUpdatePacket& move_update) {
-    s.value2b(move_update.ack_tick);
-    serialize(s, move_update.pos);
-}
-
-template<typename S>
 void serialize(S& s, PlayerSpawnPacket& spawn_packet) {
     s.object(spawn_packet.spawn_state);
 }

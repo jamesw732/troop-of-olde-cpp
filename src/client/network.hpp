@@ -91,22 +91,6 @@ class Network {
         PacketType pkt_type;
         des.value1b(pkt_type);
         switch (pkt_type) {
-            case PacketType::MovementUpdate: {
-                auto entity = world.lookup("LocalPlayer");
-                auto* move_update = entity.try_get_mut<MovementUpdatePacket>();
-                if (!move_update) {
-                    return;
-                }
-                des.object(*move_update);
-
-                // std::cout << "Received position "
-                //     << vector3_to_string(move_update->pos)
-                //     << " from server for tick "
-                //     << (int) move_update->ack_tick
-                //     << std::endl;
-                break;
-            }
-
             case PacketType::SpawnBatchPacket: {
                 // We just entered world
                 // std::cout << "Received spawns packet" << std::endl;

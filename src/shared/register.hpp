@@ -13,12 +13,11 @@ inline void register_components(flecs::world world) {
     world.component<PlayerSpawnState>();
     world.component<MovementUpdate>();
     // Add packets
-    world.component<MovementInputPacket>();
-    world.component<MovementUpdatePacket>();
     world.component<ClientLoginPacket>();
     world.component<SpawnBatchPacket>();
     world.component<PlayerSpawnPacket>();
     world.component<MovementUpdateBatchPacket>();
+    world.component<MovementInputPacket>();
     // Set singleton components
     world.set<MovementUpdateBatchPacket>({});
 }

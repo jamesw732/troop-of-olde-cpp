@@ -27,15 +27,6 @@ struct MovementInputPacket {
     std::vector<MovementInput> inputs;
 };
 
-/*
- * Contains the server's currently acknowledged tick and the corresponding position
- */
-struct MovementUpdatePacket {
-    static constexpr PacketType id = PacketType::MovementUpdate;
-    uint16_t ack_tick = -1;
-    raylib::Vector3 pos{0, 0, 0};
-};
-
 struct ClientLoginPacket {
     static constexpr PacketType id = PacketType::ClientLoginPacket;
     DisplayName name;
