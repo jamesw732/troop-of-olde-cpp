@@ -59,6 +59,7 @@ int main(void)
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_target_system(world);
+    register_movement_recv_system(world, network.netid_to_entity);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world);

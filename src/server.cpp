@@ -31,7 +31,12 @@ int main(void)
     register_components(world);
 
     register_movement_system(world);
-    register_movement_networking_system(world);
+    // register_movement_networking_system(world);
+
+    register_movement_batch_system(world);
+    register_movement_batch_networking_system(world);
+    register_movement_batch_clear_system(world);
+
     register_batch_spawn_system(world);
     register_spawn_broadcast_system(world);
 

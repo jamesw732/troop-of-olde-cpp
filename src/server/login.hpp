@@ -48,12 +48,17 @@ inline void register_spawn_broadcast_system(flecs::world& world) {
                         const DisplayName& name,
                         const Position& pos
             ) {
+            // std::cout << "Broadcasting spawn" << '\n';
             PlayerSpawnPacket spawn_packet{{network_id, name, pos}};
             world.query<Connection, NetworkId>()
                 .each([&] (const Connection& conn, const NetworkId& tgt_network_id) {
                     if (network_id.id == tgt_network_id.id) {
+                        // std::cout << "Skipping client with network id " << tgt_network_id.id << '\n';
                         return;
                     }
+                    // std::cout << "Sending character with network id " << network_id.id
+                    // << " to client with network id " << tgt_network_id.id
+                    // << '\n';
                     auto [buffer, size] = serialize(spawn_packet);
                     ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
                     enet_peer_send(conn.peer, 1, packet);

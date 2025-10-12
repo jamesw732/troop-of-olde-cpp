@@ -74,8 +74,13 @@ void serialize(S& s, MovementUpdatePacket& move_update) {
 }
 
 template<typename S>
-void serialize(S& s, PlayerSpawnPacket spawn_packet) {
+void serialize(S& s, PlayerSpawnPacket& spawn_packet) {
     s.object(spawn_packet.spawn_state);
+}
+
+template<typename S>
+void serialize(S& s, MovementUpdateBatchPacket& batch) {
+    s.container(batch.move_updates, MAX_CLIENTS);
 }
 
 // Components
@@ -105,7 +110,7 @@ void serialize(S& s, NetworkId& network_id) {
 
 template <typename S>
 void serialize(S& s, std::vector<MovementInput>& v) {
-    s.container(v, 500, [](S& s, MovementInput& input) {
+    s.container(v, 100, [](S& s, MovementInput& input) {
         s.value1b(input.x);
         s.value1b(input.z);
     });
@@ -116,3 +121,14 @@ void serialize(S& s, DisplayName& name) {
     s.text1b(name.name, 32);
 }
 
+template<typename S>
+void serialize(S& s, ClientMoveTick& tick) {
+    s.value2b(tick.val);
+}
+
+template<typename S>
+void serialize(S& s, MovementUpdate& move_update) {
+    serialize(s, move_update.network_id);
+    serialize(s, move_update.ack_tick);
+    serialize(s, move_update.pos);
+}

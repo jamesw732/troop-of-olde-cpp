@@ -15,6 +15,7 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<LerpTimer>();
     entity.add<MovementUpdatePacket>();
     entity.add<MovementInput>();
+    entity.add<AckTick>();
     return entity;
 }
 
@@ -27,5 +28,6 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<PrevPosition>();
     entity.add<LerpTimer>();
     entity.add<MovementUpdatePacket>();
+    entity.add<AckTick>();
     return entity;
 }

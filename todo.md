@@ -1,13 +1,5 @@
 # Right now:
 
-## Allow multiple players to load into world at once
-
-### (Done) Batch world state and send to new client
-
-### (Done) Make existing clients spawn new character
-
-### Batch and send world state for persistent game updates
-
 ### Handle disconnects/logout
 
 

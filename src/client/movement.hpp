@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+
 #include "enet.h"
 #include "flecs.h"
 #include "raylib-cpp.hpp"
@@ -24,25 +26,53 @@ inline void register_movement_target_system(flecs::world& world) {
         );
 }
 
-inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<TargetPosition, MovementUpdatePacket, LocalPlayer>()
+inline void register_movement_recv_system(
+        flecs::world& world,
+        std::unordered_map<NetworkId, flecs::entity>& netid_to_entity
+    ) {
+    world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](TargetPosition& target_pos, MovementUpdatePacket& move_update, LocalPlayer) {
-                // If old tick, skip reconciliation
-                if ((int16_t) (move_update.ack_tick - input_buffer.ack_tick) <= 0) {
-                    // std::cout << "Skipping client-side reconciliation" << std::endl;
-                    return;
+        .each([&] (MovementUpdateBatchPacket& batch) {
+            // std::cout << "Movement Batch Update" << '\n';
+            for (MovementUpdate move_update: batch.move_updates) {
+                auto netid_entity = netid_to_entity.find(move_update.network_id);
+                if (netid_entity == netid_to_entity.end()) {
+                    continue;
                 }
-                // If new tick, perform client-side reconciliation
-                input_buffer.flushUpTo(move_update.ack_tick);
-                TargetPosition new_pos{move_update.pos};
-                for (MovementInput input: input_buffer.buffer) {
-                    // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                    process_movement_input(new_pos.val, input);
+                flecs::entity e = netid_entity->second;
+                // std::cout << move_update.ack_tick.val << ", " << e.get<AckTick>().val << '\n';
+                if ((int16_t) (move_update.ack_tick.val - e.get<AckTick>().val) <= 0) {
+                    // std::cout << "Skipping entity" << '\n';
+                    continue;
                 }
-                target_pos.val = new_pos.val;
+                e.set<AckTick>({move_update.ack_tick.val});
+                e.set<TargetPosition>({move_update.pos.val});
             }
-        );
+        }
+    );
+}
+
+inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
+    world.system<TargetPosition, AckTick, LocalPlayer>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&input_buffer](
+                TargetPosition& target_pos,
+                AckTick& new_ack_tick,
+                LocalPlayer
+            ) {
+            // If old tick, skip reconciliation
+            if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
+                // std::cout << "Skipping client-side reconciliation" << std::endl;
+                return;
+            }
+            // If new tick, perform client-side reconciliation
+            input_buffer.flushUpTo(new_ack_tick.val);
+            for (MovementInput input: input_buffer.buffer) {
+                // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
+                process_movement_input(target_pos.val, input);
+            }
+        }
+    );
 }
 
 inline void register_movement_input_system(

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unordered_map>
 
 #include "enet.h"
 
@@ -16,6 +17,7 @@ class Network {
     ENetAddress address = {0};
     ENetEvent event;
     flecs::world world;
+    std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
 
     Network(flecs::world& w) : world(w) {};
 
@@ -106,6 +108,7 @@ class Network {
             }
 
             case PacketType::SpawnBatchPacket: {
+                // We just entered world
                 // std::cout << "Received spawns packet" << std::endl;
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
@@ -122,11 +125,17 @@ class Network {
                     entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
                     entity.set<NetworkId>(spawn_state.network_id);
                     entity.set<DisplayName>(spawn_state.name);
+                    netid_to_entity[spawn_state.network_id] = entity;
                 }
+                // std::cout << "Batch Spawn Packet: " << '\n';
+                // for (auto pair: netid_to_entity) {
+                //     std::cout << (int) pair.first.id << ", " << (int) pair.second << '\n';
+                // }
                 break;
             }
 
             case PacketType::PlayerSpawnPacket: {
+                // Remote player entered world
                 PlayerSpawnPacket spawn_packet;
                 des.object(spawn_packet);
                 PlayerSpawnState spawn_state = spawn_packet.spawn_state;
@@ -136,6 +145,18 @@ class Network {
                 entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
                 entity.set<NetworkId>(spawn_state.network_id);
                 entity.set<DisplayName>(spawn_state.name);
+                netid_to_entity[spawn_state.network_id] = entity;
+                // std::cout << "Single Spawn Packet: " << '\n';
+                // std::cout << spawn_state.network_id.id << '\n';
+                // for (auto pair: netid_to_entity) {
+                //     std::cout <<  pair.first.id << ", " << pair.second << '\n';
+                // }
+            }
+
+            case PacketType::MovementUpdateBatchPacket: {
+                MovementUpdateBatchPacket batch;
+                des.object(batch);
+                world.set<MovementUpdateBatchPacket>(batch);
             }
 
             default: {

@@ -1,4 +1,6 @@
 #pragma once
+#include <cstdint>
+
 #include "raylib-cpp.hpp"
 
 struct LocalPlayer {};
@@ -13,4 +15,8 @@ struct TargetPosition {
 
 struct LerpTimer {
     float val{0};
+};
+
+struct AckTick {
+    uint16_t val{static_cast<uint16_t>(-1)};
 };
