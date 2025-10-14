@@ -28,6 +28,7 @@ and make `include/bitsery` accessible to the compiler (copy to `/usr/local/inclu
 
 
 # Compiling and Running
+## Main Executables
 This repository uses `cmake` for building. To build, simply run the following in the root:
 ```
 mkdir build
@@ -46,16 +47,16 @@ hardcoded to connect to it. So to launch the client and server, simply run (in s
 ./client
 ```
 
-To build the tests, run `make tests`. This will create `test_client` and `test_server` executables
-which run all the unit tests for the client and server.
+## Tests
+To build the tests, instead run `make tests`. This will create `test_client` and `test_server` executables
+which run all the unit tests for the client and server. Run `ctest` to execute all tests.
 
+## Debug
 To compile with debug flags, run `make debug`.
 
-# Running
-
-## Testing with simulated networking conditions
-On Linux, the following command can be used to simulate network conditions (100ms latency, 20ms jitter,
-1% packet loss):
+## Simulating network conditions
+On Linux, the following command can be used to introduce artificial latency, jitter, and
+packet loss (100ms latency, 20ms jitter, 1% packet loss):
 ```
 sudo tc qdisc add dev lo root netem delay 100ms 20ms loss 1%
 ```

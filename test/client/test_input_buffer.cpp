@@ -35,3 +35,7 @@ void test_input_buffer() {
     buffer.flushUpTo(100); // Just make sure this doesn't crash the program
     std::cout << "Executed test_input_buffer without errors" << std::endl;
 }
+
+int main() {
+    test_input_buffer();
+}

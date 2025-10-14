@@ -5,7 +5,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SHARED_DIR ${CMAKE_SOURCE_DIR}/src/shared)
 set(CLIENT_DIR ${CMAKE_SOURCE_DIR}/src/client)
 set(SERVER_DIR ${CMAKE_SOURCE_DIR}/src/server)
-set(CLIENT_TEST_DIR ${CMAKE_SOURCE_DIR}/test/client_tests)
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
+set(CLIENT_TEST_DIR ${TEST_DIR}/client)
+set(SERVER_TEST_DIR ${TEST_DIR}/server)
 
 # Libraries
 # # Create shared interface library
@@ -43,21 +45,28 @@ target_link_libraries(server PRIVATE
 
 # Tests
 enable_testing()
-# Create test library
-add_library(client-test-lib INTERFACE ${CLIENT_TEST_DIR})
-set_target_properties(client-test-lib PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_include_directories(client-test-lib INTERFACE ${CMAKE_SOURCE_DIR}/src)
-# Create test_all executable, link with dependencies
-add_executable(test_client test/test_client.cpp)
+# Client tests
+file(GLOB TEST_CLIENT_SOURCES CONFIGURE_DEPENDS "${CLIENT_TEST_DIR}/*.cpp")
+add_executable(test_client ${TEST_CLIENT_SOURCES})
 target_link_libraries(test_client PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
-    client-lib shared client-test-lib
+    client-lib shared
 )
 add_test(NAME test_client COMMAND test_client)
 set_target_properties(test_client PROPERTIES EXCLUDE_FROM_ALL TRUE)
+# Server tests
+file(GLOB TEST_SERVER_SOURCES CONFIGURE_DEPENDS "${SERVER_TEST_DIR}/*.cpp")
+add_executable(test_server ${TEST_SERVER_SOURCES})
+target_link_libraries(test_server PRIVATE
+    raylib m pthread dl rt GL X11 flecs_static
+    client-lib shared
+)
+add_test(NAME test_server COMMAND test_server)
+set_target_properties(test_server PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
 # Create tests target for Makefile
 add_custom_target(tests
-    DEPENDS test_client
+    DEPENDS test_client test_server
 )
 
 # Debug build
