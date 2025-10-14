@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SHARED_DIR ${CMAKE_SOURCE_DIR}/src/shared)
 set(CLIENT_DIR ${CMAKE_SOURCE_DIR}/src/client)
 set(SERVER_DIR ${CMAKE_SOURCE_DIR}/src/server)
-set(CLIENT_TEST_DIR ${CMAKE_SOURCE_DIR}/src/client_tests)
+set(CLIENT_TEST_DIR ${CMAKE_SOURCE_DIR}/test/client_tests)
 
 # Libraries
 # # Create shared interface library
@@ -48,7 +48,7 @@ add_library(client-test-lib INTERFACE ${CLIENT_TEST_DIR})
 set_target_properties(client-test-lib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_include_directories(client-test-lib INTERFACE ${CMAKE_SOURCE_DIR}/src)
 # Create test_all executable, link with dependencies
-add_executable(test_client src/test_client.cpp)
+add_executable(test_client test/test_client.cpp)
 target_link_libraries(test_client PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
     client-lib shared client-test-lib
