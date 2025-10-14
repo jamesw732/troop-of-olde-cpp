@@ -27,7 +27,7 @@ and make the `include` directory accessible to the compiler (copy contents to `/
 and make `include/bitsery` accessible to the compiler (copy to `/usr/local/include`).
 
 
-# Compiling
+# Compiling and Running
 This repository uses `cmake` for building. To build, simply run the following in the root:
 ```
 mkdir build
@@ -35,8 +35,6 @@ cd build
 cmake ..
 make
 ```
-
-# Running
 Building will create two executables: `client`, and `server`.
 Currently, the server is hardcoded to host a localhost server, and the client is
 hardcoded to connect to it. So to launch the client and server, simply run (in separate terminals):
@@ -47,6 +45,13 @@ hardcoded to connect to it. So to launch the client and server, simply run (in s
 ```
 ./client
 ```
+
+To build the tests, run `make tests`. This will create `test_client` and `test_server` executables
+which run all the unit tests for the client and server.
+
+To compile with debug flags, run `make debug`.
+
+# Running
 
 ## Testing with simulated networking conditions
 On Linux, the following command can be used to simulate network conditions (100ms latency, 20ms jitter,
