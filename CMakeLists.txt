@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(MyProject CXX)
 
+include(cmake/PlatformDeps.cmake)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SHARED_DIR ${CMAKE_SOURCE_DIR}/src/shared)
 set(CLIENT_DIR ${CMAKE_SOURCE_DIR}/src/client)
@@ -39,18 +41,20 @@ target_include_directories(server-lib INTERFACE
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     client-lib shared
 )
+link_platform_libs(client)
 
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     server-lib shared
 )
+link_platform_libs(server)
 
 # Tests
 enable_testing()
@@ -58,20 +62,22 @@ enable_testing()
 file(GLOB TEST_CLIENT_SOURCES CONFIGURE_DEPENDS "${CLIENT_TEST_DIR}/*.cpp")
 add_executable(test_client ${TEST_CLIENT_SOURCES})
 target_link_libraries(test_client PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     client-lib shared
 )
+link_platform_libs(test_client)
 add_test(NAME test_client COMMAND test_client)
 set_target_properties(test_client PROPERTIES EXCLUDE_FROM_ALL TRUE)
 # Server tests
 file(GLOB TEST_SERVER_SOURCES CONFIGURE_DEPENDS "${SERVER_TEST_DIR}/*.cpp")
 add_executable(test_server ${TEST_SERVER_SOURCES})
 target_link_libraries(test_server PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     client-lib shared
 )
+link_platform_libs(test_server)
 add_test(NAME test_server COMMAND test_server)
 set_target_properties(test_server PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
@@ -86,19 +92,21 @@ set(DEBUG_CXX_FLAGS -g -O0 -DDEBUG)
 add_executable(client_debug src/client.cpp)
 target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client_debug PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     client-lib shared
 )
+link_platform_libs(client_debug)
 set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
 # Server debug build
 add_executable(server_debug src/server.cpp)
 target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server_debug PRIVATE
-    raylib m pthread dl rt GL X11 flecs_static
+    raylib flecs_static
     raylib-cpp enet bitsery
     server-lib shared
 )
+link_platform_libs(server_debug)
 set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_custom_target(debug
