@@ -12,6 +12,10 @@ set(SERVER_TEST_DIR ${TEST_DIR}/server)
 # External dependencies
 add_subdirectory(deps)
 
+add_custom_target(deps
+    DEPENDS raylib flecs
+)
+
 # Libraries
 # # Create shared interface library
 add_library(shared INTERFACE ${SHARED_DIR})
