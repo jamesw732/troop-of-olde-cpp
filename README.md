@@ -1,31 +1,5 @@
 # Dependencies
-Header-only libraries (ie ENet, raylib-cpp) are presumed to exist in a default global include
-directory (on linux, `/usr/local/include`).
-
-Static libraries (ie raylib, flecs) and their dependencies are presumed to exist in a default global
-location (on linux, `/usr/local/lib`). Each library listed may have platform-dependent installation processes.
-
-- raylib: Download (or compile from source) and install from one of the links:
-[raylib website](https://www.raylib.com/), [raylib repository](https://github.com/raysan5/raylib)
-- flecs: This repository depends on a statically compiled `flecs` library. Installing flecs by
-following the official install instructions is not straightforward, but it is easy to install
-with `cmake`.  Clone flecs from [the flecs repository](https://github.com/SanderMertens/flecs)
-and compile it using `cmake`:
-```
-    mkdir build
-    cd build
-    cmake ..
-    sudo make install
-```
-Alternatively, it should be possible to run `make` and then manually copy `libflecs_static.a` into
-a location your C++ compiler can see.
-- raylib-cpp: Download/clone from [raylib-cpp repository](https://github.com/RobLoach/raylib-cpp)
-and make the `include` directory accessible to the compiler (copy contents to `/usr/local/include`).
-- ENet: Download/clone from [the ENet repository](https://github.com/zpl-c/enet) and make
-`include/enet.h` accessible to the compiler (copy to `/usr/local/include`).
-- Bitsery: Download/clone from [the Bitsery repository](https://github.com/fraillt/bitsery/tree/master)
-and make `include/bitsery` accessible to the compiler (copy to `/usr/local/include`).
-
+All code dependencies are included in the `deps` directory and will be compiled automatically.
 
 # Compiling and Running
 ## Main Executables
@@ -53,6 +27,9 @@ which run all the unit tests for the client and server. Run `ctest` to execute a
 
 ## Debug
 To compile with debug flags, run `make debug`.
+
+## Dependencies
+To compile dependencies without compiling any `client` or `server` executables, run `make deps`.
 
 ## Simulating network conditions
 On Linux, the following command can be used to introduce artificial latency, jitter, and
