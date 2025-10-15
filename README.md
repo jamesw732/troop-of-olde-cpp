@@ -1,5 +1,12 @@
 # Dependencies
-All code dependencies are included in the `deps` directory and will be compiled automatically.
+Any C++ compiler and CMake.
+
+Code dependencies are listed in `deps` as Git submodules. To pull along with the submodules,
+run `git clone --recurse-submodules <repository-url>`. Or if you already pulled and want to grab the
+submodules, run `git submodule update --init --recursive` from `deps`.
+
+However, it is not required to download the submodules. If you don't, CMake will download them for you
+in the build directory.
 
 # Compiling and Running
 ## Main Executables
@@ -10,6 +17,8 @@ cd build
 cmake ..
 make
 ```
+Note: If this is your first time running `cmake`, you may have to do some configuration beforehand.
+
 Building will create two executables: `client`, and `server`.
 Currently, the server is hardcoded to host a localhost server, and the client is
 hardcoded to connect to it. So to launch the client and server, simply run (in separate terminals):
