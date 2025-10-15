@@ -9,6 +9,9 @@ set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 set(CLIENT_TEST_DIR ${TEST_DIR}/client)
 set(SERVER_TEST_DIR ${TEST_DIR}/server)
 
+# External dependencies
+add_subdirectory(deps)
+
 # Libraries
 # # Create shared interface library
 add_library(shared INTERFACE ${SHARED_DIR})
@@ -33,6 +36,7 @@ target_include_directories(server-lib INTERFACE
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     client-lib shared
 )
 
@@ -40,6 +44,7 @@ target_link_libraries(client PRIVATE
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     server-lib shared
 )
 
@@ -50,6 +55,7 @@ file(GLOB TEST_CLIENT_SOURCES CONFIGURE_DEPENDS "${CLIENT_TEST_DIR}/*.cpp")
 add_executable(test_client ${TEST_CLIENT_SOURCES})
 target_link_libraries(test_client PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     client-lib shared
 )
 add_test(NAME test_client COMMAND test_client)
@@ -59,6 +65,7 @@ file(GLOB TEST_SERVER_SOURCES CONFIGURE_DEPENDS "${SERVER_TEST_DIR}/*.cpp")
 add_executable(test_server ${TEST_SERVER_SOURCES})
 target_link_libraries(test_server PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     client-lib shared
 )
 add_test(NAME test_server COMMAND test_server)
@@ -76,6 +83,7 @@ add_executable(client_debug src/client.cpp)
 target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client_debug PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     client-lib shared
 )
 set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -84,6 +92,7 @@ add_executable(server_debug src/server.cpp)
 target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server_debug PRIVATE
     raylib m pthread dl rt GL X11 flecs_static
+    raylib-cpp enet bitsery
     server-lib shared
 )
 set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
