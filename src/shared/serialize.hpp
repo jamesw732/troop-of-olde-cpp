@@ -3,11 +3,11 @@
 #include <tuple>
 
 #include "flecs.h"
-#include <bitsery/bitsery.h>
-#include <bitsery/adapter/buffer.h>
-#include <bitsery/traits/vector.h>
-#include <bitsery/traits/string.h>
-#include <bitsery/traits/array.h>
+#include "bitsery/bitsery.h"
+#include "bitsery/adapter/buffer.h"
+#include "bitsery/traits/vector.h"
+#include "bitsery/traits/string.h"
+#include "bitsery/traits/array.h"
 
 #include "shared/const.hpp"
 #include "shared/util.hpp"

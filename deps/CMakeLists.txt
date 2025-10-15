@@ -13,5 +13,10 @@ target_include_directories(enet
 add_library(bitsery INTERFACE)
 target_include_directories(bitsery
     INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/bitsery
 )
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/raylib)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/flecs)

@@ -1,0 +1,6 @@
+[submodule "deps/raylib"]
+	path = deps/raylib
+	url = https://github.com/raysan5/raylib
+[submodule "deps/flecs"]
+	path = deps/flecs
+	url = https://github.com/SanderMertens/flecs
