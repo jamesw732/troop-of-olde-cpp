@@ -16,11 +16,11 @@ inline void register_movement_system(flecs::world& world) {
         .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
             // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
-            int dif = (int) (ack_tick.val - start_tick);
+            int const dif = (int) (ack_tick.val - start_tick);
             // Precondition: received tick is at most 1 more than stored tick
             // If not satisfied, process whole buffer and hope for the best
             int start_idx = std::max(0, dif + 1);
-            for (std::vector<MovementInput>::iterator it = packet.inputs.begin() + start_idx;
+            for (auto it = packet.inputs.begin() + start_idx;
                     it != packet.inputs.end(); ++it) {
                 auto input = *it;
                 raylib::Vector3 velocity((float) input.x, 0, (float) input.z);
@@ -40,7 +40,7 @@ inline void register_movement_batch_system(flecs::world& world) {
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
                   Position& pos) {
-            MovementUpdateBatchPacket& batch = world.get_mut<MovementUpdateBatchPacket>();
+            MovementUpdateBatchPacket const& batch = world.get_mut<MovementUpdateBatchPacket>();
             MovementUpdate move_update{network_id, ack_tick, pos};
             batch.move_updates.push_back(move_update);
         }
@@ -51,7 +51,7 @@ inline void register_movement_batch_networking_system(flecs::world& world) {
     world.system<Connection>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (Connection& conn) {
-            const MovementUpdateBatchPacket& batch = world.get<MovementUpdateBatchPacket>();
+            const auto& batch = world.get<MovementUpdateBatchPacket>();
             // Serialize position
             auto [buffer, size] = serialize(batch);
             // Create packet and send to client

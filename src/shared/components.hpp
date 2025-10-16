@@ -2,10 +2,10 @@
 #include <cstdint>
 #include <string>
 
-#include "raylib-cpp.hpp"
+#include "vector3.hpp"
 
 struct DisplayName {
-    std::string name = "";
+    std::string name;
 };
 
 struct NetworkId {

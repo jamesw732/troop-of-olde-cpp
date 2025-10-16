@@ -2,8 +2,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "raylib-cpp.hpp"
-
 #include "shared/components.hpp"
 
 enum class PacketType : uint8_t {
