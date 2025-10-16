@@ -40,7 +40,7 @@ inline void register_movement_batch_system(flecs::world& world) {
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
                   Position& pos) {
-            MovementUpdateBatchPacket const& batch = world.get_mut<MovementUpdateBatchPacket>();
+            MovementUpdateBatchPacket & batch = world.get_mut<MovementUpdateBatchPacket>();
             MovementUpdate move_update{network_id, ack_tick, pos};
             batch.move_updates.push_back(move_update);
         }

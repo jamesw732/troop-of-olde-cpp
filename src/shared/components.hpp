@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-#include "vector3.hpp"
+#include "Vector3.hpp"
 
 struct DisplayName {
     std::string name;

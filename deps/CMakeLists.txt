@@ -72,6 +72,26 @@ else()
     endif()
 endif()
 
+set(DBG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbg")
+if (EXISTS "${DBG_DIR}/CMakeLists.txt")
+    add_library(dbg INTERFACE)
+    target_include_directories(dbg INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/dbg-macro)
+else()
+    FetchContent_Declare(
+        dbg-fetch
+        GIT_REPOSITORY https://github.com/sharkdp/dbg-macro
+        GIT_TAG v0.5.1
+    )
+    FetchContent_MakeAvailable(dbg-fetch)
+    if (NOT TARGET dbg)
+        add_library(dbg INTERFACE)
+        target_include_directories(dbg
+            INTERFACE
+            ${dbg-fetch_SOURCE_DIR}/include
+        )
+    endif()
+endif()
+
 # raylib
 set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/raylib")
 if (EXISTS "${RAYLIB_DIR}/CMakeLists.txt")
@@ -98,5 +118,3 @@ else()
     FetchContent_MakeAvailable(flecs)
 endif()
 
-add_library(dbg INTERFACE)
-target_include_directories(dbg INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/dbg-macro)
