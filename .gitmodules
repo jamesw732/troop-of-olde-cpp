@@ -13,3 +13,6 @@
 [submodule "deps/raylib-cpp"]
 	path = deps/raylib-cpp
 	url = https://github.com/RobLoach/raylib-cpp
+[submodule "deps/dbg-macro"]
+	path = deps/dbg-macro
+	url = https://github.com/sharkdp/dbg-macro

@@ -35,7 +35,7 @@ To build the tests, instead run `make tests`. This will create `test_client` and
 which run all the unit tests for the client and server. Run `ctest` to execute all tests.
 
 ## Debug
-To compile with debug flags, run `make debug`.
+To compile with debug flags, run `make debug`. This will create `client_debug` and `server_debug` executables.
 
 ## Dependencies
 To compile dependencies without compiling any `client` or `server` executables, run `make deps`.

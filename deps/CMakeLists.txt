@@ -24,7 +24,6 @@ else()
     endif()
 endif()
 
-
 # ENet
 set(ENET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/enet")
 if (EXISTS "${ENET_DIR}/CMakeLists.txt")
@@ -48,7 +47,6 @@ else()
         )
     endif()
 endif()
-
 
 # Bitsery
 set(BITSERY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bitsery")
@@ -74,7 +72,6 @@ else()
     endif()
 endif()
 
-
 # raylib
 set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/raylib")
 if (EXISTS "${RAYLIB_DIR}/CMakeLists.txt")
@@ -88,7 +85,6 @@ else()
     FetchContent_MakeAvailable(raylib)
 endif()
 
-
 # flecs
 set(FLECS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flecs")
 if (EXISTS "${FLECS_DIR}/CMakeLists.txt")
@@ -101,3 +97,6 @@ else()
     )
     FetchContent_MakeAvailable(flecs)
 endif()
+
+add_library(dbg INTERFACE)
+target_include_directories(dbg INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/dbg-macro)

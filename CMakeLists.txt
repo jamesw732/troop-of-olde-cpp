@@ -20,19 +20,20 @@ add_custom_target(deps
 
 # Libraries
 # # Create shared interface library
-add_library(shared INTERFACE ${SHARED_DIR})
+add_library(shared INTERFACE)
 target_include_directories(shared INTERFACE
     ${CMAKE_SOURCE_DIR}/src
 )
+target_link_libraries(shared INTERFACE dbg)
 
 # # Create client library
-add_library(client-lib INTERFACE ${CLIENT_DIR})
+add_library(client-lib INTERFACE)
 target_include_directories(client-lib INTERFACE
     ${CMAKE_SOURCE_DIR}/src
 )
 
 # Create server library
-add_library(server-lib INTERFACE ${SERVER_DIR})
+add_library(server-lib INTERFACE)
 target_include_directories(server-lib INTERFACE
     ${CMAKE_SOURCE_DIR}/src
 )
