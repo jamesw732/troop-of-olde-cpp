@@ -20,6 +20,11 @@ that are relevant for networking would need to be re-wrapped given the current s
 - This would be the quick and easy way out, but introduces some awkwardness.
 - Not quite future proof, could have to wrap more types in the future
 
+### Steps
+- Make all enet calls go through Network (done)
+- Separate serialize/deserialize logic from Network implementation
+- Separate Network implementation from interface
+
 
 # Coming soon:
 

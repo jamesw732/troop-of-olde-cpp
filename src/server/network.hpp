@@ -1,8 +1,11 @@
 #pragma once
 #include <iostream>
+#include <unordered_map>
 
+#define ENET_IMPLEMENTATION
 #include "enet.h"
 #include "flecs.h"
+
 #include "server/entities.hpp"
 #include "server/components.hpp"
 #include "shared/components.hpp"
@@ -13,11 +16,11 @@
 class Network {
   public:
     ENetHost* server = {0};
-    ENetPeer* peer = {0};
     ENetAddress address = {0};
     ENetEvent event;
     flecs::world world;
     uint32_t network_id_counter = 0;
+    std::unordered_map<NetworkId, ENetPeer*> netid_to_peer;
 
     Network(flecs::world& w) : world(w) {};
 
@@ -90,6 +93,32 @@ class Network {
         }
     }
 
+    void queue_data_unreliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
+        auto netid_peer = netid_to_peer.find(network_id);
+        if (netid_peer == netid_to_peer.end()) {
+            dbg("Failed to find peer");
+            return;
+        }
+        ENetPeer* peer = netid_peer->second;
+        ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+        enet_peer_send(peer, 0, packet);
+    }
+
+    void queue_data_reliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
+        auto netid_peer = netid_to_peer.find(network_id);
+        if (netid_peer == netid_to_peer.end()) {
+            dbg("Failed to find peer");
+            return;
+        }
+        ENetPeer* peer = netid_peer->second;
+        ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(peer, 1, packet);
+    }
+
+    void send_network_buffer() {
+        enet_host_flush(server);
+    }
+
     void handle_packet() {
         uint8_t* buffer = event.packet->data;
         size_t size = event.packet->dataLength;
@@ -124,8 +153,8 @@ class Network {
                 des.object(login);
                 auto e = ::create_character(world);
                 e.set<DisplayName>(login.name);
-                e.set<Connection>({event.peer});
                 e.set<NetworkId>({network_id_counter});
+                netid_to_peer[{network_id_counter}] = event.peer;
                 network_id_counter++;
                 event.peer->data = (void*) e.raw_id();
                 e.add<NeedsSpawnBatch>();
@@ -145,16 +174,15 @@ class Network {
 
     void send_disconnect_packet(const NetworkId& network_id) {
         DisconnectPacket dc_packet{network_id};
-        world.query<Connection, NetworkId>()
-            .each([&dc_packet, &network_id] (Connection& conn, NetworkId& tgt_network_id) {
+        world.query<NetworkId, Connected>()
+            .each([&dc_packet, &network_id, this] (NetworkId& tgt_network_id, Connected) {
                 if (network_id.id == tgt_network_id.id) {
                     return;
                 }
                 std::cout << "Sending disconnect packet" << '\n';
                 auto [buffer, size] = serialize(dc_packet);
                 // Create packet and send to client
-                ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
-                enet_peer_send(conn.peer, 0, packet);
+                queue_data_unreliable(network_id, buffer, size);
             }
         );
     }

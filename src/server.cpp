@@ -6,8 +6,6 @@
 
 #include "raylib-cpp.hpp"
 #include "flecs.h"
-#define ENET_IMPLEMENTATION
-#include "enet.h"
 
 #include "server/components.hpp"
 #include "server/disconnect.hpp"
@@ -34,11 +32,11 @@ int main(void)
     register_movement_system(world);
 
     register_movement_batch_system(world);
-    register_movement_batch_networking_system(world);
+    register_movement_batch_networking_system(world, network);
     register_movement_batch_clear_system(world);
 
-    register_batch_spawn_system(world);
-    register_spawn_broadcast_system(world);
+    register_batch_spawn_system(world, network);
+    register_spawn_broadcast_system(world, network);
     register_disconnect_system(world);
 
 
@@ -48,7 +46,7 @@ int main(void)
         float dt = GetFrameTime();
         network.process_events();
         world.progress(dt);
-        enet_host_flush(network.server);
+        network.send_network_buffer();
     }
 
     return 0;

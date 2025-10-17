@@ -1,4 +1,3 @@
-#include "enet.h"
 #include "flecs.h"
 
 #include "server/components.hpp"
@@ -7,14 +6,14 @@
 #include "shared/serialize.hpp"
 
 
-inline void register_batch_spawn_system(flecs::world& world) {
+inline void register_batch_spawn_system(flecs::world& world, Network& network) {
     /*
      * Batches world state and sends to new client
      */
-    world.system<Connection, NetworkId>()
+    world.system<NetworkId>()
         .with<NeedsSpawnBatch>()
-        .each([&world] (flecs::entity e, Connection& conn, NetworkId& local_player_id) {
-            // std::cout << "Making spawn batch" << std::endl;
+        .with<Connected>()
+        .each([&world, &network] (flecs::entity e, NetworkId& local_player_id) {
             std::vector<PlayerSpawnState> spawn_states;
             auto q = world.query<NetworkId, DisplayName, Position>();
             q.each([&spawn_states] (NetworkId& id, DisplayName& name, Position& pos) {
@@ -28,30 +27,30 @@ inline void register_batch_spawn_system(flecs::world& world) {
             //     std::cout << spawn_state.network_id.id << std::endl;
             //     std::cout << vector3_to_string(spawn_state.pos.val) << std::endl;
             // }
+            dbg("Sending spawn packet");
             auto [buffer, size] = serialize(spawns);
-            ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(conn.peer, 1, packet);
+            network.queue_data_reliable(local_player_id, buffer, size);
             // Remove login packet from entity
             e.remove<NeedsSpawnBatch>();
         }
     );
 }
 
-inline void register_spawn_broadcast_system(flecs::world& world) {
+inline void register_spawn_broadcast_system(flecs::world& world, Network& network) {
     /*
      * Sends new character information to all existing clients
      */
     world.system<NetworkId, DisplayName, Position>()
         .with<NeedsSpawnBroadcast>()
-        .each([&world] (flecs::entity e,
+        .each([&world, &network] (flecs::entity e,
                         const NetworkId& network_id,
                         const DisplayName& name,
                         const Position& pos
             ) {
             // std::cout << "Broadcasting spawn" << '\n';
             PlayerSpawnPacket spawn_packet{{network_id, name, pos}};
-            world.query<Connection, NetworkId>()
-                .each([&] (const Connection& conn, const NetworkId& tgt_network_id) {
+            world.query<NetworkId, Connected>()
+                .each([&] (const NetworkId& tgt_network_id, Connected) {
                     if (network_id.id == tgt_network_id.id) {
                         // std::cout << "Skipping client with network id " << tgt_network_id.id << '\n';
                         return;
@@ -60,8 +59,7 @@ inline void register_spawn_broadcast_system(flecs::world& world) {
                     // << " to client with network id " << tgt_network_id.id
                     // << '\n';
                     auto [buffer, size] = serialize(spawn_packet);
-                    ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
-                    enet_peer_send(conn.peer, 1, packet);
+                    network.queue_data_reliable(network_id, buffer, size);
                 }
             );
             e.remove<NeedsSpawnBroadcast>();

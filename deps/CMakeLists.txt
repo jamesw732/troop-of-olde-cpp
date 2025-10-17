@@ -72,10 +72,10 @@ else()
     endif()
 endif()
 
-set(DBG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbg")
+set(DBG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbg-macro")
 if (EXISTS "${DBG_DIR}/CMakeLists.txt")
     add_library(dbg INTERFACE)
-    target_include_directories(dbg INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/dbg-macro)
+    target_include_directories(dbg INTERFACE ${DBG_DIR})
 else()
     FetchContent_Declare(
         dbg-fetch

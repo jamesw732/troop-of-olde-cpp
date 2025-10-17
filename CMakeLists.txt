@@ -26,25 +26,13 @@ target_include_directories(shared INTERFACE
 )
 target_link_libraries(shared INTERFACE dbg)
 
-# # Create client library
-add_library(client-lib INTERFACE)
-target_include_directories(client-lib INTERFACE
-    ${CMAKE_SOURCE_DIR}/src
-)
-
-# Create server library
-add_library(server-lib INTERFACE)
-target_include_directories(server-lib INTERFACE
-    ${CMAKE_SOURCE_DIR}/src
-)
-
 # Executables
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    client-lib shared
+    shared
 )
 link_platform_libs(client)
 
@@ -53,7 +41,7 @@ add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    server-lib shared
+    shared
 )
 link_platform_libs(server)
 
@@ -65,7 +53,7 @@ add_executable(test_client ${TEST_CLIENT_SOURCES})
 target_link_libraries(test_client PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    client-lib shared
+    shared
 )
 link_platform_libs(test_client)
 add_test(NAME test_client COMMAND test_client)
@@ -76,7 +64,7 @@ add_executable(test_server ${TEST_SERVER_SOURCES})
 target_link_libraries(test_server PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    client-lib shared
+    shared
 )
 link_platform_libs(test_server)
 add_test(NAME test_server COMMAND test_server)
@@ -95,7 +83,7 @@ target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client_debug PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    client-lib shared
+    shared
 )
 link_platform_libs(client_debug)
 set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -105,7 +93,7 @@ target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server_debug PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    server-lib shared
+    shared
 )
 link_platform_libs(server_debug)
 set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)

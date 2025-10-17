@@ -106,7 +106,7 @@ class Network {
         switch (pkt_type) {
             case PacketType::SpawnBatchPacket: {
                 // We just entered world
-                // std::cout << "Received spawns packet" << std::endl;
+                dbg("Received batch spawn packet");
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
@@ -143,6 +143,7 @@ class Network {
                 entity.set<NetworkId>(spawn_state.network_id);
                 entity.set<DisplayName>(spawn_state.name);
                 netid_to_entity[spawn_state.network_id] = entity;
+                dbg("Received external spawn packet");
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';
                 // for (auto pair: netid_to_entity) {

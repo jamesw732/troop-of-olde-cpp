@@ -4,6 +4,7 @@
 #include <flecs.h>
 
 #include "server/components.hpp"
+#include "server/network.hpp"
 #include "shared/packets.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
@@ -34,9 +35,10 @@ inline void register_movement_system(flecs::world& world) {
 }
 
 inline void register_movement_batch_system(flecs::world& world) {
-    world.system<Connection, NetworkId, ClientMoveTick, Position>()
+    world.system<NetworkId, ClientMoveTick, Position>()
+        .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&] (Connection& conn,
+        .each([&] (
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
                   Position& pos) {
@@ -47,16 +49,16 @@ inline void register_movement_batch_system(flecs::world& world) {
     );
 }
 
-inline void register_movement_batch_networking_system(flecs::world& world) {
-    world.system<Connection>()
+inline void register_movement_batch_networking_system(flecs::world& world, Network& network) {
+    world.system<NetworkId>()
+        .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&] (Connection& conn) {
+        .each([&] (const NetworkId& network_id) {
             const auto& batch = world.get<MovementUpdateBatchPacket>();
             // Serialize position
             auto [buffer, size] = serialize(batch);
             // Create packet and send to client
-            ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
-            enet_peer_send(conn.peer, 0, packet);
+            network.queue_data_unreliable(network_id, buffer, size);
         }
     );
 }
