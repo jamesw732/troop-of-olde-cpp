@@ -1,12 +1,12 @@
 #pragma once
 #include <unordered_map>
 
-#include "enet.h"
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
 #include "client/input.hpp"
 #include "client/components.hpp"
+#include "client/network.hpp"
 #include "shared/movement.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
@@ -101,11 +101,11 @@ inline void register_movement_system(flecs::world& world) {
         );
 }
 
-inline void register_movement_networking_system(flecs::world& world, ENetPeer* peer, InputBuffer& input_buffer,
+inline void register_movement_networking_system(flecs::world& world, Network& network, InputBuffer& input_buffer,
         uint16_t& tick) {
     world.system<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([peer, &input_buffer, &tick](LocalPlayer) {
+        .each([&network, &input_buffer, &tick](LocalPlayer) {
             // Construct movement input packet from input buffer and send to server
             MovementInputPacket input_data;
             input_data.tick = tick;
@@ -114,8 +114,7 @@ inline void register_movement_networking_system(flecs::world& world, ENetPeer* p
                 input_data.inputs.push_back(input);
             }
             auto [buffer, size] = serialize(input_data);
-            ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
-            enet_peer_send(peer, 0, packet);
+            network.queue_data_reliable(buffer, size);
 
             // Test serialize
             // InputPacket res;

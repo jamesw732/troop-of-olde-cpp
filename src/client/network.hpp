@@ -1,9 +1,10 @@
+#pragma once
 #include <iostream>
 #include <unordered_map>
 
+#define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "client/movement.hpp"
 #include "client/entities.hpp"
 #include "shared/components.hpp"
 #include "shared/serialize.hpp"
@@ -50,14 +51,26 @@ class Network {
             std::cout << "Connection to Troop of Olde server succeeded." << std::endl;
             ClientLoginPacket login{{"Player"}};
             auto [buffer, size] = serialize(login);
-            ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(peer, 1, packet);
-            enet_host_flush(client);
+            queue_data_reliable(buffer, size);
         } else {
             enet_peer_reset(peer);
             std::cout << "Connection to Troop of Olde server failed." << std::endl;
             exit(1);
         }
+    }
+
+    void queue_data_unreliable(const Buffer& buffer, const size_t size){
+        ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+        enet_peer_send(peer, 0, packet);
+    }
+
+    void queue_data_reliable(const Buffer& buffer, const size_t size){
+        ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(peer, 1, packet);
+    }
+
+    void send_network_buffer() {
+        enet_host_flush(client);
     }
 
     void process_events() {

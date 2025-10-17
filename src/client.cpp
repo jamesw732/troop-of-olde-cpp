@@ -6,8 +6,6 @@
 
 #include "raylib-cpp.hpp"
 #include "flecs.h"
-#define ENET_IMPLEMENTATION
-#include "enet.h"
 
 #include "client/components.hpp"
 #include "client/disconnect.hpp"
@@ -63,7 +61,7 @@ int main(void)
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world);
-    register_movement_networking_system(world, network.peer, input_buffer, movement_tick);
+    register_movement_networking_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_disconnect_system(world, network.netid_to_entity);
     auto move_lerp_sys = register_movement_lerp_system(world, dt);
@@ -95,7 +93,7 @@ int main(void)
             render_sys.run();
         EndDrawing();
         // Send all messages to server
-        enet_host_flush(network.client);
+        network.send_network_buffer();
     }
     CloseWindow();
     network.disconnect();
