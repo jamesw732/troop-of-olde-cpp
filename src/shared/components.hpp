@@ -3,27 +3,11 @@
 #include <string>
 
 #include "Vector3.hpp"
+#include "shared/network_components.hpp"
 
 struct DisplayName {
     std::string name;
 };
-
-struct NetworkId {
-    uint32_t id;
-
-    bool operator==(const NetworkId& other) const noexcept {
-        return id == other.id;
-    }
-};
-
-namespace std {
-    template<>
-    struct hash<NetworkId> {
-        std::size_t operator()(const NetworkId& nid) const noexcept {
-            return std::hash<uint32_t>{}(nid.id);
-        }
-    };
-}
 
 struct MovementInput {
     int8_t x = 0;
@@ -49,5 +33,3 @@ struct MovementUpdate {
     ClientMoveTick ack_tick;
     Position pos;
 };
-
-struct Disconnected {};

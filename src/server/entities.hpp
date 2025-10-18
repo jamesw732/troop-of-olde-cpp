@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 #include "flecs.h"
@@ -9,6 +10,17 @@
 inline flecs::entity create_character(flecs::world world) {
     auto entity = world.entity();
     std::cout << "Created character with entity id " << entity.id() << '\n';
+    entity.add<Position>();
+    entity.add<MovementInputPacket>();
+    entity.add<Connected>();
+    entity.add<ClientMoveTick>();
+    entity.add<DisplayName>();
+    entity.add<NetworkId>();
+    entity.add<NeedsSpawnBroadcast>();
+    return entity;
+}
+
+inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<Position>();
     entity.add<MovementInputPacket>();
     entity.add<Connected>();

@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <iostream>
 #include <unordered_map>
 
@@ -6,22 +7,26 @@
 #include "enet.h"
 #include "flecs.h"
 
-#include "server/entities.hpp"
-#include "server/components.hpp"
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
-#include "shared/serialize.hpp"
+#include "shared/network_components.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
 
+struct RecvPacket {
+    flecs::entity e;
+    std::vector<uint8_t> packet_data;
+};
+
 class Network {
-  public:
+  private:
+    uint32_t network_id_counter = 0;
+    flecs::world world;
     ENetHost* server = {0};
     ENetAddress address = {0};
     ENetEvent event;
-    flecs::world world;
-    uint32_t network_id_counter = 0;
     std::unordered_map<NetworkId, ENetPeer*> netid_to_peer;
+
+  public:
+    std::deque<RecvPacket> packets;
 
     Network(flecs::world& w) : world(w) {};
 
@@ -54,11 +59,23 @@ class Network {
                         << ":"
                         << (int) event.peer->address.port
                         << "." << std::endl;
+                    auto entity = world.entity();
+                    entity.set<NetworkId>({network_id_counter});
+                    netid_to_peer[{network_id_counter}] = event.peer;
+                    network_id_counter++;
+                    event.peer->data = (void*) entity.raw_id();
                     break;
                 }
 
                 case ENET_EVENT_TYPE_RECEIVE: {
-                    handle_packet();
+                    // handle_packet();
+                    auto id = cast_raw_id(event.peer->data);
+                    flecs::entity entity(world, id);
+                    uint8_t* buffer = event.packet->data;
+                    size_t size = event.packet->dataLength;
+                    std::vector<uint8_t> packet_data(buffer, buffer + size);
+                    RecvPacket recv_packet{entity, packet_data};
+                    packets.push_back(recv_packet);
                     break;
                 }
 
@@ -70,8 +87,8 @@ class Network {
                     auto id = cast_raw_id(event.peer->data);
                     flecs::entity entity(world, id);
                     entity.add<Disconnected>();
-                    send_disconnect_packet(entity.get<NetworkId>());
                     event.peer->data = NULL;
+                    enet_peer_reset(event.peer);
                     break;
                 }
 
@@ -83,8 +100,8 @@ class Network {
                     auto id = cast_raw_id(event.peer->data);
                     flecs::entity entity(world, id);
                     entity.add<Disconnected>();
-                    send_disconnect_packet(entity.get<NetworkId>());
                     event.peer->data = NULL;
+                    enet_peer_reset(event.peer);
                     break;
                 }
 
@@ -120,72 +137,7 @@ class Network {
         enet_host_flush(server);
     }
 
-    void handle_packet() {
-        uint8_t* buffer = event.packet->data;
-        size_t size = event.packet->dataLength;
-        bitsery::Deserializer<InputAdapter> des{InputAdapter{buffer, size}};
-        PacketType pkt_type;
-        des.value1b(pkt_type);
-        switch (pkt_type) {
-            case PacketType::MovementInputPacket: {
-                dbg("Received movement input request");
-                auto id = cast_raw_id(event.peer->data);
-                flecs::entity entity(world, id);
-                MovementInputPacket input_packet;
-                des.object(input_packet);
-                entity.set<MovementInputPacket>(input_packet);
-
-                // MovementInput input = input_packet.inputs.back();
-                // uint16_t tick = input_packet.tick;
-                // std::cout << "Received "
-                //     << input_packet.inputs.size()
-                //     << " movement inputs up to tick "
-                //     << tick
-                //     << ". Most recent: "
-                //     << (int) input.x
-                //     << ", "
-                //     << (int) input.z
-                //     << std::endl;
-                break;
-            }
-
-            case PacketType::ClientLoginPacket: {
-                dbg("Received login request");
-                ClientLoginPacket login;
-                des.object(login);
-                auto e = ::create_character(world);
-                e.set<DisplayName>(login.name);
-                e.set<NetworkId>({network_id_counter});
-                netid_to_peer[{network_id_counter}] = event.peer;
-                network_id_counter++;
-                event.peer->data = (void*) e.raw_id();
-                e.add<NeedsSpawnBatch>();
-                break;
-            }
-
-            default: {
-                break;
-            }
-        }
-
-    }
-
     ecs_entity_t cast_raw_id(void* raw_id) {
         return (ecs_entity_t)(uintptr_t) raw_id;
-    }
-
-    void send_disconnect_packet(const NetworkId& network_id) {
-        DisconnectPacket dc_packet{network_id};
-        world.query<NetworkId, Connected>()
-            .each([&dc_packet, &network_id, this] (NetworkId& tgt_network_id, Connected) {
-                if (network_id.id == tgt_network_id.id) {
-                    return;
-                }
-                std::cout << "Sending disconnect packet" << '\n';
-                auto [buffer, size] = serialize(dc_packet);
-                // Create packet and send to client
-                queue_data_unreliable(network_id, buffer, size);
-            }
-        );
     }
 };

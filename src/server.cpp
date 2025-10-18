@@ -12,6 +12,7 @@
 #include "server/network.hpp"
 #include "server/movement.hpp"
 #include "server/login.hpp"
+#include "server/packet_handler.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
@@ -26,6 +27,7 @@ int main(void)
     if (network.create() > 0) {
         return 1;
     }
+    PacketHandler packet_handler{world};
 
     register_components(world);
 
@@ -37,7 +39,7 @@ int main(void)
 
     register_batch_spawn_system(world, network);
     register_spawn_broadcast_system(world, network);
-    register_disconnect_system(world);
+    register_disconnect_system(world, network);
 
 
     // Main game loop
@@ -45,6 +47,7 @@ int main(void)
     {
         float dt = GetFrameTime();
         network.process_events();
+        packet_handler.handle_packets(network.packets);
         world.progress(dt);
         network.send_network_buffer();
     }
