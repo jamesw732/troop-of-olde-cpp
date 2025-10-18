@@ -128,6 +128,7 @@ class Network {
         des.value1b(pkt_type);
         switch (pkt_type) {
             case PacketType::MovementInputPacket: {
+                dbg("Received movement input request");
                 auto id = cast_raw_id(event.peer->data);
                 flecs::entity entity(world, id);
                 MovementInputPacket input_packet;
@@ -149,7 +150,7 @@ class Network {
             }
 
             case PacketType::ClientLoginPacket: {
-                // std::cout << "Received login packet" << std::endl;
+                dbg("Received login request");
                 ClientLoginPacket login;
                 des.object(login);
                 auto e = ::create_character(world);

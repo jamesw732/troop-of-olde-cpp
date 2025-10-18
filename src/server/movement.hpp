@@ -9,6 +9,7 @@
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/serialize.hpp"
+#include "shared/util.hpp"
 
 
 inline void register_movement_system(flecs::world& world) {
@@ -42,6 +43,7 @@ inline void register_movement_batch_system(flecs::world& world) {
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
                   Position& pos) {
+            // dbg("Batching movement updates");
             MovementUpdateBatchPacket & batch = world.get_mut<MovementUpdateBatchPacket>();
             MovementUpdate move_update{network_id, ack_tick, pos};
             batch.move_updates.push_back(move_update);
@@ -54,6 +56,7 @@ inline void register_movement_batch_networking_system(flecs::world& world, Netwo
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (const NetworkId& network_id) {
+            // dbg("Sending batched movement updates");
             const auto& batch = world.get<MovementUpdateBatchPacket>();
             // Serialize position
             auto [buffer, size] = serialize(batch);

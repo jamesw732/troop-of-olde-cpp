@@ -25,13 +25,14 @@ class PacketHandler {
         bitsery::Deserializer<InputAdapter> des{InputAdapter{packet_data.data(), packet_data.size()}};
         PacketType pkt_type;
         des.value1b(pkt_type);
-        auto netid_to_entity = world.get<NetworkMap>().netid_to_entity;
+        auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
         switch (pkt_type) {
             case PacketType::SpawnBatchPacket: {
                 // We just entered world
                 dbg("Received batch spawn packet");
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
+                dbg(spawn_batch.local_player_id.id);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
                     flecs::entity entity;
                     if (spawn_state.network_id.id == spawn_batch.local_player_id.id) {
@@ -55,6 +56,7 @@ class PacketHandler {
             }
 
             case PacketType::PlayerSpawnPacket: {
+                dbg("Received external spawn packet");
                 // Remote player entered world
                 PlayerSpawnPacket spawn_packet;
                 des.object(spawn_packet);
@@ -64,9 +66,9 @@ class PacketHandler {
                 entity.set<TargetPosition>(TargetPosition{spawn_state.pos.val});
                 entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
                 entity.set<NetworkId>(spawn_state.network_id);
+                dbg(spawn_state.network_id.id);
                 entity.set<DisplayName>(spawn_state.name);
                 netid_to_entity[spawn_state.network_id] = entity;
-                dbg("Received external spawn packet");
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';
                 // for (auto pair: netid_to_entity) {
@@ -76,6 +78,7 @@ class PacketHandler {
             }
 
             case PacketType::MovementUpdateBatchPacket: {
+                dbg("Received movement batch packet");
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
                 world.set<MovementUpdateBatchPacket>(batch);
@@ -83,7 +86,7 @@ class PacketHandler {
             }
 
             case PacketType::DisconnectPacket: {
-                std::cout << "Received disconnect packet" << '\n';
+                dbg("Received disconnect packet");
                 DisconnectPacket dc_packet;
                 des.object(dc_packet);
                 std::cout << dc_packet.network_id.id << '\n';
