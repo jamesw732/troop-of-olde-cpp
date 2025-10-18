@@ -27,13 +27,11 @@ inline void register_movement_target_system(flecs::world& world) {
         );
 }
 
-inline void register_movement_recv_system(
-        flecs::world& world,
-        std::unordered_map<NetworkId, flecs::entity>& netid_to_entity
-    ) {
+inline void register_movement_recv_system(flecs::world& world) {
     world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (MovementUpdateBatchPacket& batch) {
+            auto netid_to_entity = world.get<NetworkMap>().netid_to_entity;
             // std::cout << "Movement Batch Update" << '\n';
             for (MovementUpdate move_update: batch.move_updates) {
                 auto netid_entity = netid_to_entity.find(move_update.network_id);

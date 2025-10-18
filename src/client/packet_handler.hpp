@@ -25,6 +25,7 @@ class PacketHandler {
         bitsery::Deserializer<InputAdapter> des{InputAdapter{packet_data.data(), packet_data.size()}};
         PacketType pkt_type;
         des.value1b(pkt_type);
+        auto netid_to_entity = world.get<NetworkMap>().netid_to_entity;
         switch (pkt_type) {
             case PacketType::SpawnBatchPacket: {
                 // We just entered world

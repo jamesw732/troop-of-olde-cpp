@@ -3,7 +3,7 @@
 #include "shared/components.hpp"
 #include "shared/packets.hpp"
 
-inline void register_components(flecs::world world) {
+inline void register_components(flecs::world& world) {
     // Add normal components
     world.component<DisplayName>();
     world.component<NetworkId>();

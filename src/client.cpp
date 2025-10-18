@@ -15,6 +15,7 @@
 #include "client/movement.hpp"
 #include "client/packet_handler.hpp"
 #include "client/render.hpp"
+#include "client/register.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
 #include "shared/movement.hpp"
@@ -60,16 +61,17 @@ int main(void)
     float dt;
 
     register_components(world);
+    register_client_components(world);
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_target_system(world);
-    register_movement_recv_system(world, packet_handler.netid_to_entity);
+    register_movement_recv_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world);
     register_movement_networking_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
-    register_disconnect_system(world, packet_handler.netid_to_entity);
+    register_disconnect_system(world);
     auto move_lerp_sys = register_movement_lerp_system(world, dt);
     auto render_sys = register_render_system(world, camera, ManualPhase);
 
