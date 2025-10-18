@@ -3,20 +3,11 @@
 #include <tuple>
 
 #include "flecs.h"
-#include "bitsery/bitsery.h"
-#include "bitsery/adapter/buffer.h"
-#include "bitsery/traits/vector.h"
-#include "bitsery/traits/string.h"
-#include "bitsery/traits/array.h"
 
 #include "shared/const.hpp"
-#include "shared/util.hpp"
 #include "shared/components.hpp"
 #include "shared/packets.hpp"
-
-using Buffer = std::vector<uint8_t>;
-using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
-using InputAdapter = bitsery::InputBufferAdapter<uint8_t*>;
+#include "shared/util.hpp"
 
 static_assert(sizeof(float) == 4, "Floats must be 4 bytes");
 

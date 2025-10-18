@@ -12,6 +12,7 @@
 #include "shared/packets.hpp"
 #include "shared/serialize.hpp"
 #include "shared/const.hpp"
+#include "shared/util.hpp"
 
 class Network {
   public:

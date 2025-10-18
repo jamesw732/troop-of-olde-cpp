@@ -12,6 +12,7 @@
 #include "shared/const.hpp"
 #include "shared/serialize.hpp"
 #include "shared/util.hpp"
+#include "shared/raylib-util.hpp"
 
 
 inline void register_movement_target_system(flecs::world& world) {

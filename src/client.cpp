@@ -13,6 +13,7 @@
 #include "client/input.hpp"
 #include "client/network.hpp"
 #include "client/movement.hpp"
+#include "client/packet_handler.hpp"
 #include "client/render.hpp"
 #include "shared/components.hpp"
 #include "shared/const.hpp"
@@ -44,6 +45,11 @@ int main(void)
     world.entity("LocalPlayer");
     Network network(world);
     network.connect();
+    ClientLoginPacket login{{"Player"}};
+    auto [buffer, size] = serialize(login);
+    network.queue_data_reliable(buffer, size);
+
+    PacketHandler packet_handler(world);
 
     // TEMPORARY: Initialize player character
     // TODO: Character should be created by server
@@ -57,13 +63,13 @@ int main(void)
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_target_system(world);
-    register_movement_recv_system(world, network.netid_to_entity);
+    register_movement_recv_system(world, packet_handler.netid_to_entity);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world);
     register_movement_networking_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
-    register_disconnect_system(world, network.netid_to_entity);
+    register_disconnect_system(world, packet_handler.netid_to_entity);
     auto move_lerp_sys = register_movement_lerp_system(world, dt);
     auto render_sys = register_render_system(world, camera, ManualPhase);
 
@@ -72,6 +78,7 @@ int main(void)
     {
         dt = GetFrameTime();
         network.process_events();
+        packet_handler.handle_packets(network.packets);
         // Progress all fixed-timestep ECS timers
         world.progress(dt);
         // Do rendering
