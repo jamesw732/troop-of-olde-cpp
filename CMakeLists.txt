@@ -95,7 +95,7 @@ target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client_debug PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    shared
+    shared client-network
 )
 link_platform_libs(client_debug)
 set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -105,7 +105,7 @@ target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server_debug PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    shared
+    shared server-network
 )
 link_platform_libs(server_debug)
 set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)

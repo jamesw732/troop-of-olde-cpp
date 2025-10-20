@@ -46,7 +46,7 @@ void Network::process_events() {
         switch (impl->event.type) {
             case ENET_EVENT_TYPE_CONNECT: {
                 std::cout << "A new client connected from "
-                    <<  impl->event.peer->address.host.__in6_u.__u6_addr8
+                    // <<  (int) impl->event.peer->address.host
                     << ":"
                     << (int) impl->event.peer->address.port
                     << "." << std::endl;
