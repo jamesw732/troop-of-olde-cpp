@@ -26,13 +26,25 @@ target_include_directories(shared INTERFACE
 )
 target_link_libraries(shared INTERFACE dbg)
 
+add_library(client-network STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
+target_include_directories(client-network PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+target_link_libraries(client-network PRIVATE enet flecs bitsery)
+
+add_library(server-network STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
+target_include_directories(server-network PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+target_link_libraries(server-network PRIVATE enet flecs bitsery)
+
 # Executables
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    shared
+    shared client-network
 )
 link_platform_libs(client)
 
@@ -41,7 +53,7 @@ add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib flecs_static
     raylib-cpp enet bitsery
-    shared
+    shared server-network
 )
 link_platform_libs(server)
 
