@@ -5,52 +5,51 @@
 
 #define ENET_IMPLEMENTATION
 #include "enet.h"
-#include "flecs.h"
 
 #include "client/network.hpp"
 #include "shared/util.hpp"
 
 
 struct NetworkImpl {
-    ENetHost* client = {0};
-    ENetPeer* peer = {0};
-    ENetAddress address = {0};
+    ENetHost* client{0};
+    ENetPeer* peer{0};
+    ENetAddress address{0};
     ENetEvent event;
-    flecs::world world;
 };
 
 
-Network::Network(flecs::world& w) : world(w) {};
+Network::Network() : impl(std::make_unique<NetworkImpl>()) {};
+Network::~Network() = default;
 
 void Network::connect() {
     connect("127.0.0.1", 7777);
 }
 
 void Network::connect(std::string host_addr, int host_port) {
-    client = enet_host_create(
+    impl->client = enet_host_create(
         NULL, // Create a client host
         1, // Only allow 1 outgoing connection
         2, // Allow up to 2 channels to be used, 0 and 1
         0, // Assume any amount of incoming bandwidth
         0 // Assume any amount of outgoing bandwidth
     );
-    if (client == NULL) {
+    if (impl->client == NULL) {
         std::cout << "An error occurred while trying to create an ENet client host." << std::endl;
         exit(EXIT_FAILURE);
     }
     // Bind server address
-    enet_address_set_host(&address,host_addr.c_str());
-    address.port = host_port;
+    enet_address_set_host(&impl->address,host_addr.c_str());
+    impl->address.port = host_port;
     // Initiate the connection, allocating the two channels 0 and 1.
-    peer = enet_host_connect(client, &address, 2, 0);
-    if (peer == NULL) {
+    impl->peer = enet_host_connect(impl->client, &impl->address, 2, 0);
+    if (impl->peer == NULL) {
         std::cout << "No available peers for initiating an ENet connection." << std::endl;
         exit(EXIT_FAILURE);
     }
-    if (enet_host_service(client, &event, 10000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
+    if (enet_host_service(impl->client, &impl->event, 10000) > 0 && impl->event.type == ENET_EVENT_TYPE_CONNECT) {
         std::cout << "Connection to Troop of Olde server succeeded." << std::endl;
     } else {
-        enet_peer_reset(peer);
+        enet_peer_reset(impl->peer);
         std::cout << "Connection to Troop of Olde server failed." << std::endl;
         exit(1);
     }
@@ -58,28 +57,28 @@ void Network::connect(std::string host_addr, int host_port) {
 
 void Network::queue_data_unreliable(const Buffer& buffer, const size_t size){
     ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
-    enet_peer_send(peer, 0, packet);
+    enet_peer_send(impl->peer, 0, packet);
 }
 
 void Network::queue_data_reliable(const Buffer& buffer, const size_t size){
     ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
-    enet_peer_send(peer, 1, packet);
+    enet_peer_send(impl->peer, 1, packet);
 }
 
 void Network::send_network_buffer() {
-    enet_host_flush(client);
+    enet_host_flush(impl->client);
 }
 
 void Network::process_events() {
-    while (enet_host_service(client, &event, 0) > 0) {
-        switch (event.type) {
+    while (enet_host_service(impl->client, &impl->event, 0) > 0) {
+        switch (impl->event.type) {
             case ENET_EVENT_TYPE_CONNECT: {
                 // Don't do anything here, do logic in connect function
                 break;
             }
             case ENET_EVENT_TYPE_RECEIVE: {
-                uint8_t* buffer = event.packet->data;
-                size_t size = event.packet->dataLength;
+                uint8_t* buffer = impl->event.packet->data;
+                size_t size = impl->event.packet->dataLength;
                 std::vector<uint8_t> packet_data(buffer, buffer + size);
                 packets.push_back(packet_data);
                 break;
@@ -98,9 +97,9 @@ void Network::process_events() {
 }
 
 void Network::disconnect() {
-    enet_peer_disconnect(peer, 0);
-    while (enet_host_service(client, &event, 0) > 0) {
-        switch (event.type) {
+    enet_peer_disconnect(impl->peer, 0);
+    while (enet_host_service(impl->client, &impl->event, 0) > 0) {
+        switch (impl->event.type) {
             case ENET_EVENT_TYPE_DISCONNECT: {
                 return;
             }

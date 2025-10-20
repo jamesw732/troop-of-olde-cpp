@@ -1,9 +1,7 @@
 #pragma once
 #include <deque>
+#include <memory>
 #include <vector>
-
-#include "enet.h"
-#include "flecs.h"
 
 #include "shared/util.hpp"
 
@@ -12,15 +10,12 @@ struct NetworkImpl;
 
 class Network {
   private:
-    ENetHost* client = {0};
-    ENetPeer* peer = {0};
-    ENetAddress address = {0};
-    ENetEvent event;
-    flecs::world world;
+      std::unique_ptr<NetworkImpl> impl;
   public:
     std::deque<std::vector<uint8_t>> packets;
 
-    Network(flecs::world& world);
+    Network();
+    ~Network();
 
     void connect();
 

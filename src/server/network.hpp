@@ -1,33 +1,35 @@
 #pragma once
 #include <deque>
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 
-#include "enet.h"
 #include "flecs.h"
 
 #include "shared/network_components.hpp"
 #include "shared/const.hpp"
 #include "shared/util.hpp"
 
+
 struct RecvPacket {
     flecs::entity e;
     std::vector<uint8_t> packet_data;
 };
 
+
+struct NetworkImpl;
+
 class Network {
   private:
     uint32_t network_id_counter = 0;
     flecs::world world;
-    ENetHost* server = {0};
-    ENetAddress address = {0};
-    ENetEvent event;
-    std::unordered_map<NetworkId, ENetPeer*> netid_to_peer;
+    std::unique_ptr<NetworkImpl> impl;
 
   public:
     std::deque<RecvPacket> packets;
 
     Network(flecs::world& w);
+    ~Network();
 
     bool create();
 

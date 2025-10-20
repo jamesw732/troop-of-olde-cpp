@@ -44,7 +44,7 @@ int main(void)
 
     flecs::world world;
     world.entity("LocalPlayer");
-    Network network(world);
+    Network network;
     network.connect();
     ClientLoginPacket login{{"Player"}};
     auto [buffer, size] = serialize(login);
