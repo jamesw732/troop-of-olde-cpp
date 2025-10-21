@@ -87,7 +87,7 @@ else()
         add_library(dbg INTERFACE)
         target_include_directories(dbg
             INTERFACE
-            ${dbg-fetch_SOURCE_DIR}/include
+            ${dbg-fetch_SOURCE_DIR}
         )
     endif()
 endif()

@@ -89,13 +89,30 @@ add_custom_target(tests
 
 # Debug build
 set(DEBUG_CXX_FLAGS -g -O0 -DDEBUG)
+# Debug libraries
+add_library(client-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
+target_include_directories(client-network-debug PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+target_compile_options(client-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
+target_link_libraries(client-network-debug PRIVATE enet flecs bitsery dbg)
+set_target_properties(client-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+add_library(server-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
+target_include_directories(server-network-debug PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+target_compile_options(server-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
+target_link_libraries(server-network-debug PRIVATE enet flecs bitsery dbg)
+set_target_properties(server-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
 # Client debug build
 add_executable(client_debug src/client.cpp)
 target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client_debug PRIVATE
     raylib flecs_static
-    raylib-cpp enet bitsery
-    shared client-network
+    raylib-cpp enet bitsery dbg
+    shared client-network-debug
 )
 link_platform_libs(client_debug)
 set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -104,8 +121,8 @@ add_executable(server_debug src/server.cpp)
 target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server_debug PRIVATE
     raylib flecs_static
-    raylib-cpp enet bitsery
-    shared server-network
+    raylib-cpp enet bitsery dbg
+    shared server-network-debug
 )
 link_platform_libs(server_debug)
 set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)

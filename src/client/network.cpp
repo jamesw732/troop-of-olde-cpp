@@ -26,6 +26,10 @@ void Network::connect() {
 }
 
 void Network::connect(std::string host_addr, int host_port) {
+    if (enet_initialize() != 0) {
+        std::cout << "An error occurred while initializing ENET." << std::endl;
+        exit(EXIT_FAILURE);
+    }
     impl->client = enet_host_create(
         NULL, // Create a client host
         1, // Only allow 1 outgoing connection
