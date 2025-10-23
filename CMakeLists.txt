@@ -11,6 +11,11 @@ set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 set(CLIENT_TEST_DIR ${TEST_DIR}/client)
 set(SERVER_TEST_DIR ${TEST_DIR}/server)
 
+# Assets
+# Fonts
+file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
+add_compile_definitions(FONT_DIR="assets/fonts")
+
 # External dependencies
 add_subdirectory(deps)
 
@@ -57,36 +62,6 @@ target_link_libraries(server PRIVATE
 )
 link_platform_libs(server)
 
-# Tests
-enable_testing()
-# Client tests
-file(GLOB TEST_CLIENT_SOURCES CONFIGURE_DEPENDS "${CLIENT_TEST_DIR}/*.cpp")
-add_executable(test_client ${TEST_CLIENT_SOURCES})
-target_link_libraries(test_client PRIVATE
-    raylib flecs_static
-    raylib-cpp enet bitsery
-    shared
-)
-link_platform_libs(test_client)
-add_test(NAME test_client COMMAND test_client)
-set_target_properties(test_client PROPERTIES EXCLUDE_FROM_ALL TRUE)
-# Server tests
-file(GLOB TEST_SERVER_SOURCES CONFIGURE_DEPENDS "${SERVER_TEST_DIR}/*.cpp")
-add_executable(test_server ${TEST_SERVER_SOURCES})
-target_link_libraries(test_server PRIVATE
-    raylib flecs_static
-    raylib-cpp enet bitsery
-    shared
-)
-link_platform_libs(test_server)
-add_test(NAME test_server COMMAND test_server)
-set_target_properties(test_server PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-# Create tests target for Makefile
-add_custom_target(tests
-    DEPENDS test_client test_server
-)
-
 # Debug build
 set(DEBUG_CXX_FLAGS -g -O0 -DDEBUG)
 # Debug libraries
@@ -131,9 +106,45 @@ add_custom_target(debug
     DEPENDS client_debug server_debug
 )
 
+# Tests
+enable_testing()
+set(TEST_TARGETS "")
+# Client tests
+file(GLOB TEST_FILES "${CLIENT_TEST_DIR}/*.cpp")
+foreach(TEST_FILE ${TEST_FILES})
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+    set(TEST_NAME "client.${TEST_NAME}")
+    add_executable(${TEST_NAME} ${TEST_FILE})
+    target_link_libraries(${TEST_NAME}
+        raylib flecs_static
+        raylib-cpp enet bitsery
+        shared client-network-debug
+    )
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
 
-# Copy fonts to the build directory
-file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    list(APPEND TEST_TARGETS ${TEST_NAME})
+endforeach()
+# Server tests
+file(GLOB TEST_FILES "${SERVER_TEST_DIR}/*.cpp")
+foreach(TEST_FILE ${TEST_FILES})
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+    set(TEST_NAME "server.${TEST_NAME}")
+    add_executable(${TEST_NAME} ${TEST_FILE})
+    target_link_libraries(${TEST_NAME}
+        raylib flecs_static
+        raylib-cpp enet bitsery
+        shared server-network-debug
+    )
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
 
-# Optionally define a relative runtime path
-add_compile_definitions(FONT_DIR="assets/fonts")
+    list(APPEND TEST_TARGETS ${TEST_NAME})
+endforeach()
+# Create tests target for Makefile
+add_custom_target(tests
+    DEPENDS ${TEST_TARGETS}
+)
+

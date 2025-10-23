@@ -12,6 +12,8 @@ for arg in "$@"; do
         TARGET="debug"
     elif [ "$arg" == "tests" ]; then
         TARGET="tests"
+    elif [[ ${arg#*.} == test* ]]; then
+        TARGET=$arg
     fi
 done
 
@@ -19,10 +21,6 @@ ROOT_DIR=$(dirname "$0")
 BUILD_DIR="$ROOT_DIR/build"
 
 cd $BUILD_DIR
-# TARGET="${1:-all}"
-# if [[ "$TARGET"=="client" || "$TARGET"=="server" ]]; then
-#     TARGET="all"
-# fi
 make $TARGET
 
 if [ "$TARGET" == "debug" ]; then
@@ -35,12 +33,15 @@ if [ "$TARGET" == "debug" ]; then
     fi
 elif [ "$TARGET" == "tests" ]; then
     echo "Running tests"
-    if [ $CLIENTONLY == 0 ]; then
-        gnome-terminal -- ./test_server
+    if [ $CLIENTONLY == 1 ]; then
+        ctest -R client*
+    elif [ $SERVERONLY == 1 ]; then
+        ctest -R server*
+    else
+        ctest
     fi
-    if [ $SERVERONLY == 0 ]; then
-        gnome-terminal -- ./test_client
-    fi
+elif [[ ${TARGET#*.} == test* ]]; then
+    ctest -R $TARGET
 else
     echo "Running main build"
     if [ $CLIENTONLY == 0 ]; then

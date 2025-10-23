@@ -9,6 +9,15 @@ However, it is not required to download the submodules. If you don't, CMake will
 in the build directory.
 
 # Compiling and Running
+## `run.sh` (only Linux)
+For automated compilation and running, you can run `run.sh`. Options:
+- `client` builds and runs only client executables, can be used with other options
+- `server` builds and runs only server executables, can be used with other options
+- `debug` builds the debug executables
+- `tests` builds the unit tests. Can instead specify specific test files to run, using the command
+`./run.sh [client | server].[test file name]`, for example
+`./run.sh client.test_movement`.
+
 ## Main Executables
 This repository uses `cmake` for building. To build, simply run the following in the root:
 ```
