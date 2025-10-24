@@ -4,9 +4,10 @@ project(MyProject CXX)
 include(cmake/PlatformDeps.cmake)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(SHARED_DIR ${CMAKE_SOURCE_DIR}/src/shared)
-set(CLIENT_DIR ${CMAKE_SOURCE_DIR}/src/client)
-set(SERVER_DIR ${CMAKE_SOURCE_DIR}/src/server)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(SHARED_DIR ${SRC_DIR}/shared)
+set(CLIENT_DIR ${SRC_DIR}/client)
+set(SERVER_DIR ${SRC_DIR}/server)
 set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 set(CLIENT_TEST_DIR ${TEST_DIR}/client)
 set(SERVER_TEST_DIR ${TEST_DIR}/server)
@@ -26,21 +27,12 @@ add_custom_target(deps
 # Libraries
 # # Create shared interface library
 add_library(shared INTERFACE)
-target_include_directories(shared INTERFACE
-    ${CMAKE_SOURCE_DIR}/src
-)
 target_link_libraries(shared INTERFACE dbg)
 
 add_library(client-network STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
-target_include_directories(client-network PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
 target_link_libraries(client-network PRIVATE enet flecs bitsery)
 
 add_library(server-network STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
-target_include_directories(server-network PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
 target_link_libraries(server-network PRIVATE enet flecs bitsery)
 
 # Executables
@@ -66,17 +58,11 @@ link_platform_libs(server)
 set(DEBUG_CXX_FLAGS -g -O0 -DDEBUG)
 # Debug libraries
 add_library(client-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
-target_include_directories(client-network-debug PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
 target_compile_options(client-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(client-network-debug PRIVATE enet flecs bitsery dbg)
 set_target_properties(client-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_library(server-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
-target_include_directories(server-network-debug PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
 target_compile_options(server-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
 target_link_libraries(server-network-debug PRIVATE enet flecs bitsery dbg)
 set_target_properties(server-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -123,6 +109,7 @@ foreach(TEST_FILE ${TEST_FILES})
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
+    target_include_directories(${TEST_NAME} PRIVATE ${SRC_DIR})
 
     list(APPEND TEST_TARGETS ${TEST_NAME})
 endforeach()
@@ -140,6 +127,7 @@ foreach(TEST_FILE ${TEST_FILES})
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
+    target_include_directories(${TEST_NAME} PRIVATE ${SRC_DIR})
 
     list(APPEND TEST_TARGETS ${TEST_NAME})
 endforeach()

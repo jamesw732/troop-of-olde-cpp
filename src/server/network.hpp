@@ -6,9 +6,9 @@
 
 #include "flecs.h"
 
-#include "shared/network_components.hpp"
-#include "shared/const.hpp"
-#include "shared/util.hpp"
+#include "../shared/network_components.hpp"
+#include "../shared/const.hpp"
+#include "../shared/util.hpp"
 
 
 struct RecvPacket {

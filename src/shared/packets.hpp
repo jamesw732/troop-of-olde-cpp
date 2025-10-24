@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "shared/components.hpp"
+#include "components.hpp"
 
 enum class PacketType : uint8_t {
     MovementInputPacket,

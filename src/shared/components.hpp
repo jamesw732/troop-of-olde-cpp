@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Vector3.hpp"
-#include "shared/network_components.hpp"
+#include "network_components.hpp"
 
 struct DisplayName {
     std::string name;

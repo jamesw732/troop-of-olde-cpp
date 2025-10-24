@@ -1,8 +1,8 @@
 #include "flecs.h"
 
-#include "client/components.hpp"
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
+#include "components.hpp"
+#include "../shared/components.hpp"
+#include "../shared/packets.hpp"
 
 inline flecs::entity create_local_player(flecs::world world) {
     auto entity = world.entity("LocalPlayer");

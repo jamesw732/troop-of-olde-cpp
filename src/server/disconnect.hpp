@@ -3,11 +3,11 @@
 
 #include "flecs.h"
 
-#include "server/components.hpp"
-#include "server/network.hpp"
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
-#include "shared/serialize.hpp"
+#include "components.hpp"
+#include "network.hpp"
+#include "../shared/components.hpp"
+#include "../shared/packets.hpp"
+#include "../shared/serialize.hpp"
 
 inline void register_disconnect_system(flecs::world& world, Network& network) {
     world.system<NetworkId>()

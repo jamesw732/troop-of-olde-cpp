@@ -1,6 +1,6 @@
 #include "flecs.h"
 
-#include "client/components.hpp"
+#include "components.hpp"
 
 
 inline void register_client_components(flecs::world world) {

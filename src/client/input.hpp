@@ -3,7 +3,7 @@
 #include <deque>
 #include <iostream>
 
-#include "shared/components.hpp"
+#include "../shared/components.hpp"
 
 
 class InputHandler {

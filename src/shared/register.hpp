@@ -1,7 +1,7 @@
 #include "flecs.h"
 
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
+#include "components.hpp"
+#include "packets.hpp"
 
 inline void register_components(flecs::world& world) {
     // Add normal components

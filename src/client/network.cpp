@@ -6,7 +6,7 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 
-#include "client/network.hpp"
+#include "network.hpp"
 
 
 struct NetworkImpl {

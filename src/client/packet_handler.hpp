@@ -1,6 +1,6 @@
-#include "client/entities.hpp"
-#include "client/network.hpp"
-#include "shared/serialize.hpp"
+#include "entities.hpp"
+#include "network.hpp"
+#include "../shared/serialize.hpp"
 
 
 class PacketHandler {

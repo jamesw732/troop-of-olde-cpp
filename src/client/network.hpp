@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "shared/util.hpp"
+#include "../shared/util.hpp"
 
 struct NetworkImpl;
 

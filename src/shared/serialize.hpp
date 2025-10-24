@@ -4,10 +4,10 @@
 
 #include "flecs.h"
 
-#include "shared/const.hpp"
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
-#include "shared/util.hpp"
+#include "const.hpp"
+#include "components.hpp"
+#include "packets.hpp"
+#include "util.hpp"
 
 static_assert(sizeof(float) == 4, "Floats must be 4 bytes");
 

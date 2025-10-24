@@ -4,7 +4,7 @@
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
-#include "shared/components.hpp"
+#include "../shared/components.hpp"
 
 
 inline flecs::system register_render_system(flecs::world& world, raylib::Camera3D& camera, flecs::entity phase) {

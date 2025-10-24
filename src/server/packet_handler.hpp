@@ -1,7 +1,7 @@
 #include "flecs.h"
 
-#include "server/network.hpp"
-#include "server/entities.hpp"
+#include "network.hpp"
+#include "entities.hpp"
 
 class PacketHandler {
   private:

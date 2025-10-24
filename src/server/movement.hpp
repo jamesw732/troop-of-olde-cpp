@@ -3,13 +3,13 @@
 
 #include <flecs.h>
 
-#include "server/components.hpp"
-#include "server/network.hpp"
-#include "shared/packets.hpp"
-#include "shared/components.hpp"
-#include "shared/const.hpp"
-#include "shared/serialize.hpp"
-#include "shared/util.hpp"
+#include "components.hpp"
+#include "network.hpp"
+#include "../shared/packets.hpp"
+#include "../shared/components.hpp"
+#include "../shared/const.hpp"
+#include "../shared/serialize.hpp"
+#include "../shared/util.hpp"
 
 
 inline void register_movement_system(flecs::world& world) {

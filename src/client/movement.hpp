@@ -4,15 +4,15 @@
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
-#include "client/input.hpp"
-#include "client/components.hpp"
-#include "client/network.hpp"
-#include "shared/movement.hpp"
-#include "shared/components.hpp"
-#include "shared/const.hpp"
-#include "shared/serialize.hpp"
-#include "shared/util.hpp"
-#include "shared/raylib-util.hpp"
+#include "input.hpp"
+#include "components.hpp"
+#include "network.hpp"
+#include "../shared/movement.hpp"
+#include "../shared/components.hpp"
+#include "../shared/const.hpp"
+#include "../shared/serialize.hpp"
+#include "../shared/util.hpp"
+#include "../shared/raylib-util.hpp"
 
 
 inline void register_movement_target_system(flecs::world& world) {

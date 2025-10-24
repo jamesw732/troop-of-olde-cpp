@@ -1,9 +1,9 @@
 #include "flecs.h"
 
-#include "server/components.hpp"
-#include "server/network.hpp"
-#include "shared/packets.hpp"
-#include "shared/serialize.hpp"
+#include "components.hpp"
+#include "network.hpp"
+#include "../shared/packets.hpp"
+#include "../shared/serialize.hpp"
 
 
 inline void register_batch_spawn_system(flecs::world& world, Network& network) {

@@ -5,7 +5,7 @@
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
-#include "shared/components.hpp"
+#include "../shared/components.hpp"
 
 struct LocalPlayer {};
 

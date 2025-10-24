@@ -3,9 +3,9 @@
 
 #include "flecs.h"
 
-#include "server/components.hpp"
-#include "shared/components.hpp"
-#include "shared/packets.hpp"
+#include "components.hpp"
+#include "../shared/components.hpp"
+#include "../shared/packets.hpp"
 
 inline flecs::entity create_character(flecs::world world) {
     auto entity = world.entity();

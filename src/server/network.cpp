@@ -5,10 +5,10 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 #include "flecs.h"
-#include "server/network.hpp"
-#include "shared/network_components.hpp"
-#include "shared/const.hpp"
-#include "shared/util.hpp"
+#include "network.hpp"
+#include "../shared/network_components.hpp"
+#include "../shared/const.hpp"
+#include "../shared/util.hpp"
 
 
 struct NetworkImpl {
