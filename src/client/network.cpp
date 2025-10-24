@@ -7,7 +7,6 @@
 #include "enet.h"
 
 #include "client/network.hpp"
-#include "shared/util.hpp"
 
 
 struct NetworkImpl {

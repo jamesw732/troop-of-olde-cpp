@@ -5,9 +5,6 @@ Code dependencies are listed in `deps` as Git submodules. To pull along with the
 run `git clone --recurse-submodules <repository-url>`. Or if you already pulled and want to grab the
 submodules, run `git submodule update --init --recursive` from `deps`.
 
-However, it is not required to download the submodules. If you don't, CMake will download them for you
-in the build directory.
-
 # Compiling and Running
 ## `run.sh` (only Linux)
 For automated compilation and running, you can run `run.sh`. Options:
