@@ -2,6 +2,7 @@
 
 CLIENTONLY=0
 SERVERONLY=0
+DEBUG=0
 TARGET="all"
 for arg in "$@"; do
     if [ "$arg" == "client" ]; then
@@ -9,7 +10,7 @@ for arg in "$@"; do
     elif [ "$arg" == "server" ]; then
         SERVERONLY=1
     elif [ "$arg" == "debug" ]; then
-        TARGET="debug"
+        DEBUG=1
     elif [ "$arg" == "tests" ]; then
         TARGET="tests"
     elif [[ ${arg#*.} == test* ]]; then
@@ -23,32 +24,41 @@ BUILD_DIR="$ROOT_DIR/build"
 cd $BUILD_DIR
 make $TARGET
 
-if [ "$TARGET" == "debug" ]; then
-    echo "Running debug build"
-    if [ $CLIENTONLY == 0 ]; then
-        gnome-terminal -- gdb ./server_debug
-    fi
-    if [ $SERVERONLY == 0 ]; then
-        gnome-terminal -- gdb ./client_debug
-    fi
-elif [ "$TARGET" == "tests" ]; then
-    echo "Running tests"
+if [ "$TARGET" == "tests" ]; then
     if [ $CLIENTONLY == 1 ]; then
+        echo "Running client tests"
         ctest -R client*
     elif [ $SERVERONLY == 1 ]; then
+        echo "Running server tests"
         ctest -R server*
     else
+        echo "Running all tests"
         ctest
     fi
 elif [[ ${TARGET#*.} == test* ]]; then
-    ctest -R $TARGET
-else
-    echo "Running main build"
-    if [ $CLIENTONLY == 0 ]; then
-        gnome-terminal -- ./server
+    echo "Running test file ${TARGET}"
+    if [ $DEBUG == 1 ]; then
+        gnome-terminal -- gdb ./$TARGET
+    else
+        ctest -R $TARGET --output-on-failure
     fi
-    if [ $SERVERONLY == 0 ]; then
-        gnome-terminal -- ./client
+else
+    if [ $DEBUG == 1 ]; then
+        echo "Running debug build"
+        if [ $CLIENTONLY == 0 ]; then
+            gnome-terminal -- gdb ./server_debug
+        fi
+        if [ $SERVERONLY == 0 ]; then
+            gnome-terminal -- gdb ./client_debug
+        fi
+    else
+        echo "Running main build"
+        if [ $CLIENTONLY == 0 ]; then
+            gnome-terminal -- ./server
+        fi
+        if [ $SERVERONLY == 0 ]; then
+            gnome-terminal -- ./client
+        fi
     fi
 fi
 
