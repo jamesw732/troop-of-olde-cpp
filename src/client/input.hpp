@@ -30,8 +30,6 @@ class InputBuffer {
     public:
         // Start with rollover so that server can ack tick 0
         uint16_t ack_tick = -1;
-        // Smallest tick in buffer should always be ack tick + 1
-        uint16_t buffer_min_tick = 0;
         // std::queue<MovementInput> buffer;
         std::deque<MovementInput> buffer;
 
@@ -64,7 +62,6 @@ class InputBuffer {
             for (int i = 0; i < num_to_flush; i++) {
                 buffer.pop_front();
             }
-            buffer_min_tick = new_ack_tick + 1;
             ack_tick = new_ack_tick;
         }
 };

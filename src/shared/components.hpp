@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <cstdint>
 #include <string>
 
@@ -17,6 +18,11 @@ struct MovementInput {
 struct Position {
     raylib::Vector3 val{0, 0, 0};
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
+    os << "(" << pos.val.x << ", " << pos.val.y << ", " << pos.val.z << ")";
+    return os;
+}
 
 struct ClientMoveTick {
     uint16_t val = 0;

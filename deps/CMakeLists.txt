@@ -15,6 +15,10 @@ target_include_directories(enet
     INTERFACE
     ${ENET_DIR}/include
 )
+set_target_properties(enet PROPERTIES
+    LINKER_LANGUAGE C
+    LANGUAGE C
+)
 
 # Bitsery
 set(BITSERY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bitsery")

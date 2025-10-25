@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-#include <flecs.h>
+#include "flecs.h"
 
 #include "components.hpp"
 #include "network.hpp"
@@ -16,6 +16,7 @@ inline void register_movement_system(flecs::world& world) {
     world.system<Position, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
+            dbg("Running movement system");
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
             // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
             int const dif = (int) (ack_tick.val - start_tick);
