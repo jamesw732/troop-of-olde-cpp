@@ -19,9 +19,9 @@ inline void register_movement_target_system(flecs::world& world) {
     // Slide over current position to prev. Target will be mutated by other systems.
     world.system<Position, PrevPosition, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([] (Position& target_pos, PrevPosition& prev_pos, LerpTimer& timer) {
+        .each([] (Position& cur_pos, PrevPosition& prev_pos, LerpTimer& timer) {
             timer.val = 0;
-            prev_pos.val = target_pos.val;
+            prev_pos.val = cur_pos.val;
             // std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
             }
         );
@@ -144,8 +144,9 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         );
 }
 
-inline flecs::system register_movement_lerp_system(flecs::world& world, float& dt) {
-    return world.system<Position, TargetPosition, PrevPosition, LerpTimer>()
+inline void register_movement_lerp_system(flecs::world& world, float& dt) {
+    world.system<Position, TargetPosition, PrevPosition, LerpTimer>()
+        .interval(dt)
         .each([&dt] (Position& pos, TargetPosition& target_pos, PrevPosition& prev_pos, LerpTimer& timer) {
                 timer.val += dt;
                 // std::cout << timer.val << std::endl;

@@ -43,7 +43,6 @@ int main(void)
     raylib::Font cascadiaMono = raylib::LoadFont(cascadiaMonoPath);
 
     flecs::world world;
-    world.entity("LocalPlayer");
     Network network;
     network.connect();
     ClientLoginPacket login{{"Player"}};
@@ -72,7 +71,7 @@ int main(void)
     register_movement_networking_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_disconnect_system(world);
-    auto move_lerp_sys = register_movement_lerp_system(world, dt);
+    register_movement_lerp_system(world, dt);
     auto render_sys = register_render_system(world, camera, ManualPhase);
 
     // Main game loop
