@@ -8,12 +8,16 @@
 
 
 inline flecs::system register_render_system(flecs::world& world, raylib::Camera3D& camera, flecs::entity phase) {
-    return world.system<Position>("RenderSystem")
+    return world.system<Position, Rotation>("RenderSystem")
         .kind(phase)
-        .each([&camera](Position& pos) {
+        .each([&camera](Position& pos, Rotation& rot) {
             BeginMode3D(camera);
-                DrawCube(pos.val, 2.0f, 2.0f, 2.0f, RED);
-                DrawCubeWires(pos.val, 2.0f, 2.0f, 2.0f, MAROON);
+                rlPushMatrix();
+                    rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
+                    rlRotatef(rot.val, 0, 1, 0);
+                    DrawCube({0, 0, 0}, 2.0f, 2.0f, 2.0f, RED);
+                    DrawCubeWires({0, 0, 0}, 2.0f, 2.0f, 2.0f, MAROON);
+                rlPopMatrix();
             EndMode3D();
             }
         );

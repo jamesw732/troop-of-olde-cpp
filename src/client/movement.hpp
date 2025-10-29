@@ -90,10 +90,10 @@ inline void register_movement_input_system(
 }
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<TargetPosition, MovementInput, LocalPlayer>()
+    world.system<TargetPosition, Rotation, MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](TargetPosition& pos, MovementInput& input, LocalPlayer) {
-                process_movement_input(pos.val, input);
+        .each([](TargetPosition& pos, Rotation& rot, MovementInput& input, LocalPlayer) {
+                process_movement_input(pos.val, rot.val, input);
                 // dbg("Target Position", pos.val);
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
                 // std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;

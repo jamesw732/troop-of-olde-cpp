@@ -12,6 +12,9 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<NetworkId>();
     entity.add<TargetPosition>();
     entity.add<PrevPosition>();
+    entity.add<Rotation>();
+    entity.add<PrevRotation>();
+    entity.add<TargetRotation>();
     entity.add<LerpTimer>();
     entity.add<MovementInput>();
     entity.add<AckTick>();

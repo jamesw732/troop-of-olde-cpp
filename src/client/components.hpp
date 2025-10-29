@@ -9,13 +9,13 @@
 
 struct LocalPlayer {};
 
-struct PrevPosition {
-    raylib::Vector3 val{0, 0, 0};
-};
+struct PrevPosition : Position {};
 
-struct TargetPosition {
-    raylib::Vector3 val{0, 0, 0};
-};
+struct TargetPosition : Position {};
+
+struct PrevRotation: Rotation {};
+
+struct TargetRotation: Rotation {};
 
 struct LerpTimer {
     float val{0};

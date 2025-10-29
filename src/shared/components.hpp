@@ -13,6 +13,7 @@ struct DisplayName {
 struct MovementInput {
     int8_t x = 0;
     int8_t z = 0;
+    int8_t rot_y = 0;
 };
 
 struct Position {
@@ -23,6 +24,10 @@ inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
     os << "(" << pos.val.x << ", " << pos.val.y << ", " << pos.val.z << ")";
     return os;
 }
+
+struct Rotation {
+    float val = 0;
+};
 
 struct ClientMoveTick {
     uint16_t val = 0;
