@@ -23,38 +23,45 @@ void test_movement_systems() {
     character.add<Position>();
     character.add<PrevPosition>();
     character.add<TargetPosition>();
+    character.add<Rotation>();
+    character.add<TargetRotation>();
+    character.add<PrevRotation>();
     character.add<LerpTimer>();
     character.add<AckTick>();
     character.add<LocalPlayer>();
     character.add<NetworkId>();
     character.set<NetworkId>({0});
     character.add<MovementInput>();
-    character.set<MovementInput>({1, 0});
+    character.set<MovementInput>({1, 0, 1});
     character.add<MovementUpdateBatchPacket>();
     auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
     netid_to_entity[character.get<NetworkId>()] = character;
 
-    input_buffer.push({1, 0});
+    input_buffer.push({1, 0, 1});
     world.progress(1.0 / 60);
     assertClose(0.0, character.get<Position>().val.x);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
-    input_buffer.push({1, 0});
+    input_buffer.push({1, 0, 1});
     assertClose(0.25, character.get<TargetPosition>().val.x);
+    assertClose(5.0, character.get<TargetRotation>().val);
     world.progress(1.0 / 60);
     assertClose(0.25, character.get<Position>().val.x);
     world.progress(1.0 / 60);
+    assertClose(5.0, character.get<Rotation>().val);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0});
     assertClose(0.5, character.get<TargetPosition>().val.x);
+    assertClose(10.0, character.get<TargetRotation>().val);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
 
-    MovementUpdate update{0, 0, {{10, 0, 0}}};
+    MovementUpdate update{0, 0, {{10, 0, 0}}, {100}};
     MovementUpdateBatchPacket packet{{update}};
     character.set<MovementUpdateBatchPacket>(packet);
     world.progress(1.0 / 60);
     assertClose(10.75, character.get<TargetPosition>().val.x);
+    assertClose(110.0, character.get<TargetRotation>().val);
 }
 
 int main() {

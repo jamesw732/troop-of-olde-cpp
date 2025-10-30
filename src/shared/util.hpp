@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <cmath>
 
 #include "bitsery/bitsery.h"
 #include "bitsery/adapter/buffer.h"
@@ -29,4 +30,9 @@ inline void print_buffer(const std::vector<uint8_t>& buffer) {
             << static_cast<int>(byte) << ' ';
     }
     std::cout << std::dec << std::endl;
+}
+
+inline float angle_slerp(float a0, float a1, float t) {
+    float diff = fmodf(a1 - a0 + 180, 360) - 180;
+    return a0 + diff * t;
 }

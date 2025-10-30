@@ -26,10 +26,11 @@
 
 int main(void)
 {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetTargetFPS(60);
     // Initialize window attributes
     const int screenWidth = 800;
     const int screenHeight = 450;
-    SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Troop of Olde");
 
     // Initialize camera attributes

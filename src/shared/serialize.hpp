@@ -9,7 +9,7 @@
 #include "packets.hpp"
 #include "util.hpp"
 
-static_assert(sizeof(float) == 4, "Floats must be 4 bytes");
+static_assert(sizeof(float) == 4, "Type float must be 4 bytes");
 
 /*
  * Main serialize function
@@ -56,7 +56,7 @@ void serialize(S& s, SpawnBatchPacket& spawns) {
 template<typename S>
 void serialize(S& s, MovementInputPacket& input_packet) {
     s.value2b(input_packet.tick);
-    serialize(s, input_packet.inputs);
+    s.object(input_packet.inputs);
 }
 
 template<typename S>
@@ -71,7 +71,7 @@ void serialize(S& s, MovementUpdateBatchPacket& batch) {
 
 template<typename S>
 void serialize(S& s, DisconnectPacket& dc_packet) {
-    serialize(s, dc_packet.network_id);
+    s.object(dc_packet.network_id);
 }
 
 // Components
@@ -84,7 +84,12 @@ void serialize (S& s, raylib::Vector3& v) {
 
 template <typename S>
 void serialize(S& s, Position& pos) {
-    serialize(s, pos.val);
+    s.object(pos.val);
+}
+
+template <typename S>
+void serialize(S& s, Rotation& rot) {
+    s.value4b(rot.val);
 }
 
 template<typename S>
@@ -92,6 +97,7 @@ void serialize(S& s, PlayerSpawnState& spawn_state) {
     s.object(spawn_state.network_id);
     s.object(spawn_state.name);
     s.object(spawn_state.pos);
+    s.object(spawn_state.rot);
 }
 
 template<typename S>
@@ -104,6 +110,7 @@ void serialize(S& s, std::vector<MovementInput>& v) {
     s.container(v, 100, [](S& s, MovementInput& input) {
         s.value1b(input.x);
         s.value1b(input.z);
+        s.value1b(input.rot_y);
     });
 }
 
@@ -119,7 +126,8 @@ void serialize(S& s, ClientMoveTick& tick) {
 
 template<typename S>
 void serialize(S& s, MovementUpdate& move_update) {
-    serialize(s, move_update.network_id);
-    serialize(s, move_update.ack_tick);
-    serialize(s, move_update.pos);
+    s.object(move_update.network_id);
+    s.object(move_update.ack_tick);
+    s.object(move_update.pos);
+    s.object(move_update.rot);
 }

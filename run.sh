@@ -27,13 +27,13 @@ make $TARGET
 if [ "$TARGET" == "tests" ]; then
     if [ $CLIENTONLY == 1 ]; then
         echo "Running client tests"
-        ctest -R client*
+        ctest -R client* --output-on-failure
     elif [ $SERVERONLY == 1 ]; then
         echo "Running server tests"
-        ctest -R server*
+        ctest -R server* --output-on-failure
     else
         echo "Running all tests"
-        ctest
+        ctest --output-on-failure
     fi
 elif [[ ${TARGET#*.} == test* ]]; then
     echo "Running test file ${TARGET}"

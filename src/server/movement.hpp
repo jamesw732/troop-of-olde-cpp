@@ -8,14 +8,15 @@
 #include "../shared/packets.hpp"
 #include "../shared/components.hpp"
 #include "../shared/const.hpp"
+#include "../shared/movement.hpp"
 #include "../shared/serialize.hpp"
 #include "../shared/util.hpp"
 
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<Position, ClientMoveTick, MovementInputPacket>()
+    world.system<Position, Rotation, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](Position& pos, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
+        .each([](Position& pos, Rotation& rot, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
             dbg("Running movement system");
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
             // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
@@ -26,10 +27,7 @@ inline void register_movement_system(flecs::world& world) {
             for (auto it = packet.inputs.begin() + start_idx;
                     it != packet.inputs.end(); ++it) {
                 auto input = *it;
-                raylib::Vector3 velocity((float) input.x, 0, (float) input.z);
-                velocity = velocity.Normalize();
-                velocity = velocity * 0.25;
-                pos.val += velocity;
+                process_movement_input(pos.val, rot.val, input);
             }
             ack_tick.val = packet.tick;
         }
@@ -37,16 +35,17 @@ inline void register_movement_system(flecs::world& world) {
 }
 
 inline void register_movement_batch_system(flecs::world& world) {
-    world.system<NetworkId, ClientMoveTick, Position>()
+    world.system<NetworkId, ClientMoveTick, Position, Rotation>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
-                  Position& pos) {
+                  Position& pos,
+                  Rotation& rot) {
             // dbg("Batching movement updates");
             MovementUpdateBatchPacket & batch = world.get_mut<MovementUpdateBatchPacket>();
-            MovementUpdate move_update{network_id, ack_tick, pos};
+            MovementUpdate move_update{network_id, ack_tick, pos, rot};
             batch.move_updates.push_back(move_update);
         }
     );

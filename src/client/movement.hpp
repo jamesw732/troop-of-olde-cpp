@@ -17,11 +17,12 @@
 
 inline void register_movement_target_system(flecs::world& world) {
     // Slide over current position to prev. Target will be mutated by other systems.
-    world.system<Position, PrevPosition, LerpTimer>()
+    world.system<Position, PrevPosition, Rotation, PrevRotation, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([] (Position& cur_pos, PrevPosition& prev_pos, LerpTimer& timer) {
+        .each([] (Position& cur_pos, PrevPosition& prev_pos, Rotation& cur_rot, PrevRotation& prev_rot, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = cur_pos.val;
+            prev_rot.val = cur_rot.val;
             // std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
             }
         );
@@ -47,16 +48,18 @@ inline void register_movement_recv_system(flecs::world& world) {
                 }
                 e.set<AckTick>({move_update.ack_tick.val});
                 e.set<TargetPosition>({move_update.pos.val});
+                e.set<TargetRotation>({move_update.rot.val});
             }
         }
     );
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<TargetPosition, AckTick, LocalPlayer>()
+    world.system<TargetPosition, TargetRotation, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer](
                 TargetPosition& target_pos,
+                TargetRotation& target_rot,
                 AckTick& new_ack_tick,
                 LocalPlayer
             ) {
@@ -69,7 +72,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                process_movement_input(target_pos.val, input);
+                process_movement_input(target_pos.val, target_rot.val, input);
             }
         }
     );
@@ -90,9 +93,9 @@ inline void register_movement_input_system(
 }
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<TargetPosition, Rotation, MovementInput, LocalPlayer>()
+    world.system<TargetPosition, TargetRotation, MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](TargetPosition& pos, Rotation& rot, MovementInput& input, LocalPlayer) {
+        .each([](TargetPosition& pos, TargetRotation& rot, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, rot.val, input);
                 // dbg("Target Position", pos.val);
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
@@ -145,9 +148,11 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 }
 
 inline void register_movement_lerp_system(flecs::world& world, float& dt) {
-    world.system<Position, TargetPosition, PrevPosition, LerpTimer>()
+    world.system<Position, TargetPosition, PrevPosition, Rotation, TargetRotation, PrevRotation, LerpTimer>()
         .interval(dt)
-        .each([&dt] (Position& pos, TargetPosition& target_pos, PrevPosition& prev_pos, LerpTimer& timer) {
+        .each([&dt] (Position& pos, TargetPosition& target_pos, PrevPosition& prev_pos,
+                    Rotation& rot, TargetRotation& target_rot, PrevRotation& prev_rot,
+                    LerpTimer& timer) {
                 timer.val += dt;
                 // std::cout << timer.val << std::endl;
                 float ratio = timer.val / MOVE_UPDATE_RATE;
@@ -156,6 +161,7 @@ inline void register_movement_lerp_system(flecs::world& world, float& dt) {
                     ratio = 1.0;
                 }
                 pos.val = Vector3Lerp(prev_pos.val, target_pos.val, ratio);
+                rot.val = angle_slerp(prev_rot.val, target_rot.val, ratio);
             }
         );
 }

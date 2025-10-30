@@ -37,10 +37,12 @@ struct PlayerSpawnState {
     NetworkId network_id;
     DisplayName name;
     Position pos;
+    Rotation rot;
 };
 
 struct MovementUpdate {
     NetworkId network_id;
     ClientMoveTick ack_tick;
     Position pos;
+    Rotation rot;
 };
