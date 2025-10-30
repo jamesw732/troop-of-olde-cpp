@@ -117,7 +117,7 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 input_data.inputs.push_back(input);
             }
             auto [buffer, size] = serialize(input_data);
-            network.queue_data_reliable(buffer, size);
+            network.queue_data_unreliable(buffer, size);
 
             // Test serialize
             // InputPacket res;
