@@ -8,9 +8,9 @@
 
 
 inline flecs::system register_render_system(flecs::world& world, raylib::Camera3D& camera, flecs::entity phase) {
-    return world.system<Position, Rotation>("RenderSystem")
+    return world.system<RenderPosition, Rotation>("RenderSystem")
         .kind(phase)
-        .each([&camera](Position& pos, Rotation& rot) {
+        .each([&camera](RenderPosition& pos, Rotation& rot) {
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);

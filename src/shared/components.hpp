@@ -16,11 +16,11 @@ struct MovementInput {
     int8_t rot_y = 0;
 };
 
-struct Position {
-    raylib::Vector3 val{0, 0, 0};
+struct SimPosition {
+    raylib::Vector3 val;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
+inline std::ostream& operator<<(std::ostream& os, const SimPosition& pos) {
     os << "(" << pos.val.x << ", " << pos.val.y << ", " << pos.val.z << ")";
     return os;
 }
@@ -36,13 +36,13 @@ struct ClientMoveTick {
 struct PlayerSpawnState {
     NetworkId network_id;
     DisplayName name;
-    Position pos;
+    SimPosition pos;
     Rotation rot;
 };
 
 struct MovementUpdate {
     NetworkId network_id;
     ClientMoveTick ack_tick;
-    Position pos;
+    SimPosition pos;
     Rotation rot;
 };

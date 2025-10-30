@@ -41,9 +41,9 @@ class PacketHandler {
                     else {
                         entity = create_remote_player(world);
                     }
-                    entity.set<Position>(spawn_state.pos);
-                    entity.set<TargetPosition>(TargetPosition{spawn_state.pos.val});
-                    entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
+                    entity.set<SimPosition>(spawn_state.pos);
+                    entity.set<RenderPosition>({spawn_state.pos.val});
+                    entity.set<PrevSimPosition>({spawn_state.pos.val});
                     entity.set<NetworkId>(spawn_state.network_id);
                     entity.set<DisplayName>(spawn_state.name);
                     netid_to_entity[spawn_state.network_id] = entity;
@@ -62,9 +62,9 @@ class PacketHandler {
                 des.object(spawn_packet);
                 PlayerSpawnState spawn_state = spawn_packet.spawn_state;
                 flecs::entity entity = create_remote_player(world);
-                entity.set<Position>(spawn_state.pos);
-                entity.set<TargetPosition>(TargetPosition{spawn_state.pos.val});
-                entity.set<PrevPosition>(PrevPosition{spawn_state.pos.val});
+                entity.set<RenderPosition>({spawn_state.pos.val});
+                entity.set<SimPosition>(spawn_state.pos);
+                entity.set<PrevSimPosition>({spawn_state.pos.val});
                 entity.set<NetworkId>(spawn_state.network_id);
                 dbg(spawn_state.network_id.id);
                 entity.set<DisplayName>(spawn_state.name);

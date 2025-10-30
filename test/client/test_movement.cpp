@@ -21,8 +21,8 @@ void test_movement_systems() {
 
     flecs::entity character = world.entity("LocalPlayer");
     character.add<Position>();
-    character.add<PrevPosition>();
-    character.add<TargetPosition>();
+    character.add<PrevSimPosition>();
+    character.add<SimPosition>();
     character.add<Rotation>();
     character.add<TargetRotation>();
     character.add<PrevRotation>();
@@ -43,7 +43,7 @@ void test_movement_systems() {
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0, 1});
-    assertClose(0.25, character.get<TargetPosition>().val.x);
+    assertClose(0.25, character.get<SimPosition>().val.x);
     assertClose(5.0, character.get<TargetRotation>().val);
     world.progress(1.0 / 60);
     assertClose(0.25, character.get<Position>().val.x);
@@ -51,7 +51,7 @@ void test_movement_systems() {
     assertClose(5.0, character.get<Rotation>().val);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0});
-    assertClose(0.5, character.get<TargetPosition>().val.x);
+    assertClose(0.5, character.get<SimPosition>().val.x);
     assertClose(10.0, character.get<TargetRotation>().val);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
@@ -60,7 +60,7 @@ void test_movement_systems() {
     MovementUpdateBatchPacket packet{{update}};
     character.set<MovementUpdateBatchPacket>(packet);
     world.progress(1.0 / 60);
-    assertClose(10.75, character.get<TargetPosition>().val.x);
+    assertClose(10.75, character.get<SimPosition>().val.x);
     assertClose(110.0, character.get<TargetRotation>().val);
 }
 

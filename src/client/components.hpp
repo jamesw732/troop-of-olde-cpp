@@ -9,9 +9,13 @@
 
 struct LocalPlayer {};
 
-struct PrevPosition : Position {};
+struct PrevSimPosition {
+    raylib::Vector3 val;
+};
 
-struct TargetPosition : Position {};
+struct RenderPosition {
+    raylib::Vector3 val;
+};
 
 struct PrevRotation: Rotation {};
 

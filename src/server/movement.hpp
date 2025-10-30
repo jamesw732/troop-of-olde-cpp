@@ -14,9 +14,9 @@
 
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<Position, Rotation, ClientMoveTick, MovementInputPacket>()
+    world.system<SimPosition, Rotation, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](Position& pos, Rotation& rot, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
+        .each([](SimPosition& pos, Rotation& rot, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
             dbg("Running movement system");
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
             // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
@@ -35,13 +35,13 @@ inline void register_movement_system(flecs::world& world) {
 }
 
 inline void register_movement_batch_system(flecs::world& world) {
-    world.system<NetworkId, ClientMoveTick, Position, Rotation>()
+    world.system<NetworkId, ClientMoveTick, SimPosition, Rotation>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (
                   NetworkId& network_id,
                   ClientMoveTick& ack_tick,
-                  Position& pos,
+                  SimPosition& pos,
                   Rotation& rot) {
             // dbg("Batching movement updates");
             MovementUpdateBatchPacket & batch = world.get_mut<MovementUpdateBatchPacket>();

@@ -9,7 +9,7 @@
 
 
 inline flecs::entity add_character_components(flecs::entity entity) {
-    entity.add<Position>();
+    entity.add<SimPosition>();
     entity.add<Rotation>();
     entity.add<MovementInputPacket>();
     entity.add<Connected>();

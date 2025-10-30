@@ -83,7 +83,7 @@ void serialize (S& s, raylib::Vector3& v) {
 }
 
 template <typename S>
-void serialize(S& s, Position& pos) {
+void serialize(S& s, SimPosition& pos) {
     s.object(pos.val);
 }
 
