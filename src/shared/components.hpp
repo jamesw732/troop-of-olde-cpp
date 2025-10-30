@@ -25,7 +25,7 @@ inline std::ostream& operator<<(std::ostream& os, const SimPosition& pos) {
     return os;
 }
 
-struct Rotation {
+struct SimRotation {
     float val = 0;
 };
 
@@ -37,12 +37,12 @@ struct PlayerSpawnState {
     NetworkId network_id;
     DisplayName name;
     SimPosition pos;
-    Rotation rot;
+    SimRotation rot;
 };
 
 struct MovementUpdate {
     NetworkId network_id;
     ClientMoveTick ack_tick;
     SimPosition pos;
-    Rotation rot;
+    SimRotation rot;
 };

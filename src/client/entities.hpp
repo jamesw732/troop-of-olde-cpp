@@ -12,9 +12,9 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<RenderPosition>();
     entity.add<SimPosition>();
     entity.add<PrevSimPosition>();
-    entity.add<Rotation>();
-    entity.add<TargetRotation>();
-    entity.add<PrevRotation>();
+    entity.add<RenderRotation>();
+    entity.add<SimRotation>();
+    entity.add<PrevSimRotation>();
     entity.add<LerpTimer>();
     entity.add<MovementInput>();
     entity.add<AckTick>();
@@ -26,9 +26,9 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<RenderPosition>();
     entity.add<SimPosition>();
     entity.add<PrevSimPosition>();
-    entity.add<Rotation>();
-    entity.add<TargetRotation>();
-    entity.add<PrevRotation>();
+    entity.add<RenderRotation>();
+    entity.add<SimRotation>();
+    entity.add<PrevSimRotation>();
     entity.add<DisplayName>();
     entity.add<NetworkId>();
     entity.add<LerpTimer>();

@@ -17,9 +17,9 @@
 
 inline void register_movement_target_system(flecs::world& world) {
     // Slide over current position to prev. Target will be mutated by other systems.
-    world.system<RenderPosition, PrevSimPosition, Rotation, PrevRotation, LerpTimer>()
+    world.system<RenderPosition, PrevSimPosition, RenderRotation, PrevSimRotation, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, Rotation& cur_rot, PrevRotation& prev_rot, LerpTimer& timer) {
+        .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, RenderRotation& cur_rot, PrevSimRotation& prev_rot, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = cur_pos.val;
             prev_rot.val = cur_rot.val;
@@ -48,18 +48,18 @@ inline void register_movement_recv_system(flecs::world& world) {
                 }
                 e.set<AckTick>({move_update.ack_tick.val});
                 e.set<SimPosition>({move_update.pos.val});
-                e.set<TargetRotation>({move_update.rot.val});
+                e.set<SimRotation>({move_update.rot.val});
             }
         }
     );
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<SimPosition, TargetRotation, AckTick, LocalPlayer>()
+    world.system<SimPosition, SimRotation, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer](
                 SimPosition& target_pos,
-                TargetRotation& target_rot,
+                SimRotation& target_rot,
                 AckTick& new_ack_tick,
                 LocalPlayer
             ) {
@@ -93,9 +93,9 @@ inline void register_movement_input_system(
 }
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<SimPosition, TargetRotation, MovementInput, LocalPlayer>()
+    world.system<SimPosition, SimRotation, MovementInput, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](SimPosition& pos, TargetRotation& rot, MovementInput& input, LocalPlayer) {
+        .each([](SimPosition& pos, SimRotation& rot, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, rot.val, input);
                 // dbg("Target RenderPosition", pos.val);
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
@@ -148,10 +148,10 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 }
 
 inline void register_movement_lerp_system(flecs::world& world, float& dt) {
-    world.system<RenderPosition, SimPosition, PrevSimPosition, Rotation, TargetRotation, PrevRotation, LerpTimer>()
+    world.system<RenderPosition, SimPosition, PrevSimPosition, RenderRotation, SimRotation, PrevSimRotation, LerpTimer>()
         .interval(dt)
         .each([&dt] (RenderPosition& pos, SimPosition& target_pos, PrevSimPosition& prev_pos,
-                    Rotation& rot, TargetRotation& target_rot, PrevRotation& prev_rot,
+                    RenderRotation& rot, SimRotation& target_rot, PrevSimRotation& prev_rot,
                     LerpTimer& timer) {
                 timer.val += dt;
                 // std::cout << timer.val << std::endl;

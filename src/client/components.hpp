@@ -17,9 +17,13 @@ struct RenderPosition {
     raylib::Vector3 val;
 };
 
-struct PrevRotation: Rotation {};
+struct RenderRotation {
+    float val;
+};
 
-struct TargetRotation: Rotation {};
+struct PrevSimRotation {
+    float val;
+};
 
 struct LerpTimer {
     float val{0};
