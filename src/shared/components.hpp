@@ -20,11 +20,6 @@ struct SimPosition {
     raylib::Vector3 val;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const SimPosition& pos) {
-    os << "(" << pos.val.x << ", " << pos.val.y << ", " << pos.val.z << ")";
-    return os;
-}
-
 struct SimRotation {
     float val = 0;
 };

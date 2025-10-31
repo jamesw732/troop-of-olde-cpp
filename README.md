@@ -6,7 +6,7 @@ run `git clone --recurse-submodules <repository-url>`. Or if you already pulled 
 submodules, run `git submodule update --init --recursive` from `deps`.
 
 # Compiling and Running
-## `run.sh` (only Linux)
+## `run.sh` (assumes Linux, gnome-terminal, gdbgui)
 For automated compilation and running, you can run `run.sh`. Options:
 - `client` builds and runs only client executables, can be used with other options
 - `server` builds and runs only server executables, can be used with other options
