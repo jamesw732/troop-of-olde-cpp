@@ -1,5 +1,3 @@
-include(FetchContent)
-
 # raylib-cpp
 set(RAYLIB-CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/raylib-cpp")
 add_library(raylib-cpp INTERFACE)

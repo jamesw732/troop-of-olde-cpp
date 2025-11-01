@@ -5,8 +5,10 @@
 
 # Coming soon:
 
+## Jumping/gravity
+
+## Collision physics
+
 ## Load character model
 
 ## Animate character movement
-
-## Collision physics

@@ -1,0 +1,26 @@
+#pragma once
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <deque>
+#include <iostream>
+#include <iomanip>
+#include <memory>
+#include <unordered_map>
+#include <string>
+#include <vector>
+
+#include "bitsery/bitsery.h"
+#include "bitsery/adapter/buffer.h"
+#include "bitsery/traits/vector.h"
+#include "bitsery/traits/string.h"
+#include "bitsery/traits/array.h"
+#define ENET_IMPLEMENTATION
+#include "enet.h"
+#include "flecs.h"
+
+#ifdef DEBUG
+    #include "dbg.h"
+#else
+    #define dbg(...) ((void)0)
+#endif

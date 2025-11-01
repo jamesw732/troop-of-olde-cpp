@@ -10,23 +10,23 @@
 struct LocalPlayer {};
 
 struct PrevSimPosition {
-    raylib::Vector3 val;
+    raylib::Vector3 val{};
 };
 
 struct RenderPosition {
-    raylib::Vector3 val;
+    raylib::Vector3 val{};
 };
 
 struct RenderRotation {
-    float val;
+    float val = 0;
 };
 
 struct PrevSimRotation {
-    float val;
+    float val = 0;
 };
 
 struct LerpTimer {
-    float val{0};
+    float val = 0;
 };
 
 struct AckTick {
@@ -35,4 +35,13 @@ struct AckTick {
 
 struct NetworkMap {
     std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
+};
+
+// Up-down rotation of the head
+struct HeadRotation {
+    float x_rot = 30;
+};
+
+struct CamDistance {
+    float val = 10;
 };

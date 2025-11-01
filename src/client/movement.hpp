@@ -97,7 +97,7 @@ inline void register_movement_system(flecs::world& world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](SimPosition& pos, SimRotation& rot, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, rot.val, input);
-                // dbg("Target RenderPosition", pos.val);
+                dbg("Target Rotation", rot.val);
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
                 // std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
             }

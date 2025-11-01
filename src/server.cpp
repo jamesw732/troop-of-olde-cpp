@@ -1,11 +1,4 @@
-#include <cstdint>
-#include <iostream>
-#include <array>
-#include <bitset>
-#include <string>
-
-#include "raylib-cpp.hpp"
-#include "flecs.h"
+#include "shared/pch.hpp"
 
 #include "server/components.hpp"
 #include "server/disconnect.hpp"

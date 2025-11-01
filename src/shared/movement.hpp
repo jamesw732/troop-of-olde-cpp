@@ -4,7 +4,7 @@
 #include "raylib-cpp.hpp"
 
 #include "components.hpp"
-#include "raymath.h"
+#include "util.hpp"
 
 
 inline void process_movement_input(raylib::Vector3& pos, float& rot, MovementInput input) {
@@ -17,4 +17,5 @@ inline void process_movement_input(raylib::Vector3& pos, float& rot, MovementInp
 
     rot += input.rot_y * 5;
     rot = fmodf(rot, 360.0);
+    dbg(rot);
 }

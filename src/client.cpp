@@ -1,12 +1,6 @@
-#include <Functions.hpp>
-#include <array>
-#include <cstdint>
-#include <iostream>
-#include <bitset>
+#include "shared/pch.hpp"
 
-#include "raylib-cpp.hpp"
-#include "flecs.h"
-
+#include "client/camera.hpp"
 #include "client/components.hpp"
 #include "client/disconnect.hpp"
 #include "client/fonts.hpp"
@@ -83,6 +77,7 @@ int main(void)
         packet_handler.handle_packets(network.packets);
         // Progress all fixed-timestep ECS timers
         world.progress(dt);
+        update_camera(world, camera);
         // Do rendering
         BeginDrawing();
             // Draw the UI

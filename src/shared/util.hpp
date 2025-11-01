@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <string>
 #include <cstdint>
 #include <iostream>
@@ -33,6 +34,7 @@ inline void print_buffer(const std::vector<uint8_t>& buffer) {
 }
 
 inline float angle_slerp(float a0, float a1, float t) {
-    float diff = fmodf(a1 - a0 + 180, 360) - 180;
-    return a0 + diff * t;
+    assert(a1 - a0 + 540 > 0);
+    float diff = fmodf(a1 - a0 + 540, 360) - 180;
+    return fmodf(a0 + diff * t, 360);
 }
