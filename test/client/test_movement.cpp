@@ -20,12 +20,12 @@ void test_movement_systems() {
     register_movement_lerp_system(world, dt);
 
     flecs::entity character = world.entity("LocalPlayer");
-    character.add<Position>();
+    character.add<RenderPosition>();
     character.add<PrevSimPosition>();
     character.add<SimPosition>();
-    character.add<Rotation>();
-    character.add<TargetRotation>();
-    character.add<PrevRotation>();
+    character.add<RenderRotation>();
+    character.add<SimRotation>();
+    character.add<PrevSimRotation>();
     character.add<LerpTimer>();
     character.add<AckTick>();
     character.add<LocalPlayer>();
@@ -39,20 +39,20 @@ void test_movement_systems() {
 
     input_buffer.push({1, 0, 1});
     world.progress(1.0 / 60);
-    assertClose(0.0, character.get<Position>().val.x);
+    assertClose(0.0, character.get<RenderPosition>().val.x);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0, 1});
     assertClose(0.25, character.get<SimPosition>().val.x);
-    assertClose(5.0, character.get<TargetRotation>().val);
+    assertClose(5.0, character.get<SimRotation>().val);
     world.progress(1.0 / 60);
-    assertClose(0.25, character.get<Position>().val.x);
+    assertClose(0.25, character.get<RenderPosition>().val.x);
     world.progress(1.0 / 60);
-    assertClose(5.0, character.get<Rotation>().val);
+    assertClose(5.0, character.get<RenderRotation>().val);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0});
     assertClose(0.5, character.get<SimPosition>().val.x);
-    assertClose(10.0, character.get<TargetRotation>().val);
+    assertClose(10.0, character.get<SimRotation>().val);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
 
@@ -60,8 +60,8 @@ void test_movement_systems() {
     MovementUpdateBatchPacket packet{{update}};
     character.set<MovementUpdateBatchPacket>(packet);
     world.progress(1.0 / 60);
-    assertClose(10.75, character.get<SimPosition>().val.x);
-    assertClose(110.0, character.get<TargetRotation>().val);
+    assertClose(9.82718, character.get<SimPosition>().val.x);
+    assertClose(110.0, character.get<SimRotation>().val);
 }
 
 int main() {

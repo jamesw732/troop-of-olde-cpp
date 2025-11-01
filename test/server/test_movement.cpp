@@ -8,8 +8,8 @@
 void test_movement_system() {
     flecs::world world;
     flecs::entity e = world.entity();
-    e.add<Position>();
-    e.add<Rotation>();
+    e.add<SimPosition>();
+    e.add<SimRotation>();
     e.add<ClientMoveTick>();
     e.add<MovementInputPacket>();
     world.progress();
@@ -19,8 +19,8 @@ void test_movement_system() {
     packet.inputs.push_back({1, 0, 1});
     e.set<MovementInputPacket>(packet);
     world.progress(1.0 / 20);
-    assertClose(0.25, e.get<Position>().val.x);
-    assertClose(5.0, e.get<Rotation>().val);
+    assertClose(0.25, e.get<SimPosition>().val.x);
+    assertClose(5.0, e.get<SimRotation>().val);
     assertEquals(1, e.get<ClientMoveTick>().val);
     world.progress(1.0 / 20);
 
@@ -29,8 +29,8 @@ void test_movement_system() {
     packet.tick = 3;
     e.set<MovementInputPacket>(packet);
     world.progress(1.0 / 20);
-    assertClose(0.75, e.get<Position>().val.x);
-    assertClose(15.0, e.get<Rotation>().val);
+    assertClose(0.75, e.get<SimPosition>().val.x);
+    assertClose(15.0, e.get<SimRotation>().val);
     assertEquals(3, e.get<ClientMoveTick>().val);
 }
 

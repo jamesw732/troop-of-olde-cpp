@@ -3,8 +3,13 @@ project(MyProject CXX)
 
 include(cmake/PlatformDeps.cmake)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_DIR ${SRC_DIR}/shared)
 set(CLIENT_DIR ${SRC_DIR}/client)
@@ -19,6 +24,8 @@ file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/asset
 add_compile_definitions(FONT_DIR="assets/fonts")
 
 # External dependencies
+set(FLECS_SHARED OFF CACHE BOOL
+    "Do not build shared Flecs library" FORCE)
 add_subdirectory(deps)
 
 add_custom_target(deps
@@ -27,25 +34,35 @@ add_custom_target(deps
 
 # Libraries
 add_library(pch "${SHARED_DIR}/pch.cpp")
-target_link_libraries(pch PRIVATE raylib flecs_static raylib-cpp bitsery)
+target_link_libraries(pch PRIVATE
+    raylib flecs_static raylib-cpp bitsery dbg
+)
 target_include_directories(pch PRIVATE ${SRC_DIR})
 target_precompile_headers(pch PRIVATE "${SHARED_DIR}/pch.hpp")
 
 add_library(pch-networking "${SHARED_DIR}/pch-networking.cpp")
-target_link_libraries(pch-networking PRIVATE flecs_static enet bitsery)
+target_link_libraries(pch-networking PRIVATE
+    flecs_static enet bitsery dbg
+)
 target_include_directories(pch-networking PRIVATE ${SRC_DIR})
 target_precompile_headers(pch-networking PRIVATE "${SHARED_DIR}/pch-networking.hpp")
 
-# # Create shared interface library
+# Shared interface
 add_library(shared INTERFACE)
 target_link_libraries(shared INTERFACE dbg)
 
+# Client network static library
 add_library(client-network STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
-target_link_libraries(client-network PRIVATE enet flecs_static bitsery)
+target_link_libraries(client-network PRIVATE
+    dbg enet flecs_static bitsery
+)
 target_precompile_headers(client-network REUSE_FROM pch-networking)
 
+# Server network static library
 add_library(server-network STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
-target_link_libraries(server-network PRIVATE enet flecs_static bitsery)
+target_link_libraries(server-network PRIVATE
+    enet flecs_static bitsery dbg
+)
 target_precompile_headers(server-network REUSE_FROM pch-networking)
 
 # Executables
@@ -53,65 +70,21 @@ target_precompile_headers(server-network REUSE_FROM pch-networking)
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib flecs_static
-    raylib-cpp bitsery
+    raylib-cpp bitsery dbg
     shared client-network
 )
 link_platform_libs(client)
 target_precompile_headers(client REUSE_FROM pch)
-# target_compile_options(client PRIVATE -Winvalid-pch -H)
 
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib flecs_static
-    raylib-cpp bitsery
+    raylib-cpp bitsery dbg
     shared server-network
 )
 link_platform_libs(server)
 target_precompile_headers(server REUSE_FROM pch)
-
-# Debug build
-set(DEBUG_CXX_FLAGS -g -O0 -DDEBUG)
-# Debug libraries
-add_library(client-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
-target_compile_options(client-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
-target_link_libraries(client-network-debug PRIVATE enet flecs bitsery dbg)
-set_target_properties(client-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_precompile_headers(client-network-debug REUSE_FROM pch-networking)
-
-add_library(server-network-debug STATIC ${CMAKE_SOURCE_DIR}/src/server/network.cpp)
-target_compile_options(server-network-debug PRIVATE ${DEBUG_CXX_FLAGS})
-target_link_libraries(server-network-debug PRIVATE enet flecs bitsery dbg)
-set_target_properties(server-network-debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_precompile_headers(server-network-debug REUSE_FROM pch-networking)
-
-# Client debug build
-add_executable(client_debug src/client.cpp)
-target_compile_options(client_debug PRIVATE ${DEBUG_CXX_FLAGS})
-target_link_libraries(client_debug PRIVATE
-    raylib flecs_static
-    raylib-cpp bitsery dbg
-    shared client-network-debug
-)
-link_platform_libs(client_debug)
-set_target_properties(client_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_precompile_headers(client_debug REUSE_FROM pch)
-
-# Server debug build
-add_executable(server_debug src/server.cpp)
-target_compile_options(server_debug PRIVATE ${DEBUG_CXX_FLAGS})
-target_link_libraries(server_debug PRIVATE
-    raylib flecs_static
-    raylib-cpp bitsery dbg
-    shared server-network-debug
-)
-link_platform_libs(server_debug)
-set_target_properties(server_debug PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_precompile_headers(server_debug REUSE_FROM pch)
-
-add_custom_target(debug
-    DEPENDS client_debug server_debug
-)
 
 # Tests
 enable_testing()
@@ -125,11 +98,10 @@ foreach(TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
         raylib-cpp bitsery
-        shared client-network-debug
+        shared client-network
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
     target_include_directories(${TEST_NAME} PRIVATE ${SRC_DIR})
 
     list(APPEND TEST_TARGETS ${TEST_NAME})
@@ -143,11 +115,10 @@ foreach(TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
         raylib-cpp bitsery
-        shared server-network-debug
+        shared server-network
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    target_compile_options(${TEST_NAME} PRIVATE ${DEBUG_CXX_FLAGS})
     target_include_directories(${TEST_NAME} PRIVATE ${SRC_DIR})
 
     list(APPEND TEST_TARGETS ${TEST_NAME})
