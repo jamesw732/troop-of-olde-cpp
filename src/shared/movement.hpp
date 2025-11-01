@@ -17,5 +17,4 @@ inline void process_movement_input(raylib::Vector3& pos, float& rot, MovementInp
 
     rot += input.rot_y * 5;
     rot = fmodf(rot, 360.0);
-    dbg(rot);
 }

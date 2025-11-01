@@ -32,7 +32,6 @@ inline void register_movement_recv_system(flecs::world& world) {
     world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (MovementUpdateBatchPacket& batch) {
-            // dbg("Running movement batch system");
             auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
             for (MovementUpdate move_update: batch.move_updates) {
                 auto netid_entity = netid_to_entity.find(move_update.network_id);
@@ -40,7 +39,6 @@ inline void register_movement_recv_system(flecs::world& world) {
                     continue;
                 }
                 flecs::entity e = netid_entity->second;
-                // dbg(move_update.ack_tick.val);
                 // std::cout << move_update.ack_tick.val << ", " << e.get<AckTick>().val << '\n';
                 if ((int16_t) (move_update.ack_tick.val - e.get<AckTick>().val) <= 0) {
                     // std::cout << "Skipping entity" << '\n';
@@ -97,7 +95,6 @@ inline void register_movement_system(flecs::world& world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](SimPosition& pos, SimRotation& rot, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, rot.val, input);
-                dbg("Target Rotation", rot.val);
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
                 // std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
             }

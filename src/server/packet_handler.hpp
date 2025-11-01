@@ -29,7 +29,6 @@ class PacketHandler {
         des.value1b(pkt_type);
         switch (pkt_type) {
             case PacketType::MovementInputPacket: {
-                dbg("Received movement input request");
                 MovementInputPacket input_packet;
                 des.object(input_packet);
                 entity.set<MovementInputPacket>(input_packet);

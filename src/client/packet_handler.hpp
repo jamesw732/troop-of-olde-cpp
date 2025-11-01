@@ -32,7 +32,6 @@ class PacketHandler {
                 dbg("Received batch spawn packet");
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
-                dbg(spawn_batch.local_player_id.id);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
                     flecs::entity entity;
                     if (spawn_state.network_id.id == spawn_batch.local_player_id.id) {
@@ -66,7 +65,6 @@ class PacketHandler {
                 entity.set<SimPosition>(spawn_state.pos);
                 entity.set<PrevSimPosition>({spawn_state.pos.val});
                 entity.set<NetworkId>(spawn_state.network_id);
-                dbg(spawn_state.network_id.id);
                 entity.set<DisplayName>(spawn_state.name);
                 netid_to_entity[spawn_state.network_id] = entity;
                 // std::cout << "Single Spawn Packet: " << '\n';
@@ -78,7 +76,6 @@ class PacketHandler {
             }
 
             case PacketType::MovementUpdateBatchPacket: {
-                dbg("Received movement batch packet");
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
                 world.set<MovementUpdateBatchPacket>(batch);
