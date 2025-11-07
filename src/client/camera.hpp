@@ -11,7 +11,10 @@ inline void update_camera(flecs::world& world, raylib::Camera3D& camera) {
     if (!local_player.has<RenderPosition>()) {
         return;
     }
-    camera.target = local_player.get<RenderPosition>().val;
+    float rot = local_player.get<RenderRotation>().val * PI / 180;
+    // TODO: Variable height
+    // TODO: Variable camera distance from player
     camera.position = local_player.get<RenderPosition>().val
-        + raylib::Vector3{0, 10, 10};
+        + raylib::Vector3{sin(rot), 1, cos(rot)} * 10;
+    camera.target = local_player.get<RenderPosition>().val;
 }
