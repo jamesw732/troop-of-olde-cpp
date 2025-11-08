@@ -23,7 +23,6 @@ inline void register_movement_target_system(flecs::world& world) {
             timer.val = 0;
             prev_pos.val = cur_pos.val;
             prev_rot.val = cur_rot.val;
-            // std::cout << "Previous position: " << vector3_to_string(prev_pos.val) << std::endl;
             }
         );
 }
@@ -56,11 +55,12 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
     world.system<SimPosition, SimRotation, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer](
-                SimPosition& target_pos,
-                SimRotation& target_rot,
+                SimPosition& pos,
+                SimRotation& rot,
                 AckTick& new_ack_tick,
                 LocalPlayer
             ) {
+            // dbg(input_buffer);
             // If old tick, skip reconciliation
             if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
                 // std::cout << "Skipping client-side reconciliation" << std::endl;
@@ -70,7 +70,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                process_movement_input(target_pos.val, target_rot.val, input);
+                process_movement_input(pos.val, rot.val, input);
             }
         }
     );
@@ -95,8 +95,6 @@ inline void register_movement_system(flecs::world& world) {
         .interval(MOVE_UPDATE_RATE)
         .each([](SimPosition& pos, SimRotation& rot, MovementInput& input, LocalPlayer) {
                 process_movement_input(pos.val, rot.val, input);
-                // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                // std::cout << "Target position: " << vector3_to_string(pos.val) << std::endl;
             }
         );
 }
@@ -110,7 +108,6 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
             MovementInputPacket input_data;
             input_data.tick = tick;
             for (MovementInput input: input_buffer.buffer) {
-                // std::cout << (int) input.x << ", " << (int) input.z << std::endl;
                 input_data.inputs.push_back(input);
             }
             auto [buffer, size] = serialize(input_data);
@@ -144,22 +141,24 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         );
 }
 
-inline void register_movement_lerp_system(flecs::world& world, float& dt) {
-    world.system<RenderPosition, SimPosition, PrevSimPosition, RenderRotation, SimRotation, PrevSimRotation, LerpTimer>()
-        .interval(dt)
-        .each([&dt] (RenderPosition& pos, SimPosition& target_pos, PrevSimPosition& prev_pos,
+inline void register_movement_lerp_system(flecs::world& world) {
+    std::cout << "Registering movement lerp system\n";
+    world.system<RenderPosition, SimPosition, PrevSimPosition,
+        RenderRotation, SimRotation, PrevSimRotation,
+        LerpTimer>()
+        .each([] (RenderPosition& pos, SimPosition& target_pos, PrevSimPosition& prev_pos,
                     RenderRotation& rot, SimRotation& target_rot, PrevSimRotation& prev_rot,
                     LerpTimer& timer) {
-                timer.val += dt;
-                // std::cout << timer.val << std::endl;
-                float ratio = timer.val / MOVE_UPDATE_RATE;
-                // std::cout << timer.val << ", " << ratio << std::endl;
-                if (ratio > 1.0) {
-                    ratio = 1.0;
-                }
-                pos.val = Vector3Lerp(prev_pos.val, target_pos.val, ratio);
-                rot.val = angle_slerp(prev_rot.val, target_rot.val, ratio);
+            // std::cout << pos.val << "\n" << target_pos.val << "\n";
+            float dt = GetFrameTime();
+            timer.val += dt;
+            float ratio = timer.val / MOVE_UPDATE_RATE;
+            if (ratio > 1.0) {
+                ratio = 1.0;
             }
-        );
+            pos.val = Vector3Lerp(prev_pos.val, target_pos.val, ratio);
+            rot.val = angle_slerp(prev_rot.val, target_rot.val, ratio);
+        }
+    );
 }
 

@@ -1,9 +1,8 @@
 # Right now:
 
-## Camera rotation
-
-
 # Coming soon:
+
+## Finish Camera rotation
 
 ## Jumping/gravity
 

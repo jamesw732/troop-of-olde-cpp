@@ -66,7 +66,7 @@ int main(void)
     register_movement_networking_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_disconnect_system(world);
-    register_movement_lerp_system(world, dt);
+    register_movement_lerp_system(world);
     auto render_sys = register_render_system(world, camera, ManualPhase);
 
     // Main game loop

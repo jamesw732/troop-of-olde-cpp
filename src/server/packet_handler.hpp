@@ -31,6 +31,7 @@ class PacketHandler {
             case PacketType::MovementInputPacket: {
                 MovementInputPacket input_packet;
                 des.object(input_packet);
+                // TODO: Consider reworking packet handling to not store containers in ECS table
                 entity.set<MovementInputPacket>(input_packet);
                 break;
             }

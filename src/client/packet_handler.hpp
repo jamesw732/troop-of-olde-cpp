@@ -43,6 +43,9 @@ class PacketHandler {
                     entity.set<SimPosition>(spawn_state.pos);
                     entity.set<RenderPosition>({spawn_state.pos.val});
                     entity.set<PrevSimPosition>({spawn_state.pos.val});
+                    entity.set<SimRotation>({spawn_state.rot.val});
+                    entity.set<RenderRotation>({spawn_state.rot.val});
+                    entity.set<PrevSimRotation>({spawn_state.rot.val});
                     entity.set<NetworkId>(spawn_state.network_id);
                     entity.set<DisplayName>(spawn_state.name);
                     netid_to_entity[spawn_state.network_id] = entity;
@@ -64,6 +67,9 @@ class PacketHandler {
                 entity.set<RenderPosition>({spawn_state.pos.val});
                 entity.set<SimPosition>(spawn_state.pos);
                 entity.set<PrevSimPosition>({spawn_state.pos.val});
+                entity.set<SimRotation>({spawn_state.rot.val});
+                entity.set<RenderRotation>({spawn_state.rot.val});
+                entity.set<PrevSimRotation>({spawn_state.rot.val});
                 entity.set<NetworkId>(spawn_state.network_id);
                 entity.set<DisplayName>(spawn_state.name);
                 netid_to_entity[spawn_state.network_id] = entity;
@@ -78,6 +84,7 @@ class PacketHandler {
             case PacketType::MovementUpdateBatchPacket: {
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
+                // TODO: Consider reworking packet handling to not store containers in ECS table
                 world.set<MovementUpdateBatchPacket>(batch);
                 break;
             }

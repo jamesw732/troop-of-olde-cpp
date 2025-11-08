@@ -16,6 +16,11 @@ struct MovementInput {
     int8_t rot_y = 0;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
+    os << "(x: " << (int) input.x << ", z: " << (int) input.z << ", rot_y: " << (int) input.rot_y << ")";
+    return os;
+}
+
 struct SimPosition {
     raylib::Vector3 val;
 };
