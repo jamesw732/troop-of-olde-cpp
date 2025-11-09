@@ -39,7 +39,7 @@ class InputBuffer {
     // std::queue<MovementInput> buffer;
     std::deque<MovementInput> buffer;
 
-    void push(MovementInput input) {
+    void push(const MovementInput& input) {
         /*
          * Push a copy of the given MovementInput into the buffer
          */
@@ -50,6 +50,10 @@ class InputBuffer {
         MovementInput elem = buffer.front();
         buffer.pop_front();
         return elem;
+    }
+
+    MovementInput back() {
+        return buffer.back();
     }
 
     const bool empty() {

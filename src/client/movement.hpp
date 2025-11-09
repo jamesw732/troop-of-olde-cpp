@@ -31,6 +31,7 @@ inline void register_movement_recv_system(flecs::world& world) {
     world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (MovementUpdateBatchPacket& batch) {
+            // TODO: introduce more lag for remote players to smooth movement
             auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
             for (MovementUpdate move_update: batch.move_updates) {
                 auto netid_entity = netid_to_entity.find(move_update.network_id);
@@ -79,31 +80,33 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
 inline void register_movement_input_system(
         flecs::world& world,
         InputHandler& input_handler,
-        InputBuffer& input_buffer
-        ) {
-    world.system<MovementInput, LocalPlayer>()
+        InputBuffer& input_buffer)
+{
+    world.system()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_handler, &input_buffer](MovementInput& input, LocalPlayer) {
-                input = input_handler.get_movement_input();
-                input_buffer.push(input);
-            }
-        );
+        .each([&input_handler, &input_buffer]() {
+            input_buffer.push(input_handler.get_movement_input());
+        }
+    );
 }
 
-inline void register_movement_system(flecs::world& world) {
-    world.system<SimPosition, SimRotation, MovementInput, LocalPlayer>()
+inline void register_movement_system(
+        flecs::world& world,
+        InputBuffer& input_buffer)
+{
+    world.system<SimPosition, SimRotation, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([](SimPosition& pos, SimRotation& rot, MovementInput& input, LocalPlayer) {
-                process_movement_input(pos.val, rot.val, input);
-            }
-        );
+        .each([&input_buffer](SimPosition& pos, SimRotation& rot, LocalPlayer) {
+            process_movement_input(pos.val, rot.val, input_buffer.back());
+        }
+    );
 }
 
-inline void register_movement_networking_system(flecs::world& world, Network& network, InputBuffer& input_buffer,
+inline void register_movement_transmit_system(flecs::world& world, Network& network, InputBuffer& input_buffer,
         uint16_t& tick) {
-    world.system<LocalPlayer>()
+    world.system()
         .interval(MOVE_UPDATE_RATE)
-        .each([&network, &input_buffer, &tick](LocalPlayer) {
+        .each([&network, &input_buffer, &tick]() {
             // Construct movement input packet from input buffer and send to server
             MovementInputPacket input_data;
             input_data.tick = tick;
@@ -132,9 +135,9 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
 }
 
 inline void register_movement_tick_system(flecs::world& world, uint16_t& movement_tick) {
-    world.system<LocalPlayer>()
+    world.system()
         .interval(MOVE_UPDATE_RATE)
-        .each([&movement_tick](LocalPlayer) {
+        .each([&movement_tick]() {
                 movement_tick++;
                 // std::cout << "Begin tick " << (int) movement_tick << std::endl;
             }
@@ -142,7 +145,6 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 }
 
 inline void register_movement_lerp_system(flecs::world& world) {
-    std::cout << "Registering movement lerp system\n";
     world.system<RenderPosition, SimPosition, PrevSimPosition,
         RenderRotation, SimRotation, PrevSimRotation,
         LerpTimer>()

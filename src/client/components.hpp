@@ -37,9 +37,14 @@ struct NetworkMap {
     std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
 };
 
-// Up-down rotation of the head
-struct HeadRotation {
-    float x_rot = 30;
+// Vertical rotation of the head
+struct HeadXRotation {
+    float val = 30;
+};
+
+// Camera's horizontal rotation offset from character's Y rotation
+struct HeadYRotation {
+    float val = 0;
 };
 
 struct CamDistance {

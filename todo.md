@@ -1,8 +1,12 @@
 # Right now:
 
-# Coming soon:
-
 ## Finish Camera rotation
+- Mouse rotation
+- Up/Down rotation
+- Scroll to zoom
+
+
+# Coming soon:
 
 ## Jumping/gravity
 

@@ -18,6 +18,7 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<LerpTimer>();
     entity.add<MovementInput>();
     entity.add<AckTick>();
+    entity.add<HeadYRotation>();
     return entity;
 }
 

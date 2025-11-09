@@ -6,6 +6,8 @@
 
 #include "components.hpp"
 
+// TODO: Implement camera collision with terrain
+
 inline void update_camera(flecs::world& world, raylib::Camera3D& camera) {
     auto local_player = world.lookup("LocalPlayer");
     if (!local_player.has<RenderPosition>()) {
