@@ -58,15 +58,17 @@ int main(void)
     register_client_components(world);
 
     auto ManualPhase = world.entity("ManualPhase");
-    register_movement_target_system(world);
     register_movement_recv_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world, input_buffer);
     register_movement_transmit_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
+    register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world, input_handler);
+    register_camera_lerp_reset_system(world);
+    register_camera_lerp_system(world);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 

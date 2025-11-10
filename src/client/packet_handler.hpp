@@ -48,7 +48,9 @@ class PacketHandler {
                     entity.set<PrevSimRotation>({spawn_state.rot.val});
                     entity.set<NetworkId>(spawn_state.network_id);
                     entity.set<DisplayName>(spawn_state.name);
-                    entity.set<HeadXRotation>({30.0});
+                    entity.set<CamRotation>({30.0});
+                    entity.set<CamSimRotation>({30.0});
+                    entity.set<PrevCamSimRotation>({30.0});
                     netid_to_entity[spawn_state.network_id] = entity;
                 }
                 // std::cout << "Batch Spawn Packet: " << '\n';

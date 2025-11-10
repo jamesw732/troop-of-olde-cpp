@@ -20,7 +20,7 @@ void test_movement_system() {
     e.set<MovementInputPacket>(packet);
     world.progress(1.0 / 20);
     assertClose(0.25, e.get<SimPosition>().val.x);
-    assertClose(5.0, e.get<SimRotation>().val);
+    assertClose(5.0, e.get<SimRotation>().y);
     assertEquals(1, e.get<ClientMoveTick>().val);
     world.progress(1.0 / 20);
 
@@ -30,7 +30,7 @@ void test_movement_system() {
     e.set<MovementInputPacket>(packet);
     world.progress(1.0 / 20);
     assertClose(0.75, e.get<SimPosition>().val.x);
-    assertClose(15.0, e.get<SimRotation>().val);
+    assertClose(15.0, e.get<SimRotation>().y);
     assertEquals(3, e.get<ClientMoveTick>().val);
 }
 

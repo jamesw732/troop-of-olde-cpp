@@ -16,18 +16,6 @@
 #include "../shared/raylib-util.hpp"
 
 
-inline void register_movement_target_system(flecs::world& world) {
-    // Slide over current position to prev. Target will be mutated by other systems.
-    world.system<RenderPosition, PrevSimPosition, RenderRotation, PrevSimRotation, LerpTimer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, RenderRotation& cur_rot, PrevSimRotation& prev_rot, LerpTimer& timer) {
-            timer.val = 0;
-            prev_pos.val = cur_pos.val;
-            prev_rot.val = cur_rot.val;
-            }
-        );
-}
-
 inline void register_movement_recv_system(flecs::world& world) {
     world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
@@ -91,15 +79,6 @@ inline void register_movement_input_system(
     );
 }
 
-inline void register_camera_input_system(flecs::world& world, InputHandler& input_handler) {
-    world.system<HeadXRotation, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_handler] (HeadXRotation& x_rot, LocalPlayer) {
-            process_camera_input(input_handler.get_updown_keyboard_rotation(), x_rot.val);
-        }
-    );
-}
-
 inline void register_movement_system(
         flecs::world& world,
         InputBuffer& input_buffer)
@@ -150,6 +129,18 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .each([&movement_tick]() {
                 movement_tick++;
                 // std::cout << "Begin tick " << (int) movement_tick << std::endl;
+            }
+        );
+}
+
+inline void register_movement_lerp_reset_system(flecs::world& world) {
+    // Slide over current position to prev. Target will be mutated by other systems.
+    world.system<RenderPosition, PrevSimPosition, RenderRotation, PrevSimRotation, LerpTimer>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, RenderRotation& cur_rot, PrevSimRotation& prev_rot, LerpTimer& timer) {
+            timer.val = 0;
+            prev_pos.val = cur_pos.val;
+            prev_rot.val = cur_rot.val;
             }
         );
 }

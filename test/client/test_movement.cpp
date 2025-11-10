@@ -12,7 +12,7 @@ void test_movement_systems() {
     uint16_t movement_tick = 0;
     world.set<NetworkMap>({});
 
-    register_movement_target_system(world);
+    register_movement_lerp_reset_system(world);
     register_movement_recv_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_system(world);
@@ -44,15 +44,15 @@ void test_movement_systems() {
     world.progress(1.0 / 60);
     input_buffer.push({1, 0, 1});
     assertClose(0.25, character.get<SimPosition>().val.x);
-    assertClose(5.0, character.get<SimRotation>().val);
+    assertClose(5.0, character.get<SimRotation>().y);
     world.progress(1.0 / 60);
     assertClose(0.25, character.get<RenderPosition>().val.x);
     world.progress(1.0 / 60);
-    assertClose(5.0, character.get<RenderRotation>().val);
+    assertClose(5.0, character.get<RenderRotation>().y);
     world.progress(1.0 / 60);
     input_buffer.push({1, 0});
     assertClose(0.5, character.get<SimPosition>().val.x);
-    assertClose(10.0, character.get<SimRotation>().val);
+    assertClose(10.0, character.get<SimRotation>().y);
     world.progress(1.0 / 60);
     world.progress(1.0 / 60);
 
@@ -61,7 +61,7 @@ void test_movement_systems() {
     character.set<MovementUpdateBatchPacket>(packet);
     world.progress(1.0 / 60);
     assertClose(9.82718, character.get<SimPosition>().val.x);
-    assertClose(110.0, character.get<SimRotation>().val);
+    assertClose(110.0, character.get<SimRotation>().y);
 }
 
 int main() {

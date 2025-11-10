@@ -9,16 +9,18 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<LocalPlayer>();
     entity.add<DisplayName>();
     entity.add<NetworkId>();
+    entity.add<AckTick>();
+
+    entity.add<LerpTimer>();
     entity.add<RenderPosition>();
     entity.add<SimPosition>();
     entity.add<PrevSimPosition>();
     entity.add<RenderRotation>();
     entity.add<SimRotation>();
     entity.add<PrevSimRotation>();
-    entity.add<LerpTimer>();
-    entity.add<MovementInput>();
-    entity.add<AckTick>();
-    entity.add<HeadXRotation>();
+    entity.add<CamRotation>();
+    entity.add<CamSimRotation>();
+    entity.add<PrevCamSimRotation>();
     return entity;
 }
 
