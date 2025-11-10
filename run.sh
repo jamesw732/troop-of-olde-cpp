@@ -54,6 +54,7 @@ else
     fi
     if [ $SERVERONLY == 0 ]; then
         $TERM_COMMAND -- $RUN_COMMAND ./client
+        # $TERM_COMMAND -- bash -c "__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia $RUN_COMMAND ./client"
     fi
 fi
 
