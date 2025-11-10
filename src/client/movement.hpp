@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 
+#include "camera.hpp"
 #include "flecs.h"
 #include "raylib-cpp.hpp"
 
@@ -86,6 +87,15 @@ inline void register_movement_input_system(
         .interval(MOVE_UPDATE_RATE)
         .each([&input_handler, &input_buffer]() {
             input_buffer.push(input_handler.get_movement_input());
+        }
+    );
+}
+
+inline void register_camera_input_system(flecs::world& world, InputHandler& input_handler) {
+    world.system<HeadXRotation, LocalPlayer>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&input_handler] (HeadXRotation& x_rot, LocalPlayer) {
+            process_camera_input(input_handler.get_updown_keyboard_rotation(), x_rot.val);
         }
     );
 }

@@ -66,6 +66,7 @@ int main(void)
     register_movement_transmit_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_movement_lerp_system(world);
+    register_camera_input_system(world, input_handler);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
