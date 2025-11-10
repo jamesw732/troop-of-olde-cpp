@@ -42,17 +42,6 @@ struct CamRotation {
     float y = 0;
 };
 
-struct PrevCamSimRotation {
-    float x = 0;
-    float y = 0;
-};
-
-struct CamSimRotation {
-    float x = 0;
-    float y = 0;
-};
-
-
 struct CamDistance {
     float val = 10;
 };

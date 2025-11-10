@@ -19,8 +19,6 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<SimRotation>();
     entity.add<PrevSimRotation>();
     entity.add<CamRotation>();
-    entity.add<CamSimRotation>();
-    entity.add<PrevCamSimRotation>();
     return entity;
 }
 

@@ -21,7 +21,7 @@
 int main(void)
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);
+    SetTargetFPS(500);
     // Initialize window attributes
     const int screenWidth = 800;
     const int screenHeight = 450;
@@ -67,8 +67,6 @@ int main(void)
     register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world, input_handler);
-    register_camera_lerp_reset_system(world);
-    register_camera_lerp_system(world);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
