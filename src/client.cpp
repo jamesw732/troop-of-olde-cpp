@@ -46,9 +46,6 @@ int main(void)
 
     PacketHandler packet_handler(world);
 
-    // TEMPORARY: Initialize player character
-    // TODO: Character should be created by server
-
     InputHandler input_handler;
     InputBuffer input_buffer;
     uint16_t movement_tick = 0;

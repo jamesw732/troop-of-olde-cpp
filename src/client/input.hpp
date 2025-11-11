@@ -5,6 +5,7 @@
 
 #include "raylib-cpp.hpp"
 
+#include "components.hpp"
 #include "../shared/components.hpp"
 #include "../shared/raylib-util.hpp"
 
@@ -32,6 +33,27 @@ struct InputHandler {
         }
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
             input.mouse_rot_y = raylib::Mouse::GetDelta().x;
+        }
+        return input;
+    }
+
+    CameraInput get_camera_input() {
+        CameraInput input;
+        if (IsKeyDown(KEY_UP)) {
+            input.rot_x++;
+        }
+        if (IsKeyDown(KEY_DOWN)) {
+            input.rot_x--;
+        }
+        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+            input.mouse_rot.x = raylib::Mouse::GetDelta().y;
+        }
+        else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+            input.mouse_rot.x = raylib::Mouse::GetDelta().y;
+            input.mouse_rot.y = raylib::Mouse::GetDelta().x;
+        }
+        else {
+            input.reset = true;
         }
         return input;
     }

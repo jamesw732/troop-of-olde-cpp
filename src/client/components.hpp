@@ -37,6 +37,12 @@ struct NetworkMap {
     std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
 };
 
+struct CameraInput {
+    int8_t rot_x = 0;
+    raylib::Vector2 mouse_rot{};
+    bool reset = false;
+};
+
 struct CamRotation {
     float x = 0;
     float y = 0;
