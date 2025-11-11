@@ -3,11 +3,13 @@
 #include <deque>
 #include <iostream>
 
+#include "raylib-cpp.hpp"
+
 #include "../shared/components.hpp"
+#include "../shared/raylib-util.hpp"
 
 
-class InputHandler {
-  public:
+struct InputHandler {
     MovementInput get_movement_input() {
         MovementInput input;
         if (IsKeyDown(KEY_W)) {
@@ -27,6 +29,9 @@ class InputHandler {
         }
         if (IsKeyDown(KEY_D)) {
             input.rot_y--;
+        }
+        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
+            input.mouse_rot_y = raylib::Mouse::GetDelta().x;
         }
         return input;
     }

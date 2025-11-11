@@ -111,6 +111,7 @@ void serialize(S& s, std::vector<MovementInput>& v) {
         s.value1b(input.x);
         s.value1b(input.z);
         s.value1b(input.rot_y);
+        s.value2b(input.mouse_rot_y);
     });
 }
 

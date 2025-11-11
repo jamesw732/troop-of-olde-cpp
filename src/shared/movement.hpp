@@ -16,5 +16,6 @@ inline void process_movement_input(raylib::Vector3& pos, float& rot, MovementInp
     pos += velocity;
 
     rot += input.rot_y * 5;
+    rot -= input.mouse_rot_y;
     rot = fmodf(rot, 360.0);
 }

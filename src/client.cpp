@@ -21,7 +21,7 @@
 int main(void)
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(500);
+    SetTargetFPS(60);
     // Initialize window attributes
     const int screenWidth = 800;
     const int screenHeight = 450;

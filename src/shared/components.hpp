@@ -14,6 +14,7 @@ struct MovementInput {
     int8_t x = 0;
     int8_t z = 0;
     int8_t rot_y = 0;
+    int16_t mouse_rot_y = 0;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
