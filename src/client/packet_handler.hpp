@@ -49,6 +49,8 @@ class PacketHandler {
                     entity.set<NetworkId>(spawn_state.network_id);
                     entity.set<DisplayName>(spawn_state.name);
                     entity.set<CamRotation>({30.0});
+                    entity.set<Color>(RED);
+                    entity.set<ModelName>({"cube"});
                     netid_to_entity[spawn_state.network_id] = entity;
                 }
                 // std::cout << "Batch Spawn Packet: " << '\n';

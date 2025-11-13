@@ -9,6 +9,7 @@ inline void register_components(flecs::world& world) {
     world.component<NetworkId>();
     world.component<MovementInput>();
     world.component<SimPosition>();
+    world.component<SimRotation>();
     world.component<ClientMoveTick>();
     world.component<PlayerSpawnState>();
     world.component<MovementUpdate>();

@@ -30,6 +30,14 @@ struct SimRotation {
     float val = 0;
 };
 
+struct Scale {
+    raylib::Vector3 val{1, 1, 1};
+};
+
+struct ModelName {
+    std::string name;
+};
+
 struct ClientMoveTick {
     uint16_t val = 0;
 };
@@ -47,3 +55,5 @@ struct MovementUpdate {
     SimPosition pos;
     SimRotation rot;
 };
+
+struct Terrain {};

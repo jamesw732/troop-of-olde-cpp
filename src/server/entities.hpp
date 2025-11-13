@@ -11,6 +11,7 @@
 inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<SimPosition>();
     entity.add<SimRotation>();
+    entity.add<Scale>();
     entity.add<MovementInputPacket>();
     entity.add<Connected>();
     entity.add<ClientMoveTick>();

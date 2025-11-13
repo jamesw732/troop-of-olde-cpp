@@ -18,7 +18,11 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<RenderRotation>();
     entity.add<SimRotation>();
     entity.add<PrevSimRotation>();
+    entity.add<Scale>();
     entity.add<CamRotation>();
+    entity.add<CamDistance>();
+    entity.add<Color>();
+    entity.add<ModelName>();
     return entity;
 }
 
@@ -34,5 +38,7 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<NetworkId>();
     entity.add<LerpTimer>();
     entity.add<AckTick>();
+    entity.add<Color>();
+    entity.add<ModelName>();
     return entity;
 }

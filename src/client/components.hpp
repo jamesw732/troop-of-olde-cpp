@@ -41,6 +41,7 @@ struct CameraInput {
     int8_t rot_x = 0;
     raylib::Vector2 mouse_rot{};
     bool reset = false;
+    float scroll = 0;
 };
 
 struct CamRotation {

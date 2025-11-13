@@ -54,6 +54,14 @@ int main(void)
     register_components(world);
     register_client_components(world);
 
+    // TODO: Load terrain from disk
+    auto floor = world.entity("Floor");
+    floor.set<RenderPosition>({});
+    floor.set<RenderRotation>({});
+    floor.set<Scale>({{10, 0, 10}});
+    floor.set<Color>(BLUE);
+    floor.set<ModelName>({"3d_quad"});
+
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_recv_system(world);
     register_movement_reconcile_system(world, input_buffer);
@@ -80,16 +88,12 @@ int main(void)
         BeginDrawing();
             // Draw the UI
             ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                DrawGrid(10, 1.0f);
-            EndMode3D();
             std::string key_indicator = "    ";
             if (IsKeyDown(KEY_W)) key_indicator[0] = 'W';
             if (IsKeyDown(KEY_A)) key_indicator[1] = 'A';
             if (IsKeyDown(KEY_S)) key_indicator[2] = 'S';
             if (IsKeyDown(KEY_D)) key_indicator[3] = 'D';
             raylib::DrawTextEx(cascadiaMono, key_indicator, {10, 40}, 20, 2, DARKGRAY);
-            // cascadiaMono.DrawText(key_indicator, {10, 40}, 20, 2, DARKGRAY);
             DrawFPS(10, 10);
             // Draw each entity in the scene
             render_sys.run();

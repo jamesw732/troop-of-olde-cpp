@@ -55,18 +55,8 @@ struct InputHandler {
         else {
             input.reset = true;
         }
+        input.scroll = GetMouseWheelMove();
         return input;
-    }
-
-    int8_t get_updown_keyboard_rotation() {
-        int8_t ret{0};
-        if (IsKeyDown(KEY_UP)) {
-            ret++;
-        }
-        if (IsKeyDown(KEY_DOWN)) {
-            ret--;
-        }
-        return ret;
     }
 };
 
