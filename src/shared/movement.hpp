@@ -4,18 +4,19 @@
 #include "raylib-cpp.hpp"
 
 #include "components.hpp"
+#include "const.hpp"
 #include "util.hpp"
 
 
-inline void process_movement_input(raylib::Vector3& pos, float& rot, MovementInput input) {
-    raylib::Vector3 velocity((float) input.x, 0, (float) input.z);
-    velocity = velocity.Normalize();
-    velocity = Vector3RotateByAxisAngle(velocity, {0, 1, 0}, rot * PI / 180);
-    velocity = velocity * 0.25;
-
-    pos += velocity;
+inline raylib::Vector3 process_movement_input(MovementInput input, float& rot) {
+    raylib::Vector3 disp{(float) input.x, 0, (float) input.z};
+    disp = disp.Normalize();
+    disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
+    disp = disp * 0.25;
 
     rot += input.rot_y * 5;
     rot -= input.mouse_rot_y;
     rot = fmodf(rot, 360.0);
+
+    return disp;
 }

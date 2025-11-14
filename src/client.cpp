@@ -61,6 +61,7 @@ int main(void)
     floor.set<Scale>({{10, 0, 10}});
     floor.set<Color>(BLUE);
     floor.set<ModelName>({"3d_quad"});
+    floor.add<Terrain>();
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_recv_system(world);

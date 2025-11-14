@@ -60,7 +60,8 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
                 // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                process_movement_input(pos.val, rot.val, input);
+                raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val);
+                pos.val += disp;
             }
         }
     );
@@ -86,7 +87,8 @@ inline void register_movement_system(
     world.system<SimPosition, SimRotation, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer](SimPosition& pos, SimRotation& rot, LocalPlayer) {
-            process_movement_input(pos.val, rot.val, input_buffer.back());
+            raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val);
+            pos.val += disp;
         }
     );
 }

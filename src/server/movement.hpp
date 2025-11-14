@@ -26,7 +26,9 @@ inline void register_movement_system(flecs::world& world) {
             for (auto it = packet.inputs.begin() + start_idx;
                     it != packet.inputs.end(); ++it) {
                 auto input = *it;
-                process_movement_input(pos.val, rot.val, input);
+                // process_movement_input(pos.val, rot.val, input);
+                raylib::Vector3 disp = process_movement_input(input, rot.val);
+                pos.val += disp;
             }
             ack_tick.val = packet.tick;
         }

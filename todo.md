@@ -3,7 +3,7 @@
 ## Collision physics
 - Ground (done)
 - Gravity
-    - Split up movement input processing from position updates, update a Velocity component
+    - Split up movement input processing from position updates, update a Velocity variable (done)
     - Spawn character at nonzero height
     - Add gravity to velocity when not grounded
     - When processing velocity, query entities with a Terrain component. Check ray collision with
