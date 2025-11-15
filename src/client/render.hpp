@@ -20,38 +20,65 @@ inline Color get_wire_color(Color cube_color) {
 
 }
 
-inline flecs::system register_render_system(flecs::world& world, raylib::Camera3D& camera, flecs::entity phase) {
-    return world.system<RenderPosition, RenderRotation, Scale, Color, ModelName>("RenderSystem")
+inline flecs::system register_terrain_render_system(
+    flecs::world& world,
+    raylib::Camera3D& camera,
+    flecs::entity phase)
+{
+    return world.system<SimPosition, SimRotation, Scale, Color, ModelName, Terrain>()
         .kind(phase)
-        .each([&camera](RenderPosition& pos,
-                    RenderRotation& rot,
+        .each([&camera](SimPosition& pos,
+                    SimRotation& rot,
                     Scale& scale,
                     Color& color,
-                    ModelName& model_name)
+                    ModelName& model_name,
+                    Terrain)
         {
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
                     rlRotatef(rot.val, 0, 1, 0);
-                if (model_name.name == "cube") {
+                    if (model_name.name == "3d_quad") {
+                        DrawTriangle3D(
+                            {-scale.val.x / 2, 0, -scale.val.z / 2},
+                            {-scale.val.x / 2, 0, scale.val.z / 2},
+                            {scale.val.x / 2, 0, -scale.val.z / 2},
+                            color
+                        );
+                        DrawTriangle3D(
+                            {scale.val.x / 2, 0, scale.val.z / 2},
+                            {scale.val.x / 2, 0, -scale.val.z / 2},
+                            {-scale.val.x / 2, 0, scale.val.z / 2},
+                            color
+                        );
+                    }
+                rlPopMatrix();
+            EndMode3D();
+        }
+    );
+}
+
+inline flecs::system register_character_render_system(
+    flecs::world& world,
+    raylib::Camera3D& camera,
+    flecs::entity phase)
+{
+    return world.system<RenderPosition, RenderRotation, Scale, Color, ModelName, Character>()
+        .kind(phase)
+        .each([&camera](RenderPosition& pos,
+                    RenderRotation& rot,
+                    Scale& scale,
+                    Color& color,
+                    ModelName& model_name,
+                    Character)
+        {
+            BeginMode3D(camera);
+                rlPushMatrix();
+                    rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
+                    rlRotatef(rot.val, 0, 1, 0);
                     DrawCube({0, scale.val.y / 2, 0}, scale.val.x, scale.val.y, scale.val.z, color);
                     DrawCubeWires({0, scale.val.y / 2, 0}, scale.val.x, scale.val.y, scale.val.z,
                         get_wire_color(color));
-                }
-                if (model_name.name == "3d_quad") {
-                    DrawTriangle3D(
-                        {-scale.val.x / 2, 0, -scale.val.z / 2},
-                        {-scale.val.x / 2, 0, scale.val.z / 2},
-                        {scale.val.x / 2, 0, -scale.val.z / 2},
-                        color
-                    );
-                    DrawTriangle3D(
-                        {scale.val.x / 2, 0, scale.val.z / 2},
-                        {scale.val.x / 2, 0, -scale.val.z / 2},
-                        {-scale.val.x / 2, 0, scale.val.z / 2},
-                        color
-                    );
-                }
                 rlPopMatrix();
             EndMode3D();
         }

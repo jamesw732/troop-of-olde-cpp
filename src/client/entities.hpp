@@ -6,6 +6,7 @@
 
 inline flecs::entity create_local_player(flecs::world world) {
     auto entity = world.entity("LocalPlayer");
+    entity.add<Character>();
     entity.add<LocalPlayer>();
     entity.add<DisplayName>();
     entity.add<NetworkId>();
@@ -30,6 +31,7 @@ inline flecs::entity create_local_player(flecs::world world) {
 
 inline flecs::entity create_remote_player(flecs::world world) {
     auto entity = world.entity();
+    entity.add<Character>();
     entity.add<RenderPosition>();
     entity.add<SimPosition>();
     entity.add<PrevSimPosition>();

@@ -56,8 +56,8 @@ int main(void)
 
     // TODO: Load terrain from disk
     auto floor = world.entity("Floor");
-    floor.set<RenderPosition>({});
-    floor.set<RenderRotation>({});
+    floor.set<SimPosition>({});
+    floor.set<SimRotation>({});
     floor.set<Scale>({{10, 0, 10}});
     floor.set<Color>(BLUE);
     floor.set<ModelName>({"3d_quad"});
@@ -73,7 +73,8 @@ int main(void)
     register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world, input_handler);
-    auto render_sys = register_render_system(world, camera, ManualPhase);
+    auto render_terrain_sys = register_terrain_render_system(world, camera, ManualPhase);
+    auto render_sys = register_character_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
     // Main game loop
@@ -97,6 +98,7 @@ int main(void)
             raylib::DrawTextEx(cascadiaMono, key_indicator, {10, 40}, 20, 2, DARKGRAY);
             DrawFPS(10, 10);
             // Draw each entity in the scene
+            render_terrain_sys.run();
             render_sys.run();
         EndDrawing();
         // Send all messages to server

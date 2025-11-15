@@ -9,6 +9,7 @@
 
 
 inline flecs::entity add_character_components(flecs::entity entity) {
+    entity.add<Character>();
     entity.add<SimPosition>();
     entity.add<SimRotation>();
     entity.add<Scale>();

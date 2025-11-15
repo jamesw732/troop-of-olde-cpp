@@ -57,3 +57,4 @@ struct MovementUpdate {
 };
 
 struct Terrain {};
+struct Character {};
