@@ -5,6 +5,7 @@
 
 #include "Vector3.hpp"
 #include "network_components.hpp"
+#include "raylib-util.hpp"
 
 struct DisplayName {
     std::string name;
@@ -23,11 +24,11 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
 }
 
 struct SimPosition {
-    raylib::Vector3 val;
+    raylib::Vector3 val{};
 };
 
 struct SimRotation {
-    float val = 0;
+    raylib::Vector3 val{};
 };
 
 struct Scale {
@@ -55,6 +56,12 @@ struct MovementUpdate {
     SimPosition pos;
     SimRotation rot;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {
+    os << "{ack_tick: " << update.ack_tick.val
+        << ", pos: " << update.pos.val << ", rot: " << update.rot.val << "}";
+    return os;
+}
 
 struct Terrain {};
 struct Character {};

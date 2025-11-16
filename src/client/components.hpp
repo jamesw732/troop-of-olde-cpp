@@ -18,11 +18,11 @@ struct RenderPosition {
 };
 
 struct RenderRotation {
-    float val = 0;
+    raylib::Vector3 val{};
 };
 
 struct PrevSimRotation {
-    float val = 0;
+    raylib::Vector3 val{};
 };
 
 struct LerpTimer {

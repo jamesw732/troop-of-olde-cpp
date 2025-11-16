@@ -37,7 +37,9 @@ inline flecs::system register_terrain_render_system(
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
-                    rlRotatef(rot.val, 0, 1, 0);
+                    rlRotatef(rot.val.x, 1, 0, 0);
+                    rlRotatef(rot.val.y, 0, 1, 0);
+                    rlRotatef(rot.val.z, 0, 0, 1);
                     if (model_name.name == "3d_quad") {
                         DrawTriangle3D(
                             {-scale.val.x / 2, 0, -scale.val.z / 2},
@@ -75,7 +77,7 @@ inline flecs::system register_character_render_system(
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
-                    rlRotatef(rot.val, 0, 1, 0);
+                    rlRotatef(rot.val.y, 0, 1, 0);
                     DrawCube({0, scale.val.y / 2, 0}, scale.val.x, scale.val.y, scale.val.z, color);
                     DrawCubeWires({0, scale.val.y / 2, 0}, scale.val.x, scale.val.y, scale.val.z,
                         get_wire_color(color));

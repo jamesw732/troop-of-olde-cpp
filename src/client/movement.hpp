@@ -28,9 +28,7 @@ inline void register_movement_recv_system(flecs::world& world) {
                     continue;
                 }
                 flecs::entity e = netid_entity->second;
-                // std::cout << move_update.ack_tick.val << ", " << e.get<AckTick>().val << '\n';
                 if ((int16_t) (move_update.ack_tick.val - e.get<AckTick>().val) <= 0) {
-                    // std::cout << "Skipping entity" << '\n';
                     continue;
                 }
                 e.set<AckTick>({move_update.ack_tick.val});
@@ -50,17 +48,14 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                 AckTick& new_ack_tick,
                 LocalPlayer
             ) {
-            // dbg(input_buffer);
             // If old tick, skip reconciliation
             if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
-                // std::cout << "Skipping client-side reconciliation" << std::endl;
                 return;
             }
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
-                // std::cout << "Processing movement: " << (int) input.x << ", " << (int) input.z << std::endl;
-                raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val);
+                raylib::Vector3 disp = process_movement_input(input, rot.val.y);
                 pos.val += disp;
             }
         }
@@ -87,7 +82,7 @@ inline void register_movement_system(
     world.system<SimPosition, SimRotation, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer](SimPosition& pos, SimRotation& rot, LocalPlayer) {
-            raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val);
+            raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val.y);
             pos.val += disp;
         }
     );
@@ -130,7 +125,6 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .interval(MOVE_UPDATE_RATE)
         .each([&movement_tick]() {
                 movement_tick++;
-                // std::cout << "Begin tick " << (int) movement_tick << std::endl;
             }
         );
 }
@@ -151,10 +145,15 @@ inline void register_movement_lerp_system(flecs::world& world) {
     world.system<RenderPosition, SimPosition, PrevSimPosition,
         RenderRotation, SimRotation, PrevSimRotation,
         LerpTimer>()
-        .each([] (RenderPosition& pos, SimPosition& target_pos, PrevSimPosition& prev_pos,
-                    RenderRotation& rot, SimRotation& target_rot, PrevSimRotation& prev_rot,
-                    LerpTimer& timer) {
-            // std::cout << pos.val << "\n" << target_pos.val << "\n";
+        .each([] (
+                RenderPosition& pos,
+                SimPosition& target_pos,
+                PrevSimPosition& prev_pos,
+                RenderRotation& rot,
+                SimRotation& target_rot,
+                PrevSimRotation& prev_rot,
+                LerpTimer& timer)
+        {
             float dt = GetFrameTime();
             timer.val += dt;
             float ratio = timer.val / MOVE_UPDATE_RATE;
@@ -162,7 +161,7 @@ inline void register_movement_lerp_system(flecs::world& world) {
                 ratio = 1.0;
             }
             pos.val = Vector3Lerp(prev_pos.val, target_pos.val, ratio);
-            rot.val = angle_slerp(prev_rot.val, target_rot.val, ratio);
+            rot.val.y = angle_slerp(prev_rot.val.y, target_rot.val.y, ratio);
         }
     );
 }

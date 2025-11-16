@@ -89,7 +89,7 @@ void serialize(S& s, SimPosition& pos) {
 
 template <typename S>
 void serialize(S& s, SimRotation& rot) {
-    s.value4b(rot.val);
+    s.object(rot.val);
 }
 
 template<typename S>

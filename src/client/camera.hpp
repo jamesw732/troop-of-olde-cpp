@@ -41,7 +41,7 @@ inline void update_camera(flecs::world& world, raylib::Camera3D& camera) {
     }
     CamRotation cam_rotation = local_player.get<CamRotation>();
     CamDistance cam_distance = local_player.get<CamDistance>();
-    float y_rot = (local_player.get<RenderRotation>().val + cam_rotation.y) * PI / 180;
+    float y_rot = (local_player.get<RenderRotation>().val.y + cam_rotation.y) * PI / 180;
     float polar_rot = (90 - cam_rotation.x) * PI / 180;
     raylib::Vector3 sphere_coords{
         sin(polar_rot) * sin(y_rot),

@@ -8,7 +8,7 @@
 #include "util.hpp"
 
 
-inline raylib::Vector3 process_movement_input(MovementInput input, float& rot) {
+inline raylib::Vector3 process_movement_input(const MovementInput& input, float& rot) {
     raylib::Vector3 disp{(float) input.x, 0, (float) input.z};
     disp = disp.Normalize();
     disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
