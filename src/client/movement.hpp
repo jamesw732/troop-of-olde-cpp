@@ -11,9 +11,10 @@
 #include "../shared/movement.hpp"
 #include "../shared/components.hpp"
 #include "../shared/const.hpp"
+#include "../shared/physics.hpp"
+#include "../shared/raylib-util.hpp"
 #include "../shared/serialize.hpp"
 #include "../shared/util.hpp"
-#include "../shared/raylib-util.hpp"
 
 
 inline void register_movement_recv_system(flecs::world& world) {
@@ -81,8 +82,11 @@ inline void register_movement_system(
 {
     world.system<SimPosition, SimRotation, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](SimPosition& pos, SimRotation& rot, LocalPlayer) {
+        .each([&input_buffer, &world](SimPosition& pos, SimRotation& rot, LocalPlayer) {
             raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val.y);
+            // process_physics(world, pos.val, disp);
+            raylib::Vector3 test_disp{0, -1, 0};
+            process_physics(world, pos.val + raylib::Vector3{0, 0.1, 0}, test_disp);
             pos.val += disp;
         }
     );
