@@ -5,6 +5,7 @@
 
 #include "components.hpp"
 #include "const.hpp"
+#include "physics.hpp"
 #include "util.hpp"
 
 
@@ -19,4 +20,26 @@ inline raylib::Vector3 process_movement_input(const MovementInput& input, float&
     rot = fmodf(rot, 360.0);
 
     return disp;
+}
+
+inline void tick_movement(
+    flecs::world& world,
+    raylib::Vector3& pos,
+    float& rot,
+    const MovementInput& input,
+    float& gravity,
+    bool& grounded)
+{
+
+}
+
+inline void tick_movement(
+    flecs::world& world,
+    raylib::Vector3& pos,
+    float& rot,
+    const MovementInput& input)
+{
+    raylib::Vector3 disp = process_movement_input(input, rot);
+    process_collision(world, pos, disp);
+    pos += disp;
 }

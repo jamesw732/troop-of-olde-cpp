@@ -43,12 +43,12 @@ inline void register_movement_recv_system(flecs::world& world) {
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
     world.system<SimPosition, SimRotation, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](
+        .each([&input_buffer, &world](
                 SimPosition& pos,
                 SimRotation& rot,
                 AckTick& new_ack_tick,
-                LocalPlayer
-            ) {
+                LocalPlayer)
+        {
             // If old tick, skip reconciliation
             if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
                 return;
@@ -56,8 +56,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
-                raylib::Vector3 disp = process_movement_input(input, rot.val.y);
-                pos.val += disp;
+                tick_movement(world, pos.val, rot.val.y, input);
             }
         }
     );
@@ -83,11 +82,7 @@ inline void register_movement_system(
     world.system<SimPosition, SimRotation, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world](SimPosition& pos, SimRotation& rot, LocalPlayer) {
-            raylib::Vector3 disp = process_movement_input(input_buffer.back(), rot.val.y);
-            // process_physics(world, pos.val, disp);
-            raylib::Vector3 test_disp{0, -1, 0};
-            process_physics(world, pos.val + raylib::Vector3{0, 0.1, 0}, test_disp);
-            pos.val += disp;
+            tick_movement(world, pos.val, rot.val.y, input_buffer.back());
         }
     );
 }

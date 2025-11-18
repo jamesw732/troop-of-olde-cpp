@@ -45,6 +45,8 @@ T deserialize(const uint8_t* buffer, size_t size) {
 template<typename S>
 void serialize(S& s, ClientLoginPacket& login) {
     s.object(login.name);
+    s.object(login.pos);
+    s.object(login.rot);
 }
 
 template<typename S>

@@ -7,6 +7,9 @@
 #include "network_components.hpp"
 #include "raylib-util.hpp"
 
+
+struct Character {};
+
 struct DisplayName {
     std::string name;
 };
@@ -64,4 +67,11 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) 
 }
 
 struct Terrain {};
-struct Character {};
+
+struct Gravity {
+    float val;
+};
+
+struct Grounded {
+    bool val;
+};

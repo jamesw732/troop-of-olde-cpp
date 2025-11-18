@@ -21,7 +21,7 @@ class PacketHandler {
     }
 
     void handle_packet(RecvPacket packet) {
-        flecs::entity entity = packet.e;
+        flecs::entity player = packet.e;
         uint8_t* buffer = packet.packet_data.data();
         size_t size = packet.packet_data.size();
         bitsery::Deserializer<InputAdapter> des{InputAdapter{buffer, size}};
@@ -32,7 +32,7 @@ class PacketHandler {
                 MovementInputPacket input_packet;
                 des.object(input_packet);
                 // TODO: Consider reworking packet handling to not store containers in ECS table
-                entity.set<MovementInputPacket>(input_packet);
+                player.set<MovementInputPacket>(input_packet);
                 break;
             }
 
@@ -40,9 +40,11 @@ class PacketHandler {
                 dbg("Received login request");
                 ClientLoginPacket login;
                 des.object(login);
-                add_character_components(entity);
-                entity.set<DisplayName>(login.name);
-                entity.add<NeedsSpawnBatch>();
+                add_character_components(player);
+                player.set<DisplayName>(login.name);
+                player.set<SimPosition>(login.pos);
+                player.set<SimRotation>(login.rot);
+                player.add<NeedsSpawnBatch>();
                 break;
             }
 

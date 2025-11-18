@@ -40,9 +40,10 @@ int main(void)
     flecs::world world;
     Network network;
     network.connect();
-    ClientLoginPacket login{{"Player"}};
+    ClientLoginPacket login{{"Player"}, {{0, 1, 0}}, {{0, 0, 0}}};
     auto [buffer, size] = serialize(login);
     network.queue_data_reliable(buffer, size);
+    network.send_network_buffer();
 
     PacketHandler packet_handler(world);
 

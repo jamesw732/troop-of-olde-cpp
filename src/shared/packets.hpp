@@ -29,6 +29,8 @@ struct MovementInputPacket {
 struct ClientLoginPacket {
     static constexpr PacketType id = PacketType::ClientLoginPacket;
     DisplayName name;
+    SimPosition pos;
+    SimRotation rot;
 };
 
 struct SpawnBatchPacket {

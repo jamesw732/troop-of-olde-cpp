@@ -75,6 +75,8 @@ class PacketHandler {
                 entity.set<PrevSimRotation>({spawn_state.rot.val});
                 entity.set<NetworkId>(spawn_state.network_id);
                 entity.set<DisplayName>(spawn_state.name);
+                entity.set<Color>(RED);
+                entity.set<ModelName>({"cube"});
                 netid_to_entity[spawn_state.network_id] = entity;
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';
