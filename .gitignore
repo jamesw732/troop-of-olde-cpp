@@ -4,3 +4,4 @@ Debug/*
 .cache
 *.html
 .clangd
+ideas/*

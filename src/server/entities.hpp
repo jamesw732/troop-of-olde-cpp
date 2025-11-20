@@ -19,5 +19,8 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<DisplayName>();
     entity.add<NetworkId>();
     entity.add<NeedsSpawnBroadcast>();
+
+    entity.add<Gravity>();
+    entity.add<Grounded>();
     return entity;
 }

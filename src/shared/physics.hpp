@@ -35,17 +35,38 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
     return RayCollision(false);
 }
 
-inline void process_collision(flecs::world& world, const raylib::Vector3& pos, raylib::Vector3& disp) {
+inline void process_collision(
+    flecs::world& world,
+    const raylib::Vector3& pos,
+    raylib::Vector3& disp,
+    bool& grounded)
+{
     world.query<Terrain, ModelName>()
         .each([&] (flecs::entity e, Terrain, ModelName model_name) {
-            RayCollision collision = get_ray_collision(Ray{pos, disp}, e);
+            RayCollision collision = get_ray_collision(Ray{pos, disp.Normalize()}, e);
+            if (!collision.hit || collision.distance > disp.Length()) {
+                if (!grounded) {
+                    return;
+                }
+                // If no collision from moving, check if we're still close to ground
+                collision = get_ray_collision(Ray{pos, {0, -1, 0}}, e);
+                if (!collision.hit || collision.distance > 0.2) {
+                    grounded = false;
+                }
+                return;
+            }
+            if (!grounded) {
+                disp = (raylib::Vector3) collision.point - pos;
+                disp *= 0.95;
+                grounded = true;
+            }
         }
     );
 }
 
 inline void update_gravity(float& grav, const bool& grounded) {
     if (!grounded) {
-        grav += 100 * MOVE_UPDATE_RATE;
+        grav += MOVE_UPDATE_RATE;
     }
     else {
         grav = 0;

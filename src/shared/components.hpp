@@ -38,6 +38,14 @@ struct Scale {
     raylib::Vector3 val{1, 1, 1};
 };
 
+struct Gravity {
+    float val = 0;
+};
+
+struct Grounded {
+    bool val = false;
+};
+
 struct ModelName {
     std::string name;
 };
@@ -58,6 +66,8 @@ struct MovementUpdate {
     ClientMoveTick ack_tick;
     SimPosition pos;
     SimRotation rot;
+    Grounded grounded;
+    Gravity gravity;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {
@@ -68,10 +78,3 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) 
 
 struct Terrain {};
 
-struct Gravity {
-    float val;
-};
-
-struct Grounded {
-    bool val;
-};

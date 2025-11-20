@@ -94,6 +94,16 @@ void serialize(S& s, SimRotation& rot) {
     s.object(rot.val);
 }
 
+template <typename S>
+void serialize(S& s, Gravity& gravity) {
+    s.value4b(gravity.val);
+}
+
+template <typename S>
+void serialize(S& s, Grounded& grounded) {
+    s.value1b(grounded.val);
+}
+
 template<typename S>
 void serialize(S& s, PlayerSpawnState& spawn_state) {
     s.object(spawn_state.network_id);
@@ -133,4 +143,6 @@ void serialize(S& s, MovementUpdate& move_update) {
     s.object(move_update.ack_tick);
     s.object(move_update.pos);
     s.object(move_update.rot);
+    s.object(move_update.gravity);
+    s.object(move_update.grounded);
 }

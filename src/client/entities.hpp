@@ -23,6 +23,9 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<Color>();
     entity.add<ModelName>();
 
+    entity.add<Grounded>();
+    entity.add<Gravity>();
+
     entity.add<CamRotation>();
     entity.add<CamDistance>();
     return entity;

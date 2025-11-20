@@ -22,6 +22,15 @@ int main(void)
     }
     PacketHandler packet_handler{world};
 
+    // TODO: Load terrain from disk
+    auto floor = world.entity("Floor");
+    floor.set<SimPosition>({});
+    floor.set<SimRotation>({});
+    floor.set<Scale>({{10, 0, 10}});
+    floor.set<Color>(BLUE);
+    floor.set<ModelName>({"3d_quad"});
+    floor.add<Terrain>();
+
     register_components(world);
 
     register_movement_system(world);

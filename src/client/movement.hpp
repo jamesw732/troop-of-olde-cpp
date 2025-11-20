@@ -33,19 +33,23 @@ inline void register_movement_recv_system(flecs::world& world) {
                     continue;
                 }
                 e.set<AckTick>({move_update.ack_tick.val});
-                e.set<SimPosition>({move_update.pos.val});
-                e.set<SimRotation>({move_update.rot.val});
+                e.set<SimPosition>(move_update.pos);
+                e.set<SimRotation>(move_update.rot);
+                e.set<Gravity>(move_update.gravity);
+                e.set<Grounded>(move_update.grounded);
             }
         }
     );
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<SimPosition, SimRotation, AckTick, LocalPlayer>()
+    world.system<SimPosition, SimRotation, Gravity, Grounded, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world](
                 SimPosition& pos,
                 SimRotation& rot,
+                Gravity& gravity,
+                Grounded& grounded,
                 AckTick& new_ack_tick,
                 LocalPlayer)
         {
@@ -56,7 +60,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
             for (MovementInput input: input_buffer.buffer) {
-                tick_movement(world, pos.val, rot.val.y, input);
+                tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
             }
         }
     );
@@ -79,10 +83,16 @@ inline void register_movement_system(
         flecs::world& world,
         InputBuffer& input_buffer)
 {
-    world.system<SimPosition, SimRotation, LocalPlayer>()
+    world.system<SimPosition, SimRotation, Gravity, Grounded, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer, &world](SimPosition& pos, SimRotation& rot, LocalPlayer) {
-            tick_movement(world, pos.val, rot.val.y, input_buffer.back());
+        .each([&input_buffer, &world]
+           (SimPosition& pos,
+            SimRotation& rot,
+            Gravity& gravity,
+            Grounded& grounded,
+            LocalPlayer)
+        {
+            tick_movement(world, pos.val, rot.val.y, input_buffer.back(), gravity.val, grounded.val);
         }
     );
 }

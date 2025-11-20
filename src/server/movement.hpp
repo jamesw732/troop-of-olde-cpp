@@ -14,9 +14,16 @@
 
 
 inline void register_movement_system(flecs::world& world) {
-    world.system<SimPosition, SimRotation, ClientMoveTick, MovementInputPacket>()
+    world.system<SimPosition, SimRotation, Gravity, Grounded, ClientMoveTick, MovementInputPacket>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&world](SimPosition& pos, SimRotation& rot, ClientMoveTick& ack_tick, MovementInputPacket& packet) {
+        .each([&world]
+           (SimPosition& pos,
+            SimRotation& rot,
+            Gravity& gravity,
+            Grounded& grounded,
+            ClientMoveTick& ack_tick,
+            MovementInputPacket& packet)
+        {
             uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
             // std::cout << "Processing " << packet.tick - ack_tick.val << " movement inputs" << std::endl;
             int const dif = (int) (ack_tick.val - start_tick);
@@ -26,7 +33,7 @@ inline void register_movement_system(flecs::world& world) {
             for (auto it = packet.inputs.begin() + start_idx;
                     it != packet.inputs.end(); ++it) {
                 auto input = *it;
-                tick_movement(world, pos.val, rot.val.y, input);
+                tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
             }
             ack_tick.val = packet.tick;
         }

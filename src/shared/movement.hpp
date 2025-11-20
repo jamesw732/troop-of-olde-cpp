@@ -30,7 +30,11 @@ inline void tick_movement(
     float& gravity,
     bool& grounded)
 {
-
+    raylib::Vector3 disp = process_movement_input(input, rot);
+    update_gravity(gravity, grounded);
+    disp.y -= gravity;
+    process_collision(world, pos, disp, grounded);
+    pos += disp;
 }
 
 inline void tick_movement(
@@ -40,6 +44,5 @@ inline void tick_movement(
     const MovementInput& input)
 {
     raylib::Vector3 disp = process_movement_input(input, rot);
-    process_collision(world, pos, disp);
     pos += disp;
 }
