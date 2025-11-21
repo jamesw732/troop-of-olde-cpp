@@ -66,8 +66,8 @@ struct MovementUpdate {
     ClientMoveTick ack_tick;
     SimPosition pos;
     SimRotation rot;
-    Grounded grounded;
     Gravity gravity;
+    Grounded grounded;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {

@@ -102,7 +102,6 @@ inline void register_movement_transmit_system(flecs::world& world, Network& netw
     world.system()
         .interval(MOVE_UPDATE_RATE)
         .each([&network, &input_buffer, &tick]() {
-            // Construct movement input packet from input buffer and send to server
             MovementInputPacket input_data;
             input_data.tick = tick;
             for (MovementInput input: input_buffer.buffer) {
@@ -139,7 +138,6 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 }
 
 inline void register_movement_lerp_reset_system(flecs::world& world) {
-    // Slide over current position to prev. Target will be mutated by other systems.
     world.system<RenderPosition, PrevSimPosition, RenderRotation, PrevSimRotation, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
         .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, RenderRotation& cur_rot, PrevSimRotation& prev_rot, LerpTimer& timer) {
