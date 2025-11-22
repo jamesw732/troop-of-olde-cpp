@@ -7,8 +7,8 @@
 - Write a generic GetRayIntersection function which queries all terrain elements and calls one of the
 various collision functions depending on the model. (done)
 - Test the collision function by shooting a ray downwards, and testing whether it hits floor. (done)
-- Gravity
-- Jumping
+- Gravity (done)
+- Jumping (done)
 - Terrain collision
 
 # Coming soon:

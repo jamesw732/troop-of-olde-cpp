@@ -56,8 +56,8 @@ inline void process_collision(
                 return;
             }
             if (!grounded) {
-                disp = (raylib::Vector3) collision.point - pos;
-                disp *= 0.95;
+                disp = Vector3Subtract(collision.point, pos);
+                disp += {0, 0.001, 0};
                 grounded = true;
             }
         }
@@ -66,7 +66,7 @@ inline void process_collision(
 
 inline void update_gravity(float& grav, const bool& grounded) {
     if (!grounded) {
-        grav += MOVE_UPDATE_RATE;
+        grav -= MOVE_UPDATE_RATE;
     }
     else {
         grav = 0;

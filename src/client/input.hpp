@@ -34,6 +34,7 @@ struct InputHandler {
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
             input.mouse_rot_y = raylib::Mouse::GetDelta().x;
         }
+        input.jump = IsKeyDown(KEY_SPACE);
         return input;
     }
 
