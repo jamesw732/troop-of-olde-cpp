@@ -57,7 +57,7 @@ inline void process_collision(
             }
             if (!grounded) {
                 disp = Vector3Subtract(collision.point, pos);
-                disp += {0, 0.001, 0};
+                disp -= disp.Normalize() * 0.01;
                 grounded = true;
             }
         }
