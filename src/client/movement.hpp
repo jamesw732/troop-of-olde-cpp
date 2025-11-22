@@ -29,14 +29,14 @@ inline void register_movement_recv_system(flecs::world& world) {
                     continue;
                 }
                 flecs::entity e = netid_entity->second;
-                if ((int16_t) (move_update.ack_tick.val - e.get<AckTick>().val) <= 0) {
+                if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) {
                     continue;
                 }
-                e.set<AckTick>({move_update.ack_tick.val});
-                e.set<SimPosition>(move_update.pos);
-                e.set<SimRotation>(move_update.rot);
-                e.set<Gravity>(move_update.gravity);
-                e.set<Grounded>(move_update.grounded);
+                e.set<AckTick>({move_update.ack_tick});
+                e.set<SimPosition>({move_update.pos});
+                e.set<SimRotation>({move_update.rot});
+                e.set<Gravity>({move_update.gravity});
+                e.set<Grounded>({move_update.grounded});
             }
         }
     );

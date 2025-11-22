@@ -34,20 +34,20 @@ class PacketHandler {
                 des.object(spawn_batch);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
                     flecs::entity entity;
-                    if (spawn_state.network_id.id == spawn_batch.local_player_id.id) {
+                    if (spawn_state.network_id == spawn_batch.local_player_id) {
                         entity = create_local_player(world);
                     }
                     else {
                         entity = create_remote_player(world);
                     }
-                    entity.set<SimPosition>(spawn_state.pos);
-                    entity.set<RenderPosition>({spawn_state.pos.val});
-                    entity.set<PrevSimPosition>({spawn_state.pos.val});
-                    entity.set<SimRotation>({spawn_state.rot.val});
-                    entity.set<RenderRotation>({spawn_state.rot.val});
-                    entity.set<PrevSimRotation>({spawn_state.rot.val});
-                    entity.set<NetworkId>(spawn_state.network_id);
-                    entity.set<DisplayName>(spawn_state.name);
+                    entity.set<SimPosition>({spawn_state.pos});
+                    entity.set<RenderPosition>({spawn_state.pos});
+                    entity.set<PrevSimPosition>({spawn_state.pos});
+                    entity.set<SimRotation>({spawn_state.rot});
+                    entity.set<RenderRotation>({spawn_state.rot});
+                    entity.set<PrevSimRotation>({spawn_state.rot});
+                    entity.set<NetworkId>({spawn_state.network_id});
+                    entity.set<DisplayName>({spawn_state.name});
                     entity.set<CamRotation>({30.0});
                     entity.set<Color>(RED);
                     entity.set<ModelName>({"cube"});
@@ -67,14 +67,14 @@ class PacketHandler {
                 des.object(spawn_packet);
                 PlayerSpawnState spawn_state = spawn_packet.spawn_state;
                 flecs::entity entity = create_remote_player(world);
-                entity.set<RenderPosition>({spawn_state.pos.val});
-                entity.set<SimPosition>(spawn_state.pos);
-                entity.set<PrevSimPosition>({spawn_state.pos.val});
-                entity.set<SimRotation>({spawn_state.rot.val});
-                entity.set<RenderRotation>({spawn_state.rot.val});
-                entity.set<PrevSimRotation>({spawn_state.rot.val});
-                entity.set<NetworkId>(spawn_state.network_id);
-                entity.set<DisplayName>(spawn_state.name);
+                entity.set<RenderPosition>({spawn_state.pos});
+                entity.set<SimPosition>({spawn_state.pos});
+                entity.set<PrevSimPosition>({spawn_state.pos});
+                entity.set<SimRotation>({spawn_state.rot});
+                entity.set<RenderRotation>({spawn_state.rot});
+                entity.set<PrevSimRotation>({spawn_state.rot});
+                entity.set<NetworkId>({spawn_state.network_id});
+                entity.set<DisplayName>({spawn_state.name});
                 entity.set<Color>(RED);
                 entity.set<ModelName>({"cube"});
                 netid_to_entity[spawn_state.network_id] = entity;
@@ -98,7 +98,7 @@ class PacketHandler {
                 dbg("Received disconnect packet");
                 DisconnectPacket dc_packet;
                 des.object(dc_packet);
-                std::cout << dc_packet.network_id.id << '\n';
+                std::cout << dc_packet.network_id << '\n';
                 auto netid_entity = netid_to_entity.find(dc_packet.network_id);
                 if (netid_entity == netid_to_entity.end()) {
                     break;

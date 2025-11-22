@@ -44,14 +44,14 @@ T deserialize(const uint8_t* buffer, size_t size) {
 // Packets
 template<typename S>
 void serialize(S& s, ClientLoginPacket& login) {
-    s.object(login.name);
+    s.text1b(login.name, 32);
     s.object(login.pos);
     s.object(login.rot);
 }
 
 template<typename S>
 void serialize(S& s, SpawnBatchPacket& spawns) {
-    s.object(spawns.local_player_id);
+    s.value4b(spawns.local_player_id);
     s.container(spawns.spawn_states, MAX_CLIENTS);
 }
 
@@ -73,10 +73,10 @@ void serialize(S& s, MovementUpdateBatchPacket& batch) {
 
 template<typename S>
 void serialize(S& s, DisconnectPacket& dc_packet) {
-    s.object(dc_packet.network_id);
+    s.value4b(dc_packet.network_id);
 }
 
-// Components
+// Primitives
 template <typename S>
 void serialize (S& s, raylib::Vector3& v) {
     s.value4b(v.x);
@@ -84,37 +84,13 @@ void serialize (S& s, raylib::Vector3& v) {
     s.value4b(v.z);
 }
 
-template <typename S>
-void serialize(S& s, SimPosition& pos) {
-    s.object(pos.val);
-}
-
-template <typename S>
-void serialize(S& s, SimRotation& rot) {
-    s.object(rot.val);
-}
-
-template <typename S>
-void serialize(S& s, Gravity& gravity) {
-    s.value4b(gravity.val);
-}
-
-template <typename S>
-void serialize(S& s, Grounded& grounded) {
-    s.value1b(grounded.val);
-}
-
+// Components
 template<typename S>
 void serialize(S& s, PlayerSpawnState& spawn_state) {
-    s.object(spawn_state.network_id);
-    s.object(spawn_state.name);
+    s.value4b(spawn_state.network_id);
+    s.text1b(spawn_state.name, 32);
     s.object(spawn_state.pos);
     s.object(spawn_state.rot);
-}
-
-template<typename S>
-void serialize(S& s, NetworkId& network_id) {
-    s.value4b(network_id.id);
 }
 
 template <typename S>
@@ -129,21 +105,11 @@ void serialize(S& s, std::vector<MovementInput>& v) {
 }
 
 template<typename S>
-void serialize(S& s, DisplayName& name) {
-    s.text1b(name.name, 32);
-}
-
-template<typename S>
-void serialize(S& s, ClientMoveTick& tick) {
-    s.value2b(tick.val);
-}
-
-template<typename S>
 void serialize(S& s, MovementUpdate& move_update) {
-    s.object(move_update.network_id);
-    s.object(move_update.ack_tick);
+    s.value4b(move_update.network_id);
+    s.value2b(move_update.ack_tick);
     s.object(move_update.pos);
     s.object(move_update.rot);
-    s.object(move_update.gravity);
-    s.object(move_update.grounded);
+    s.value4b(move_update.gravity);
+    s.value1b(move_update.grounded);
 }

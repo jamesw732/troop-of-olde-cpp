@@ -54,7 +54,7 @@ inline void register_movement_batch_system(flecs::world& world) {
                   Grounded& grounded)
         {
             MovementUpdateBatchPacket & batch = world.get_mut<MovementUpdateBatchPacket>();
-            MovementUpdate move_update{network_id, ack_tick, pos, rot, gravity, grounded};
+            MovementUpdate move_update{network_id.id, ack_tick.val, pos.val, rot.val, gravity.val, grounded.val};
             batch.move_updates.push_back(move_update);
         }
     );

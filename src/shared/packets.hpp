@@ -28,14 +28,14 @@ struct MovementInputPacket {
 
 struct ClientLoginPacket {
     static constexpr PacketType id = PacketType::ClientLoginPacket;
-    DisplayName name;
-    SimPosition pos;
-    SimRotation rot;
+    std::string name;
+    raylib::Vector3 pos;
+    raylib::Vector3 rot;
 };
 
 struct SpawnBatchPacket {
     static constexpr PacketType id = PacketType::SpawnBatchPacket;
-    NetworkId local_player_id;
+    uint32_t local_player_id;
     std::vector<PlayerSpawnState> spawn_states;
 };
 
@@ -51,5 +51,5 @@ struct MovementUpdateBatchPacket {
 
 struct DisconnectPacket {
     static constexpr PacketType id = PacketType::DisconnectPacket;
-    NetworkId network_id;
+    uint32_t network_id;
 };

@@ -34,7 +34,7 @@ struct AckTick {
 };
 
 struct NetworkMap {
-    std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
+    std::unordered_map<uint32_t, flecs::entity> netid_to_entity;
 };
 
 struct CameraInput {

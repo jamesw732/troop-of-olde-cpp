@@ -41,9 +41,9 @@ class PacketHandler {
                 ClientLoginPacket login;
                 des.object(login);
                 add_character_components(player);
-                player.set<DisplayName>(login.name);
-                player.set<SimPosition>(login.pos);
-                player.set<SimRotation>(login.rot);
+                player.set<DisplayName>({login.name});
+                player.set<SimPosition>({login.pos});
+                player.set<SimRotation>({login.rot});
                 player.add<NeedsSpawnBatch>();
                 break;
             }

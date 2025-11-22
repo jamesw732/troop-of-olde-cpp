@@ -13,7 +13,7 @@ inline void register_disconnect_system(flecs::world& world, Network& network) {
     world.system<NetworkId>()
         .with<Disconnected>()
         .each([&] (flecs::entity entity, NetworkId& network_id) {
-            DisconnectPacket dc_packet{network_id};
+            DisconnectPacket dc_packet{network_id.id};
             world.query<NetworkId, Connected>()
                 .each([&] (NetworkId& tgt_network_id, Connected) {
                     if (network_id.id == tgt_network_id.id) {

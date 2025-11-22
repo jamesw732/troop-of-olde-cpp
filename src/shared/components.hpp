@@ -56,24 +56,28 @@ struct ClientMoveTick {
 };
 
 struct PlayerSpawnState {
-    NetworkId network_id;
-    DisplayName name;
-    SimPosition pos;
-    SimRotation rot;
+    uint32_t network_id;
+    std::string name;
+    raylib::Vector3 pos;
+    raylib::Vector3 rot;
 };
 
 struct MovementUpdate {
-    NetworkId network_id;
-    ClientMoveTick ack_tick;
-    SimPosition pos;
-    SimRotation rot;
-    Gravity gravity;
-    Grounded grounded;
+    uint32_t network_id;
+    uint16_t ack_tick;
+    raylib::Vector3 pos;
+    raylib::Vector3 rot;
+    float gravity;
+    bool grounded;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {
-    os << "{ack_tick: " << update.ack_tick.val
-        << ", pos: " << update.pos.val << ", rot: " << update.rot.val << "}";
+    os << "{ack_tick: " << update.ack_tick
+        << ", pos: " << update.pos
+        << ", rot: " << update.rot
+        << ", gravity: " << update.gravity
+        << ", grounded: " << update.grounded
+        << "}";
     return os;
 }
 

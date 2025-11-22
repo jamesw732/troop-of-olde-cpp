@@ -18,10 +18,10 @@ inline void register_batch_spawn_system(flecs::world& world, Network& network) {
             auto q = world.query<NetworkId, DisplayName, SimPosition>();
             q.each([&spawn_states] (NetworkId& id, DisplayName& name, SimPosition& pos) {
                     // std::cout << "Adding player to spawn_states" << std::endl;
-                    spawn_states.push_back(PlayerSpawnState{id, name, pos});
+                    spawn_states.push_back(PlayerSpawnState{id.id, name.name, pos.val});
                     }
                 );
-            SpawnBatchPacket spawns{local_player_id, spawn_states};
+            SpawnBatchPacket spawns{local_player_id.id, spawn_states};
             // for (PlayerSpawnState spawn_state: spawns.spawn_states) {
             //     std::cout << spawn_state.name.name << std::endl;
             //     std::cout << spawn_state.network_id.id << std::endl;
@@ -48,7 +48,7 @@ inline void register_spawn_broadcast_system(flecs::world& world, Network& networ
                         const SimPosition& pos
             ) {
             // std::cout << "Broadcasting spawn" << '\n';
-            PlayerSpawnPacket spawn_packet{{network_id, name, pos}};
+            PlayerSpawnPacket spawn_packet{{network_id.id, name.name, pos.val}};
             world.query<NetworkId, Connected>()
                 .each([&] (const NetworkId& tgt_network_id, Connected) {
                     if (network_id.id == tgt_network_id.id) {
