@@ -20,6 +20,11 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<NetworkId>();
     entity.add<NeedsSpawnBroadcast>();
 
+    entity.add<PredPosition>();
+    entity.add<PredRotation>();
+    entity.add<PredGravity>();
+    entity.add<PredGrounded>();
+
     entity.add<Gravity>();
     entity.add<Grounded>();
     return entity;
