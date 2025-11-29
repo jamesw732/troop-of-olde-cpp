@@ -3,6 +3,7 @@
 #include "server/components.hpp"
 #include "server/disconnect.hpp"
 #include "server/network.hpp"
+#include "server/mesh_loader.hpp"
 #include "server/movement.hpp"
 #include "server/login.hpp"
 #include "server/packet_handler.hpp"
@@ -22,14 +23,27 @@ int main(void)
     }
     PacketHandler packet_handler{world};
 
+    std::unordered_map<std::string, MeshData> loaded_meshes;
+    loaded_meshes.reserve(128);
+
+    loaded_meshes["sample_world"] = {LoadMesh(MODEL_DIR "sample_world.glb")};
+
+    auto terrain = world.entity("World");
+    terrain.set<Color>(BLUE);
+    terrain.set<ModelType>({"mesh"});
+    terrain.set<MeshData>(loaded_meshes["sample_world"]);
+    terrain.add<SimPosition>();
+    terrain.add<SimRotation>();
+    terrain.add<Scale>();
+    terrain.add<Terrain>();
     // TODO: Load terrain from disk
-    auto floor = world.entity("Floor");
-    floor.set<SimPosition>({});
-    floor.set<SimRotation>({});
-    floor.set<Scale>({{10, 0, 10}});
-    floor.set<Color>(BLUE);
-    floor.set<ModelName>({"3d_quad"});
-    floor.add<Terrain>();
+    // auto floor = world.entity("Floor");
+    // floor.set<SimPosition>({});
+    // floor.set<SimRotation>({});
+    // floor.set<Scale>({{10, 0, 10}});
+    // floor.set<Color>(BLUE);
+    // floor.set<ModelType>({"3d_quad"});
+    // floor.add<Terrain>();
 
     register_components(world);
 

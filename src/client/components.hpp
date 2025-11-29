@@ -52,3 +52,7 @@ struct CamRotation {
 struct CamDistance {
     float val = 10;
 };
+
+struct ModelPointer {
+    Model* model;
+};

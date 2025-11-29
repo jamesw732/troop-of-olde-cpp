@@ -35,7 +35,7 @@ int main(void)
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
 
-    raylib::Font cascadiaMono = raylib::LoadFont(cascadiaMonoPath);
+    Font cascadiaMono = LoadFont(cascadiaMonoPath.c_str());
 
     flecs::world world;
     Network network;
@@ -55,14 +55,32 @@ int main(void)
     register_components(world);
     register_client_components(world);
 
+    std::unordered_map<std::string, Model> loaded_models;
+    loaded_models.reserve(128);
+
+    loaded_models["sample_world"] = LoadModel((MODEL_DIR "sample_world.glb"));
+
+    auto terrain = world.entity("World");
+    terrain.set<Color>(BLUE);
+    terrain.set<ModelType>({"mesh"});
+    terrain.set<ModelPointer>({&loaded_models["sample_world"]});
+    terrain.set<MeshData>({loaded_models["sample_world"].meshes});
+    terrain.add<Scale>();
+    terrain.add<SimPosition>();
+    terrain.add<SimRotation>();
+    terrain.add<RenderPosition>();
+    terrain.add<RenderRotation>();
+    terrain.add<Terrain>();
     // TODO: Load terrain from disk
-    auto floor = world.entity("Floor");
-    floor.set<SimPosition>({});
-    floor.set<SimRotation>({});
-    floor.set<Scale>({{10, 0, 10}});
-    floor.set<Color>(BLUE);
-    floor.set<ModelName>({"3d_quad"});
-    floor.add<Terrain>();
+    // auto floor = world.entity("Floor");
+    // floor.set<SimPosition>({});
+    // floor.set<SimRotation>({});
+    // floor.set<RenderPosition>({});
+    // floor.set<RenderRotation>({});
+    // floor.set<Scale>({{10, 0, 10}});
+    // floor.set<Color>(BLUE);
+    // floor.set<ModelType>({"3d_quad"});
+    // floor.add<Terrain>();
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_recv_system(world);
@@ -74,8 +92,9 @@ int main(void)
     register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world, input_handler);
-    auto render_terrain_sys = register_terrain_render_system(world, camera, ManualPhase);
-    auto render_sys = register_character_render_system(world, camera, ManualPhase);
+    // auto render_terrain_sys = register_terrain_render_system(world, camera, ManualPhase);
+    // auto render_sys = register_character_render_system(world, camera, ManualPhase);
+    auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
     // Main game loop
@@ -96,10 +115,9 @@ int main(void)
             if (IsKeyDown(KEY_A)) key_indicator[1] = 'A';
             if (IsKeyDown(KEY_S)) key_indicator[2] = 'S';
             if (IsKeyDown(KEY_D)) key_indicator[3] = 'D';
-            raylib::DrawTextEx(cascadiaMono, key_indicator, {10, 40}, 20, 2, DARKGRAY);
+            DrawTextEx(cascadiaMono, key_indicator.c_str(), {10, 40}, 20, 2, DARKGRAY);
             DrawFPS(10, 10);
             // Draw each entity in the scene
-            render_terrain_sys.run();
             render_sys.run();
         EndDrawing();
         // Send all messages to server

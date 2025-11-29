@@ -1,15 +1,11 @@
 # Right now:
 
 ## Collision physics
-- Add ground terrain (done)
-- Split up movement input processing from position updates, update a Velocity variable (done)
-- Refactor Rotation components to use a Vector3 val rather than a float for just the y rotation. (done)
-- Write a generic GetRayIntersection function which queries all terrain elements and calls one of the
-various collision functions depending on the model. (done)
-- Test the collision function by shooting a ray downwards, and testing whether it hits floor. (done)
-- Gravity (done)
-- Jumping (done)
-- Terrain collision
+- Fix bugs with server-side meshes:
+  - Seg faulting half the time I run
+  - Mesh collision is wrong, can go off edge while server thinks it's good, sometimes fall through the floor
+- Add generic mesh collision logic
+- Add basic "3d quad" and "cube" models to the model map, and remove ModelType component/handling
 
 # Coming soon:
 

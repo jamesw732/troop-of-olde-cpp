@@ -47,8 +47,12 @@ struct Grounded {
     bool val = false;
 };
 
-struct ModelName {
+struct ModelType {
     std::string name;
+};
+
+struct MeshData {
+    Mesh* mesh;
 };
 
 struct ClientMoveTick {

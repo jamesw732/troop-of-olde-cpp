@@ -38,3 +38,4 @@ add_subdirectory(${RAYLIB_DIR})
 # flecs
 set(FLECS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flecs")
 add_subdirectory(${FLECS_DIR})
+

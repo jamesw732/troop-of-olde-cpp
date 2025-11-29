@@ -21,7 +21,7 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<PrevSimRotation>();
     entity.add<Scale>();
     entity.add<Color>();
-    entity.add<ModelName>();
+    entity.add<ModelType>();
 
     entity.add<Grounded>();
     entity.add<Gravity>();
@@ -47,6 +47,6 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<PrevSimRotation>();
     entity.add<Scale>();
     entity.add<Color>();
-    entity.add<ModelName>();
+    entity.add<ModelType>();
     return entity;
 }

@@ -7,19 +7,19 @@
 
 
 inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
-    if (!e.has<ModelName>()) {
+    if (!e.has<ModelType>()) {
         assert(false);
         return RayCollision(false);
     }
-    if (e.get<ModelName>().name == "3d_quad") {
-        Vector3 pos = e.get<SimPosition>().val;
-        Vector3 rot = e.get<SimRotation>().val;
-        Vector3 scale = e.get<Scale>().val;
-        Matrix m_scale = MatrixScale(scale.x, scale.y, scale.z);
-        Matrix m_rot   = MatrixRotateXYZ((Vector3){rot.x, rot.y, rot.z});
-        Matrix m_trans = MatrixTranslate(pos.x, pos.y, pos.z);
+    Vector3 pos = e.get<SimPosition>().val;
+    Vector3 rot = e.get<SimRotation>().val;
+    Vector3 scale = e.get<Scale>().val;
+    Matrix m_scale = MatrixScale(scale.x, scale.y, scale.z);
+    Matrix m_rot   = MatrixRotateXYZ((Vector3){rot.x, rot.y, rot.z});
+    Matrix m_trans = MatrixTranslate(pos.x, pos.y, pos.z);
 
-        Matrix transform = MatrixMultiply(MatrixMultiply(m_scale, m_rot), m_trans);
+    Matrix transform = MatrixMultiply(MatrixMultiply(m_scale, m_rot), m_trans);
+    if (e.get<ModelType>().name == "3d_quad") {
         Vector3 local_corners[4] = {
             {-0.5f, 0.0f, -0.5f}, // bottom-left
             { 0.5f, 0.0f, -0.5f}, // bottom-right
@@ -32,6 +32,10 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
         }
         return GetRayCollisionQuad(ray, world_corners[0], world_corners[1], world_corners[2], world_corners[3]);
     }
+    if (e.get<ModelType>().name == "mesh") {
+        // Just look at first mesh, may eventually need to use multiple
+        return GetRayCollisionMesh(ray, *e.get<MeshData>().mesh, transform);
+    }
     return RayCollision(false);
 }
 
@@ -41,8 +45,8 @@ inline void process_collision(
     raylib::Vector3& disp,
     bool& grounded)
 {
-    world.query<Terrain, ModelName>()
-        .each([&] (flecs::entity e, Terrain, ModelName model_name) {
+    world.query<Terrain, ModelType>()
+        .each([&] (flecs::entity e, Terrain, ModelType model_name) {
             RayCollision collision = get_ray_collision(Ray{pos, disp.Normalize()}, e);
             if (!collision.hit || collision.distance > disp.Length()) {
                 if (!grounded) {

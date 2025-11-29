@@ -21,18 +21,17 @@ set(SERVER_TEST_DIR ${TEST_DIR}/server)
 # Assets
 # Fonts
 file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
-add_compile_definitions(FONT_DIR="assets/fonts")
+add_compile_definitions(FONT_DIR="assets/fonts/")
+file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+add_compile_definitions(MODEL_DIR="assets/models/")
 
 # External dependencies
 set(FLECS_SHARED OFF CACHE BOOL
     "Do not build shared Flecs library" FORCE)
 add_subdirectory(deps)
 
-add_custom_target(deps
-    DEPENDS raylib flecs
-)
 
-# Libraries
+# PCH
 add_library(pch "${SHARED_DIR}/pch.cpp")
 target_link_libraries(pch PRIVATE
     raylib flecs_static raylib-cpp bitsery dbg
@@ -46,10 +45,6 @@ target_link_libraries(pch-networking PRIVATE
 )
 target_include_directories(pch-networking PRIVATE ${SRC_DIR})
 target_precompile_headers(pch-networking PRIVATE "${SHARED_DIR}/pch-networking.hpp")
-
-# Shared interface
-add_library(shared INTERFACE)
-target_link_libraries(shared INTERFACE dbg)
 
 # Client network static library
 add_library(client-network STATIC ${CMAKE_SOURCE_DIR}/src/client/network.cpp)
@@ -65,13 +60,18 @@ target_link_libraries(server-network PRIVATE
 )
 target_precompile_headers(server-network REUSE_FROM pch-networking)
 
+# Server mesh loader
+add_library(server-meshloader STATIC ${CMAKE_SOURCE_DIR}/src/server/mesh_loader.cpp)
+target_link_libraries(server-meshloader PRIVATE raylib-cpp)
+target_include_directories(server-meshloader PRIVATE "${CMAKE_SOURCE_DIR}/deps/raylib/src")
+
 # Executables
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib flecs_static
     raylib-cpp bitsery dbg
-    shared client-network
+    client-network
 )
 link_platform_libs(client)
 target_precompile_headers(client REUSE_FROM pch)
@@ -81,7 +81,7 @@ add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib flecs_static
     raylib-cpp bitsery dbg
-    shared server-network
+    server-network server-meshloader
 )
 link_platform_libs(server)
 target_precompile_headers(server REUSE_FROM pch)
@@ -98,7 +98,7 @@ foreach(TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
         raylib-cpp bitsery
-        shared client-network
+        client-network
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -115,7 +115,7 @@ foreach(TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
         raylib-cpp bitsery
-        shared server-network
+        server-network server-meshloader
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_target_properties(${TEST_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
