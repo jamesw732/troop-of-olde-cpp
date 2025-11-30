@@ -51,8 +51,8 @@ struct ModelType {
     std::string name;
 };
 
-struct MeshData {
-    Mesh* mesh;
+struct ModelPointer {
+    Model* model;
 };
 
 struct ClientMoveTick {

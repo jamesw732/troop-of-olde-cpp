@@ -64,7 +64,6 @@ int main(void)
     terrain.set<Color>(BLUE);
     terrain.set<ModelType>({"mesh"});
     terrain.set<ModelPointer>({&loaded_models["sample_world"]});
-    terrain.set<MeshData>({loaded_models["sample_world"].meshes});
     terrain.add<Scale>();
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();

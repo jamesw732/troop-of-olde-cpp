@@ -34,7 +34,7 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
     }
     if (e.get<ModelType>().name == "mesh") {
         // Just look at first mesh, may eventually need to use multiple
-        return GetRayCollisionMesh(ray, *e.get<MeshData>().mesh, transform);
+        return GetRayCollisionMesh(ray, *e.get<ModelPointer>().model->meshes, transform);
     }
     return RayCollision(false);
 }

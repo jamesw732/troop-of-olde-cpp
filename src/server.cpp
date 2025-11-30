@@ -23,15 +23,16 @@ int main(void)
     }
     PacketHandler packet_handler{world};
 
-    std::unordered_map<std::string, MeshData> loaded_meshes;
+    std::unordered_map<std::string, Model> loaded_meshes;
     loaded_meshes.reserve(128);
 
-    loaded_meshes["sample_world"] = {LoadMesh(MODEL_DIR "sample_world.glb")};
+    Model world_model = LoadServerModel(MODEL_DIR "sample_world.glb");
+    loaded_meshes["sample_world"] = world_model;
 
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
     terrain.set<ModelType>({"mesh"});
-    terrain.set<MeshData>(loaded_meshes["sample_world"]);
+    terrain.set<ModelPointer>({&world_model});
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();
     terrain.add<Scale>();
