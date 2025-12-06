@@ -43,6 +43,6 @@ inline void tick_movement(
     update_gravity(gravity, grounded);
     raylib::Vector3 disp = process_movement_input(input, rot, gravity, grounded);
     disp.y += gravity;
-    process_collision(world, pos, disp, grounded);
+    process_feet_collision(world, pos, disp, grounded);
     pos += disp;
 }

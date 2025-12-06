@@ -39,7 +39,7 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
     return RayCollision(false);
 }
 
-inline void process_collision(
+inline void process_feet_collision(
     flecs::world& world,
     const raylib::Vector3& pos,
     raylib::Vector3& disp,
@@ -48,22 +48,45 @@ inline void process_collision(
     world.query<Terrain, ModelType>()
         .each([&] (flecs::entity e, Terrain, ModelType model_name) {
             RayCollision collision = get_ray_collision(Ray{pos, disp.Normalize()}, e);
-            if (!collision.hit || collision.distance > disp.Length()) {
-                if (!grounded) {
+            Vector3 normal = collision.normal;
+            float collision_dist = collision.distance;
+            float disp_dist = Vector3Length(disp);
+            std::cout << disp_dist << "\n";
+            if (collision.hit && collision_dist < disp_dist) {
+                if (Vector3Normalize(normal).y <= 0.2) {
+                    // Walking into a wall
+                    Vector3 direction = Vector3Normalize({normal.y, 0, -normal.x});
+                    float dot = Vector3DotProduct(direction, Vector3Normalize(disp));
+                    disp = Vector3Scale(direction, dot * disp_dist);
+                    grounded = true;
                     return;
                 }
-                // If no collision from moving, check if we're still close to ground
-                collision = get_ray_collision(Ray{pos, {0, -1, 0}}, e);
-                if (!collision.hit || collision.distance > 0.2) {
-                    grounded = false;
+                if (!grounded) {
+                    // Landing
+                    disp = Vector3Subtract(collision.point, pos);
+                    disp -= disp.Normalize() * 0.01;
+                    grounded = true;
+                    return;
                 }
+                // Walking up a slope
+                Vector3 direction = Vector3Normalize({
+                    disp.x * normal.y,
+                   -disp.z * normal.z - disp.x * normal.x,
+                    disp.z * normal.y
+                });
+                disp = Vector3Scale(direction, disp_dist);
+                std::cout << Vector3Length(disp) << "\n";
                 return;
             }
             if (!grounded) {
-                disp = Vector3Subtract(collision.point, pos);
-                disp -= disp.Normalize() * 0.01;
-                grounded = true;
+                return;
             }
+            // If velocity doesn't collide, look below feet
+            collision = get_ray_collision(Ray{pos, {0, -1, 0}}, e);
+            if (!collision.hit || collision.distance > 0.2) {
+                grounded = false;
+            }
+            return;
         }
     );
 }
