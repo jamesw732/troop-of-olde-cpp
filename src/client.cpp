@@ -18,8 +18,9 @@
 #include "shared/util.hpp"
 
 
-int main(void)
+int main()
 {
+    int const targetFPS = 60;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
     // Initialize window attributes
@@ -29,18 +30,18 @@ int main(void)
 
     // Initialize camera attributes
     raylib::Camera3D camera;
-    camera.position = raylib::Vector3(0.0f, 10.0f, 10.0f);
-    camera.target = raylib::Vector3(0.0f, 0.0f, 0.0f);      // Camera looking at point
-    camera.up = raylib::Vector3(0.0f, 1.0f, 0.0f);
-    camera.fovy = 45.0f;                                // Camera field-of-view Y
+    camera.position = raylib::Vector3(0.0F, 10.0F, 10.0F);
+    camera.target = raylib::Vector3(0.0F, 0.0F, 0.0F);      // Camera looking at point
+    camera.up = raylib::Vector3(0.0F, 1.0F, 0.0F);
+    camera.fovy = 45.0F;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
 
-    Font cascadiaMono = LoadFont(cascadiaMonoPath.c_str());
+    const Font cascadiaMono = LoadFont(cascadiaMonoPath.c_str());
 
     flecs::world world;
     Network network;
     network.connect();
-    ClientLoginPacket login{{"Player"}, {0, 1, 0}, {0, 0, 0}};
+    const ClientLoginPacket login{.name={"Player"}, .pos={0, 1, 0}, .rot={0, 0, 0}};
     auto [buffer, size] = serialize(login);
     network.queue_data_reliable(buffer, size);
     network.send_network_buffer();
@@ -50,7 +51,7 @@ int main(void)
     InputHandler input_handler;
     InputBuffer input_buffer;
     uint16_t movement_tick = 0;
-    float dt;
+    float dt = 0;
 
     register_components(world);
     register_client_components(world);
