@@ -71,6 +71,7 @@ int main()
     terrain.add<RenderPosition>();
     terrain.add<RenderRotation>();
     terrain.add<Terrain>();
+    terrain.set<Scale>({{10, 10, 10}});
     // TODO: Load terrain from disk
     // auto floor = world.entity("Floor");
     // floor.set<SimPosition>({});

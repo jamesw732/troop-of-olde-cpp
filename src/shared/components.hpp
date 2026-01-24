@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <string>
 
-#include "Vector3.hpp"
+#include "raylib.h"
+#include "raylib-cpp.hpp"
+
 #include "network_components.hpp"
 #include "raylib-util.hpp"
 
@@ -28,11 +30,11 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
 }
 
 struct SimPosition {
-    raylib::Vector3 val{};
+    raylib::Vector3 val;
 };
 
 struct SimRotation {
-    raylib::Vector3 val{};
+    raylib::Vector3 val;
 };
 
 struct Scale {

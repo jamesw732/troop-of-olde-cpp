@@ -1,7 +1,7 @@
 @echo off
 SET SCRIPT_DIR=%~dp0
 cd /d "%SCRIPT_DIR%\build"
-cmake -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe -DCMAKE_BUILD_TYPE=Debug ..
+cmake -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 mingw32-make
 
 start cmd /k server.exe

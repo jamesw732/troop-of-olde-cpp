@@ -14,7 +14,7 @@
 #include "shared/serialize.hpp"
 
 
-int main(void)
+int main()
 {
     flecs::world world;
     Network network(world);
@@ -37,6 +37,8 @@ int main(void)
     terrain.add<SimRotation>();
     terrain.add<Scale>();
     terrain.add<Terrain>();
+    terrain.set<Scale>({{10, 10, 10}});
+
     // TODO: Load terrain from disk
     // auto floor = world.entity("Floor");
     // floor.set<SimPosition>({});

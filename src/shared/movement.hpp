@@ -1,11 +1,12 @@
 #pragma once
 #include <cmath>
 
+#include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "components.hpp"
 #include "const.hpp"
 #include "physics.hpp"
+#include "components.hpp"
 #include "util.hpp"
 
 
@@ -34,15 +35,19 @@ inline raylib::Vector3 process_movement_input(
 
 inline void tick_movement(
     flecs::world& world,
-    raylib::Vector3& pos,
+    Vector3& pos,
     float& rot,
     const MovementInput& input,
     float& gravity,
     bool& grounded)
 {
     update_gravity(gravity, grounded);
-    raylib::Vector3 disp = process_movement_input(input, rot, gravity, grounded);
+    Vector3 disp = process_movement_input(input, rot, gravity, grounded);
     disp.y += gravity;
-    process_feet_collision(world, pos, disp, grounded);
-    pos += disp;
+    Vector3 collision_disp = process_collision(world, pos, disp, Vector3Length(disp));
+    check_beneath(world, pos, grounded);
+    pos = Vector3Add(pos, collision_disp);
+    if (!Vector3Equals(disp, collision_disp)) {
+        grounded = true;
+    }
 }
