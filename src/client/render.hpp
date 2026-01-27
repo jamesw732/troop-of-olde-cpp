@@ -83,7 +83,6 @@ inline flecs::system register_render_system(
                         );
                     }
                     else if (model_type.name == "mesh") {
-                        std::cout << "Rendering mesh\n";
                         ModelPointer model = e.get<ModelPointer>();
                         DrawModel(*model.model, {}, 1, color);
                         DrawMeshWire(*model.model->meshes, {}, BLACK);
