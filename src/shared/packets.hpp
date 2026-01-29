@@ -29,8 +29,8 @@ struct MovementInputPacket {
 struct ClientLoginPacket {
     static constexpr PacketType id = PacketType::ClientLoginPacket;
     std::string name;
-    raylib::Vector3 pos;
-    raylib::Vector3 rot;
+    Vector3 pos;
+    Vector3 rot;
 };
 
 struct SpawnBatchPacket {

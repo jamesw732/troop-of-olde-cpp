@@ -15,7 +15,8 @@
 #include "bitsery/traits/vector.h"
 #include "bitsery/traits/string.h"
 #include "bitsery/traits/array.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "external/cgltf.h"
 #include "flecs.h"
 
 #ifdef DEBUG

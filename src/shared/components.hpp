@@ -4,7 +4,6 @@
 #include <string>
 
 #include "raylib.h"
-#include "raylib-cpp.hpp"
 
 #include "network_components.hpp"
 #include "raylib-util.hpp"
@@ -30,15 +29,15 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
 }
 
 struct SimPosition {
-    raylib::Vector3 val;
+    Vector3 val;
 };
 
 struct SimRotation {
-    raylib::Vector3 val;
+    Vector3 val;
 };
 
 struct Scale {
-    raylib::Vector3 val{1, 1, 1};
+    Vector3 val{1, 1, 1};
 };
 
 struct Gravity {
@@ -64,15 +63,15 @@ struct ClientMoveTick {
 struct PlayerSpawnState {
     uint32_t network_id;
     std::string name;
-    raylib::Vector3 pos;
-    raylib::Vector3 rot;
+    Vector3 pos;
+    Vector3 rot;
 };
 
 struct MovementUpdate {
     uint32_t network_id;
     uint16_t ack_tick;
-    raylib::Vector3 pos;
-    raylib::Vector3 rot;
+    Vector3 pos;
+    Vector3 rot;
     float gravity;
     bool grounded;
 };

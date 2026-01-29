@@ -3,7 +3,8 @@
 #include <limits>
 
 #include "flecs.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "raymath.h"
 
 #include "components.hpp"
 #include "const.hpp"
@@ -85,7 +86,7 @@ inline Vector3 get_slope_projection(
 
 inline Vector3 process_collision(
     flecs::world& world,
-    const raylib::Vector3& position,
+    const Vector3& position,
     const Vector3& direction,
     const float distance
 )
@@ -109,7 +110,7 @@ inline Vector3 process_collision(
 
 inline void check_beneath(
     flecs::world& world,
-    const raylib::Vector3& pos,
+    const Vector3& pos,
     bool& grounded)
 {
     RayCollision closest_collision{};

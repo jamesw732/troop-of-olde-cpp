@@ -3,26 +3,26 @@
 #include <unordered_map>
 
 #include "flecs.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
 
 #include "../shared/components.hpp"
 
 struct LocalPlayer {};
 
 struct PrevSimPosition {
-    raylib::Vector3 val{};
+    Vector3 val{};
 };
 
 struct RenderPosition {
-    raylib::Vector3 val{};
+    Vector3 val{};
 };
 
 struct RenderRotation {
-    raylib::Vector3 val{};
+    Vector3 val{};
 };
 
 struct PrevSimRotation {
-    raylib::Vector3 val{};
+    Vector3 val{};
 };
 
 struct LerpTimer {
@@ -39,7 +39,7 @@ struct NetworkMap {
 
 struct CameraInput {
     int8_t rot_x = 0;
-    raylib::Vector2 mouse_rot{};
+    Vector2 mouse_rot{};
     bool reset = false;
     float scroll = 0;
 };

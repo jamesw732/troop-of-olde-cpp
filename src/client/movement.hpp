@@ -3,7 +3,8 @@
 
 #include "camera.hpp"
 #include "flecs.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "raymath.h"
 
 #include "input.hpp"
 #include "components.hpp"

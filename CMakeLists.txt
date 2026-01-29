@@ -32,16 +32,14 @@ file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/asse
 # PCH
 add_library(pch "${SHARED_DIR}/pch.cpp")
 target_link_libraries(pch PRIVATE
-    raylib flecs_static raylib-cpp bitsery dbg
+    raylib flecs_static bitsery dbg
 )
-target_include_directories(pch PRIVATE ${SRC_DIR})
 target_precompile_headers(pch PRIVATE "${SHARED_DIR}/pch.hpp")
 
 add_library(pch-networking "${SHARED_DIR}/pch-networking.cpp")
 target_link_libraries(pch-networking PRIVATE
     flecs_static enet bitsery dbg
 )
-target_include_directories(pch-networking PRIVATE ${SRC_DIR})
 target_precompile_headers(pch-networking PRIVATE "${SHARED_DIR}/pch-networking.hpp")
 
 # Client network static library
@@ -60,15 +58,14 @@ target_precompile_headers(server-network REUSE_FROM pch-networking)
 
 # Server mesh loader
 add_library(server-meshloader STATIC ${CMAKE_SOURCE_DIR}/src/server/mesh_loader.cpp)
-target_link_libraries(server-meshloader PRIVATE raylib-cpp)
-target_include_directories(server-meshloader PRIVATE "${CMAKE_SOURCE_DIR}/deps/raylib/src")
+target_link_libraries(server-meshloader PRIVATE raylib)
 
 # Executables
 # Create client executable, link with dependencies
 add_executable(client src/client.cpp)
 target_link_libraries(client PRIVATE
     raylib flecs_static
-    raylib-cpp bitsery dbg
+    bitsery dbg
     client-network
 )
 link_platform_libs(client)
@@ -79,7 +76,7 @@ target_compile_definitions(client PRIVATE FONT_DIR="assets/fonts/" MODEL_DIR="as
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
     raylib flecs_static
-    raylib-cpp bitsery dbg
+    bitsery dbg
     server-network server-meshloader
 )
 link_platform_libs(server)
@@ -99,7 +96,7 @@ foreach(TEST_FILE ${TEST_FILES})
     add_executable(${TEST_NAME} ${TEST_FILE})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
-        raylib-cpp bitsery
+        bitsery
         client-network
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
@@ -116,7 +113,7 @@ foreach(TEST_FILE ${TEST_FILES})
     add_executable(${TEST_NAME} ${TEST_FILE})
     target_link_libraries(${TEST_NAME}
         raylib flecs_static
-        raylib-cpp bitsery
+        bitsery
         server-network server-meshloader
     )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})

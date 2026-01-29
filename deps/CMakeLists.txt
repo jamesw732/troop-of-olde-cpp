@@ -1,11 +1,3 @@
-# raylib-cpp
-set(RAYLIB-CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/raylib-cpp")
-add_library(raylib-cpp INTERFACE)
-target_include_directories(raylib-cpp
-    INTERFACE
-    ${RAYLIB-CPP_DIR}/include
-)
-
 # ENet
 set(ENET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/enet")
 add_library(enet INTERFACE)

@@ -3,7 +3,7 @@
 #include <deque>
 #include <iostream>
 
-#include "raylib-cpp.hpp"
+#include "raylib.h"
 
 #include "components.hpp"
 #include "../shared/components.hpp"
@@ -32,7 +32,7 @@ struct InputHandler {
             input.rot_y--;
         }
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
-            input.mouse_rot_y = raylib::Mouse::GetDelta().x;
+            input.mouse_rot_y = GetMouseDelta().x;
         }
         input.jump = IsKeyDown(KEY_SPACE);
         return input;
@@ -47,11 +47,11 @@ struct InputHandler {
             input.rot_x--;
         }
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
-            input.mouse_rot.x = raylib::Mouse::GetDelta().y;
+            input.mouse_rot.x = GetMouseDelta().y;
         }
         else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-            input.mouse_rot.x = raylib::Mouse::GetDelta().y;
-            input.mouse_rot.y = raylib::Mouse::GetDelta().x;
+            input.mouse_rot.x = GetMouseDelta().y;
+            input.mouse_rot.y = GetMouseDelta().x;
         }
         else {
             input.reset = true;

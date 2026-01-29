@@ -1,10 +1,9 @@
 # Right now:
 - Physics is not 100% correct:
-    - Character shakes
-    - Managed to clip through ground once
-
-- Consider cleaning up physics.hpp to use raylib-cpp types.
-This will require using raylib::Ray, should be reasonable.
+    - Character shakes when touching the ground - Client and server might disagree on
+        physics slightly? 
+    - Managed to clip through ground several times. Seems to be related to server, if one
+        client passes through ground at the start then every client will. 
 
 - Do the network data logging thing
 

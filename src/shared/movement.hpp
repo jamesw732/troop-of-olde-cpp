@@ -2,7 +2,7 @@
 #include <cmath>
 
 #include "raylib.h"
-#include "raylib-cpp.hpp"
+#include "raymath.h"
 
 #include "const.hpp"
 #include "physics.hpp"
@@ -10,16 +10,16 @@
 #include "util.hpp"
 
 
-inline raylib::Vector3 process_movement_input(
+inline Vector3 process_movement_input(
     const MovementInput& input,
     float& rot,
     float& gravity,
     bool& grounded)
 {
-    raylib::Vector3 disp{(float) input.x, 0, (float) input.z};
-    disp = disp.Normalize();
+    Vector3 disp{(float) input.x, 0, (float) input.z};
+    disp = Vector3Normalize(disp);
     disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
-    disp = disp * 0.25;
+    disp = Vector3Scale(disp, 0.25);
 
     rot += input.rot_y * 5;
     rot -= input.mouse_rot_y;

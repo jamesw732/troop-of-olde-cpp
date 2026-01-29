@@ -3,6 +3,7 @@
 #include <tuple>
 
 #include "flecs.h"
+#include "raylib.h"
 
 #include "const.hpp"
 #include "components.hpp"
@@ -78,7 +79,7 @@ void serialize(S& s, DisconnectPacket& dc_packet) {
 
 // Primitives
 template <typename S>
-void serialize (S& s, raylib::Vector3& v) {
+void serialize (S& s, Vector3& v) {
     s.value4b(v.x);
     s.value4b(v.y);
     s.value4b(v.z);

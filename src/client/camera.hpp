@@ -2,7 +2,8 @@
 #include <cmath>
 
 #include "flecs.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "raymath.h"
 
 #include "../shared/const.hpp"
 #include "components.hpp"
@@ -34,7 +35,7 @@ inline void register_camera_input_system(flecs::world& world, InputHandler& inpu
 }
 
 // Updates the camera's position from character's rotation values
-inline void update_camera(flecs::world& world, raylib::Camera3D& camera) {
+inline void update_camera(flecs::world& world, Camera3D& camera) {
     auto local_player = world.lookup("LocalPlayer");
     if (!local_player.has<RenderPosition>() || !local_player.has<CamRotation>()) {
         return;
@@ -43,13 +44,14 @@ inline void update_camera(flecs::world& world, raylib::Camera3D& camera) {
     CamDistance cam_distance = local_player.get<CamDistance>();
     float y_rot = (local_player.get<RenderRotation>().val.y + cam_rotation.y) * PI / 180;
     float polar_rot = (90 - cam_rotation.x) * PI / 180;
-    raylib::Vector3 sphere_coords{
+    Vector3 sphere_coords{
         sin(polar_rot) * sin(y_rot),
         cos(polar_rot),
         sin(polar_rot) * cos(y_rot)
     };
-    // TODO: Variable camera distance from player
-    camera.position = local_player.get<RenderPosition>().val
-        + sphere_coords * cam_distance.val;
+    camera.position = Vector3Add(
+        local_player.get<RenderPosition>().val,
+        Vector3Scale(sphere_coords, cam_distance.val)
+    );
     camera.target = local_player.get<RenderPosition>().val;
 }

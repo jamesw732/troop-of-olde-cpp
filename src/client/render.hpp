@@ -2,7 +2,8 @@
 #include <iostream>
 
 #include "flecs.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "rlgl.h"
 
 #include "../shared/components.hpp"
 #include "components.hpp"
@@ -44,7 +45,7 @@ inline void DrawMeshWire(const Mesh& mesh, const Vector3& pos, const Color& colo
 
 inline flecs::system register_render_system(
     flecs::world& world,
-    raylib::Camera3D& camera,
+    Camera3D& camera,
     flecs::entity phase)
 {
     return world.system<RenderPosition, RenderRotation, Scale, Color, ModelType>()

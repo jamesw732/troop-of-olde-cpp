@@ -1,4 +1,6 @@
 #pragma once
+#include "raylib.h"
+
 #include "../shared/components.hpp"
 
 struct Connected {};
@@ -6,11 +8,11 @@ struct NeedsSpawnBatch {};
 struct NeedsSpawnBroadcast {};
 
 struct PredPosition {
-    raylib::Vector3 val;
+    Vector3 val;
 };
 
 struct PredRotation {
-    raylib::Vector3 val;
+    Vector3 val;
 };
 
 struct PredGravity {

@@ -29,10 +29,10 @@ int main()
     InitWindow(screenWidth, screenHeight, "Troop of Olde");
 
     // Initialize camera attributes
-    raylib::Camera3D camera;
-    camera.position = raylib::Vector3(0.0F, 10.0F, 10.0F);
-    camera.target = raylib::Vector3(0.0F, 0.0F, 0.0F);      // Camera looking at point
-    camera.up = raylib::Vector3(0.0F, 1.0F, 0.0F);
+    Camera3D camera;
+    camera.position = Vector3{0.0F, 10.0F, 10.0F};
+    camera.target = Vector3{0.0F, 0.0F, 0.0F};      // Camera looking at point
+    camera.up = Vector3{0.0F, 1.0F, 0.0F};
     camera.fovy = 45.0F;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
 
