@@ -18,17 +18,15 @@ set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 set(CLIENT_TEST_DIR ${TEST_DIR}/client)
 set(SERVER_TEST_DIR ${TEST_DIR}/server)
 
-# Assets
-# Fonts
-file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
-add_compile_definitions(FONT_DIR="assets/fonts/")
-file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
-add_compile_definitions(MODEL_DIR="assets/models/")
 
 # External dependencies
 set(FLECS_SHARED OFF CACHE BOOL
     "Do not build shared Flecs library" FORCE)
 add_subdirectory(deps)
+
+# Copy asset directories to build path
+file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
+file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
 
 # PCH
@@ -75,6 +73,7 @@ target_link_libraries(client PRIVATE
 )
 link_platform_libs(client)
 target_precompile_headers(client REUSE_FROM pch)
+target_compile_definitions(client PRIVATE FONT_DIR="assets/fonts/" MODEL_DIR="assets/models/")
 
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
@@ -85,6 +84,9 @@ target_link_libraries(server PRIVATE
 )
 link_platform_libs(server)
 target_precompile_headers(server REUSE_FROM pch)
+# Assets
+file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+target_compile_definitions(server PRIVATE MODEL_DIR="assets/models/")
 
 # Tests
 enable_testing()

@@ -2,7 +2,7 @@
 # This script generates a tmux environment configured for developing in vim on WSL.
 # Modify the BUILD_DIR variable to point at your build location.
 
-BUILD_DIR="build-win"
+BUILD_DIR="build"
 
 # ------------------------- Modify above this line -------------------------------------
 
