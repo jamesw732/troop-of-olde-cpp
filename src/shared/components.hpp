@@ -29,11 +29,11 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
 }
 
 struct SimPosition {
-    Vector3 val;
+    Vector3 val{0};
 };
 
 struct SimRotation {
-    Vector3 val;
+    Vector3 val{0};
 };
 
 struct Scale {

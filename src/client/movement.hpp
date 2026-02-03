@@ -17,12 +17,15 @@
 #include "../shared/serialize.hpp"
 #include "../shared/util.hpp"
 
+/* #define DISABLE_SERVER */
+
 
 inline void register_movement_recv_system(flecs::world& world) {
     world.system<MovementUpdateBatchPacket>()
         .interval(MOVE_UPDATE_RATE)
         .each([&] (MovementUpdateBatchPacket& batch) {
             // TODO: introduce more lag for remote players to smooth movement
+#ifndef DISABLE_SERVER
             auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
             for (MovementUpdate move_update: batch.move_updates) {
                 auto netid_entity = netid_to_entity.find(move_update.network_id);
@@ -39,6 +42,7 @@ inline void register_movement_recv_system(flecs::world& world) {
                 e.set<Gravity>({move_update.gravity});
                 e.set<Grounded>({move_update.grounded});
             }
+#endif
         }
     );
 }
@@ -60,9 +64,11 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             }
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
+#ifndef DISABLE_SERVER
             for (MovementInput input: input_buffer.buffer) {
                 tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
             }
+#endif
         }
     );
 }
@@ -107,6 +113,13 @@ inline void register_movement_transmit_system(flecs::world& world, Network& netw
             input_data.tick = tick;
             for (MovementInput input: input_buffer.buffer) {
                 input_data.inputs.push_back(input);
+            }
+            // TODO: test this in a high-latency setting
+            if (input_buffer.buffer.size() >= MAX_INPUT_BUFFER) {
+                int diff = input_buffer.buffer.size() - MAX_INPUT_BUFFER;
+                input_buffer.buffer.erase(input_buffer.buffer.begin(),
+                    input_buffer.buffer.begin() + diff + 1
+                );
             }
             auto [buffer, size] = serialize(input_data);
             network.queue_data_unreliable(buffer, size);

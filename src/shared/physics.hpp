@@ -1,5 +1,4 @@
 #pragma once
-#include <algorithm>
 #include <limits>
 
 #include "flecs.h"
@@ -8,9 +7,10 @@
 
 #include "components.hpp"
 #include "const.hpp"
+#include "raylib-util.hpp"
 
 /*
- * Check whether a ray collides with an entity's model, in simulation space
+ * Get collision between a ray and a single mesh, in simulation space
  */
 inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
     if (!e.has<ModelType>()) {
@@ -21,10 +21,12 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
     Vector3 const rot = e.get<SimRotation>().val;
     Vector3 const scale = e.get<Scale>().val;
     Matrix const m_scale = MatrixScale(scale.x, scale.y, scale.z);
-    Matrix const m_rot   = MatrixRotateXYZ((Vector3){rot.x, rot.y, rot.z});
+    Matrix const m_rot   = MatrixRotateXYZ({rot.x, rot.y, rot.z});
     Matrix const m_trans = MatrixTranslate(pos.x, pos.y, pos.z);
 
     Matrix const transform = MatrixMultiply(MatrixMultiply(m_scale, m_rot), m_trans);
+    // TODO: Rather than treat this as a separate case, just store a 3d quad as a Mesh
+    // and use GetRayCollisionMesh
     if (e.get<ModelType>().name == "3d_quad") {
         Vector3 const local_corners[4] = {
             {-0.5F, 0.0F, -0.5F}, // bottom-left
@@ -48,18 +50,21 @@ inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
 inline RayCollision find_closest_collision(
     flecs::world& world,
     const Vector3& pos,
-    const Vector3& disp)
+    const Vector3& dir)
  {
-    RayCollision closest_collision{};
-    closest_collision.distance = std::numeric_limits<float>::max();
+    RayCollision closest_collision{
+        .hit=false,
+        .distance=std::numeric_limits<float>::max(),
+        .point={0, 0, 0},
+        .normal={0, 1, 0}
+    };
     // Find the closest collision, if there are multiple
     world.query<Terrain, ModelType>()
         .each([&] (flecs::entity e, const Terrain&, const ModelType&) {
-            const RayCollision collision = get_ray_collision(Ray{pos, Vector3Normalize(disp)}, e);
-            if(!collision.hit) return;
-            if (closest_collision.distance > collision.distance) {
-                closest_collision = collision;
-            }
+            Ray ray{pos, Vector3Normalize(dir)};
+            const RayCollision collision = get_ray_collision(ray, e);
+            if(!collision.hit || closest_collision.distance <= collision.distance) return;
+            closest_collision = collision;
         });
     return closest_collision;
 }
@@ -69,7 +74,7 @@ inline Vector3 get_wall_projection(
     const Vector3& normal
 )
 {
-    const Vector3& ret{normal.y, 0, -normal.x};
+    const Vector3 ret{normal.z, 0, -normal.x};
     return Vector3Normalize(Vector3Scale(ret, Vector3DotProduct(ret, direction)));
 }
 
@@ -88,15 +93,25 @@ inline Vector3 process_collision(
     flecs::world& world,
     const Vector3& position,
     const Vector3& direction,
-    const float distance
+    const float distance,
+    int depth = 1,
+    int max_depth = 3
 )
 {
+    if (depth > max_depth) {
+        return Vector3{};
+    }
     RayCollision closest_collision = find_closest_collision(world, position, direction);
     if (!closest_collision.hit || closest_collision.distance > distance) {
         return Vector3Scale(Vector3Normalize(direction), distance);
     }
-    Vector3 new_point = Vector3Subtract(closest_collision.point, Vector3Scale(Vector3Normalize(direction), 0.1));
-    float new_distance = distance - closest_collision.distance;
+    Vector3 cur_displacement = Vector3Scale(Vector3Normalize(direction), closest_collision.distance);
+    // Add a small damping factor with constant magnitude
+    Vector3 damping = Vector3Scale(Vector3Normalize(direction), 0.01);
+    cur_displacement = Vector3Subtract(cur_displacement, damping);
+    Vector3 new_point = Vector3Add(position, cur_displacement);
+
+    float rem_distance = distance - closest_collision.distance;
     Vector3 new_direction;
     if (Vector3Normalize(closest_collision.normal).y <= 0.2) {
         new_direction = get_wall_projection(direction, closest_collision.normal);
@@ -104,8 +119,9 @@ inline Vector3 process_collision(
     else {
         new_direction = get_slope_projection(direction, closest_collision.normal);
     }
-    Vector3 new_displacement = Vector3Subtract(new_point, position);
-    return Vector3Add(new_displacement, process_collision(world, new_point, new_direction, new_distance));
+    return Vector3Add(
+        cur_displacement,
+        process_collision(world, new_point, new_direction, rem_distance, depth + 1));
 }
 
 inline void check_beneath(
@@ -113,18 +129,8 @@ inline void check_beneath(
     const Vector3& pos,
     bool& grounded)
 {
-    RayCollision closest_collision{};
-    closest_collision.distance = std::numeric_limits<float>::max();
-    // Find the closest collision, if there are multiple
-    world.query<Terrain, ModelType>()
-        .each([&] (flecs::entity e, const Terrain&, const ModelType&) {
-            const RayCollision collision = get_ray_collision(Ray{pos, {0, -1, 0}}, e);
-            if(!collision.hit) return;
-            if (closest_collision.distance > collision.distance) {
-                closest_collision = collision;
-            }
-        });
-    if (!closest_collision.hit || closest_collision.distance > 0.1) {
+    RayCollision closest_collision = find_closest_collision(world, pos, {0, -1, 0});
+    if (!closest_collision.hit || closest_collision.distance > 0.01) {
         grounded = false;
     }
     else {

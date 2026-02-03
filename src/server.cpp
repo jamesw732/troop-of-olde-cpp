@@ -27,8 +27,9 @@ int main()
     loaded_meshes.reserve(128);
 
     Model world_model = LoadServerModel(MODEL_DIR "sample_world.glb");
-    loaded_meshes["sample_world"] = world_model;
+    /* print_mesh_vertices(*world_model.meshes); */
 
+    loaded_meshes["sample_world"] = world_model;
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
     terrain.set<ModelType>({"mesh"});
@@ -38,15 +39,6 @@ int main()
     terrain.add<Scale>();
     terrain.add<Terrain>();
     terrain.set<Scale>({{10, 10, 10}});
-
-    // TODO: Load terrain from disk
-    // auto floor = world.entity("Floor");
-    // floor.set<SimPosition>({});
-    // floor.set<SimRotation>({});
-    // floor.set<Scale>({{10, 0, 10}});
-    // floor.set<Color>(BLUE);
-    // floor.set<ModelType>({"3d_quad"});
-    // floor.add<Terrain>();
 
     register_components(world);
 

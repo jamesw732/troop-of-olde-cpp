@@ -60,6 +60,7 @@ int main()
     loaded_models.reserve(128);
 
     loaded_models["sample_world"] = LoadModel((MODEL_DIR "sample_world.glb"));
+    /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
@@ -72,16 +73,6 @@ int main()
     terrain.add<RenderRotation>();
     terrain.add<Terrain>();
     terrain.set<Scale>({{10, 10, 10}});
-    // TODO: Load terrain from disk
-    // auto floor = world.entity("Floor");
-    // floor.set<SimPosition>({});
-    // floor.set<SimRotation>({});
-    // floor.set<RenderPosition>({});
-    // floor.set<RenderRotation>({});
-    // floor.set<Scale>({{10, 0, 10}});
-    // floor.set<Color>(BLUE);
-    // floor.set<ModelType>({"3d_quad"});
-    // floor.add<Terrain>();
 
     auto ManualPhase = world.entity("ManualPhase");
     register_movement_recv_system(world);

@@ -96,7 +96,7 @@ void serialize(S& s, PlayerSpawnState& spawn_state) {
 
 template <typename S>
 void serialize(S& s, std::vector<MovementInput>& v) {
-    s.container(v, 100, [](S& s, MovementInput& input) {
+    s.container(v, MAX_INPUT_BUFFER, [](S& s, MovementInput& input) {
         s.value1b(input.x);
         s.value1b(input.z);
         s.value1b(input.rot_y);
