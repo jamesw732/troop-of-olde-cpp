@@ -10,7 +10,9 @@ struct NetworkImpl;
 
 class Network {
   private:
-      std::unique_ptr<NetworkImpl> impl;
+    std::unique_ptr<NetworkImpl> impl;
+    std::ofstream out_log_file;
+    std::ofstream in_log_file;
   public:
     std::deque<std::vector<uint8_t>> packets;
 
@@ -30,4 +32,8 @@ class Network {
     void process_events();
 
     void disconnect();
+
+    void open_log_files();
+
+    void close_log_files();
 };

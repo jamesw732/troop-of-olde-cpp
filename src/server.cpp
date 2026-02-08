@@ -1,3 +1,6 @@
+#include <atomic>
+#include <csignal>
+
 #include "shared/pch.hpp"
 
 #include "server/components.hpp"
@@ -13,6 +16,13 @@
 #include "shared/register.hpp"
 #include "shared/serialize.hpp"
 
+std::atomic<bool> running{true};
+
+void handle_signal(int signal) {
+    if (signal == SIGINT) {
+        running.store(false);
+    }
+}
 
 int main()
 {
@@ -50,9 +60,10 @@ int main()
     register_spawn_broadcast_system(world, network);
     register_disconnect_system(world, network);
 
+    std::signal(SIGINT, handle_signal);
 
     // Main game loop
-    while (true)
+    while (running.load())
     {
         float dt = GetFrameTime();
         network.process_events();
@@ -60,6 +71,8 @@ int main()
         world.progress(dt);
         network.send_network_buffer();
     }
+    dbg("Stopping server");
+    network.close_log_files();
 
     return 0;
 }

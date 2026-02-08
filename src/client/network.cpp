@@ -11,7 +11,9 @@ struct NetworkImpl {
 };
 
 
-Network::Network() : impl(std::make_unique<NetworkImpl>()) {};
+Network::Network() : impl(std::make_unique<NetworkImpl>()) {
+    open_log_files();
+};
 Network::~Network() = default;
 
 void Network::connect() {
@@ -54,11 +56,13 @@ void Network::connect(std::string host_addr, int host_port) {
 
 void Network::queue_data_unreliable(const Buffer& buffer, const size_t size){
     ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
+    log(out_log_file, buffer, size);
     enet_peer_send(impl->peer, 0, packet);
 }
 
 void Network::queue_data_reliable(const Buffer& buffer, const size_t size){
     ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
+    log(out_log_file, buffer, size);
     enet_peer_send(impl->peer, 1, packet);
 }
 
@@ -76,8 +80,10 @@ void Network::process_events() {
             case ENET_EVENT_TYPE_RECEIVE: {
                 uint8_t* buffer = impl->event.packet->data;
                 size_t size = impl->event.packet->dataLength;
-                std::vector<uint8_t> packet_data(buffer, buffer + size);
+                Buffer packet_data(buffer, buffer + size);
+                // To be handled by PacketHandler
                 packets.push_back(packet_data);
+                log(in_log_file, packet_data, size);
                 break;
             }
             case ENET_EVENT_TYPE_DISCONNECT: {
@@ -108,4 +114,14 @@ void Network::disconnect() {
             }
         }
     }
+}
+
+void Network::open_log_files() {
+    out_log_file.open("client-out.bin", std::ios_base::binary | std::ios_base::app);
+    in_log_file.open("client-in.bin", std::ios_base::binary | std::ios_base::app);
+}
+
+void Network::close_log_files() {
+    in_log_file.close();
+    out_log_file.close();
 }

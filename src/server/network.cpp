@@ -13,7 +13,9 @@ struct NetworkImpl {
     std::unordered_map<NetworkId, ENetPeer*> netid_to_peer;
 };
 
-Network::Network(flecs::world& w) : world(w), impl(std::make_unique<NetworkImpl>()) {};
+Network::Network(flecs::world& w) : world(w), impl(std::make_unique<NetworkImpl>()) {
+    open_log_files();
+};
 Network::~Network() = default;
 
 bool Network::create() {
@@ -54,14 +56,16 @@ void Network::process_events() {
             }
 
             case ENET_EVENT_TYPE_RECEIVE: {
-                // handle_packet();
                 auto id = cast_raw_id(impl->event.peer->data);
                 flecs::entity entity(world, id);
                 uint8_t* buffer = impl->event.packet->data;
                 size_t size = impl->event.packet->dataLength;
-                std::vector<uint8_t> packet_data(buffer, buffer + size);
+                Buffer packet_data(buffer, buffer + size);
                 RecvPacket recv_packet{entity, packet_data};
+                // To be handled by PacketHandler
                 packets.push_back(recv_packet);
+                dbg("Received event");
+                log(in_log_file, packet_data, size);
                 break;
             }
 
@@ -106,6 +110,7 @@ void Network::queue_data_unreliable(const NetworkId& network_id, const Buffer& b
     ENetPeer* peer = netid_peer->second;
     ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
     enet_peer_send(peer, 0, packet);
+    log(out_log_file, buffer, size);
 }
 
 void Network::queue_data_reliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
@@ -117,10 +122,21 @@ void Network::queue_data_reliable(const NetworkId& network_id, const Buffer& buf
     ENetPeer* peer = netid_peer->second;
     ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(peer, 1, packet);
+    log(out_log_file, buffer, size);
 }
 
 void Network::send_network_buffer() {
     enet_host_flush(impl->server);
+}
+
+void Network::open_log_files() {
+    out_log_file.open("server-out.bin", std::ios_base::binary | std::ios_base::app);
+    in_log_file.open("server-in.bin", std::ios_base::binary | std::ios_base::app);
+}
+
+void Network::close_log_files() {
+    out_log_file.close();
+    in_log_file.close();
 }
 
 ecs_entity_t Network::cast_raw_id(void* raw_id) {

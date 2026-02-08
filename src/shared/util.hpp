@@ -2,6 +2,7 @@
 #include <cassert>
 #include <string>
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -37,4 +38,11 @@ inline float angle_slerp(float a0, float a1, float t) {
     assert(a1 - a0 + 540 > 0);
     float diff = fmodf(a1 - a0 + 540, 360) - 180;
     return fmodf(a0 + diff * t, 360);
+}
+
+inline void log(std::ofstream& log_file, const Buffer& buffer, const size_t size) {
+    log_file << size;
+    for (uint8_t byte: buffer) {
+        log_file << byte;
+    }
 }

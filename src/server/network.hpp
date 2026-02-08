@@ -24,6 +24,8 @@ class Network {
     uint32_t network_id_counter = 0;
     flecs::world world;
     std::unique_ptr<NetworkImpl> impl;
+    std::ofstream out_log_file;
+    std::ofstream in_log_file;
 
   public:
     std::deque<RecvPacket> packets;
@@ -42,4 +44,7 @@ class Network {
     void send_network_buffer();
 
     ecs_entity_t cast_raw_id(void* raw_id);
+
+    void open_log_files();
+    void close_log_files();
 };

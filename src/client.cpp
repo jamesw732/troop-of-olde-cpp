@@ -117,6 +117,7 @@ int main()
     }
     CloseWindow();
     network.disconnect();
+    network.close_log_files();
 
     return 0;
 }
