@@ -18,9 +18,3 @@
 #define ENET_IMPLEMENTATION
 #include "enet.h"
 #include "flecs.h"
-
-#ifdef DEBUG
-    #include "dbg.h"
-#else
-    #define dbg(...) ((void)0)
-#endif

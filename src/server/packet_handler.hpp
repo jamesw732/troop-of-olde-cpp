@@ -37,7 +37,6 @@ class PacketHandler {
             }
 
             case PacketType::ClientLoginPacket: {
-                dbg("Received login request");
                 ClientLoginPacket login;
                 des.object(login);
                 add_character_components(player);

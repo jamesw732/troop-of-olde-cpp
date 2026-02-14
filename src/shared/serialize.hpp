@@ -59,7 +59,16 @@ void serialize(S& s, SpawnBatchPacket& spawns) {
 template<typename S>
 void serialize(S& s, MovementInputPacket& input_packet) {
     s.value2b(input_packet.tick);
-    s.object(input_packet.inputs);
+    s.container(input_packet.inputs, MAX_INPUT_BUFFER);
+}
+
+template<typename S>
+void serialize(S& s, MovementInput& input) {
+    s.value1b(input.x);
+    s.value1b(input.z);
+    s.value1b(input.rot_y);
+    s.value2b(input.mouse_rot_y);
+    s.value1b(input.jump);
 }
 
 template<typename S>
@@ -86,23 +95,23 @@ void serialize (S& s, Vector3& v) {
 }
 
 // Components
+/* template <typename S> */
+/* void serialize(S& s, std::vector<MovementInput>& v) { */
+/*     s.container(v, MAX_INPUT_BUFFER, [](S& s, MovementInput& input) { */
+/*         s.value1b(input.x); */
+/*         s.value1b(input.z); */
+/*         s.value1b(input.rot_y); */
+/*         s.value2b(input.mouse_rot_y); */
+/*         s.value1b(input.jump); */
+/*     }); */
+/* } */
+
 template<typename S>
 void serialize(S& s, PlayerSpawnState& spawn_state) {
     s.value4b(spawn_state.network_id);
     s.text1b(spawn_state.name, 32);
     s.object(spawn_state.pos);
     s.object(spawn_state.rot);
-}
-
-template <typename S>
-void serialize(S& s, std::vector<MovementInput>& v) {
-    s.container(v, MAX_INPUT_BUFFER, [](S& s, MovementInput& input) {
-        s.value1b(input.x);
-        s.value1b(input.z);
-        s.value1b(input.rot_y);
-        s.value2b(input.mouse_rot_y);
-        s.value1b(input.jump);
-    });
 }
 
 template<typename S>

@@ -5,6 +5,7 @@ include(cmake/PlatformDeps.cmake)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
+    add_compile_definitions(DBG_MACRO_NO_WARNING)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -127,3 +128,9 @@ add_custom_target(tests
     DEPENDS ${TEST_TARGETS}
 )
 
+add_executable(logger src/logger.cpp)
+target_link_libraries(logger PRIVATE
+    raylib flecs_static
+    bitsery dbg
+)
+link_platform_libs(logger)

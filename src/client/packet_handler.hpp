@@ -1,5 +1,6 @@
 #include "entities.hpp"
 #include "network.hpp"
+#include "../shared/packets.hpp"
 #include "../shared/serialize.hpp"
 
 
@@ -29,7 +30,6 @@ class PacketHandler {
         switch (pkt_type) {
             case PacketType::SpawnBatchPacket: {
                 // We just entered world
-                dbg("Received batch spawn packet");
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
@@ -61,7 +61,6 @@ class PacketHandler {
             }
 
             case PacketType::PlayerSpawnPacket: {
-                dbg("Received external spawn packet");
                 // Remote player entered world
                 PlayerSpawnPacket spawn_packet;
                 des.object(spawn_packet);
@@ -95,7 +94,6 @@ class PacketHandler {
             }
 
             case PacketType::DisconnectPacket: {
-                dbg("Received disconnect packet");
                 DisconnectPacket dc_packet;
                 des.object(dc_packet);
                 std::cout << dc_packet.network_id << '\n';
@@ -113,5 +111,4 @@ class PacketHandler {
             }
         }
     }
-
 };

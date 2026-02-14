@@ -6,7 +6,6 @@
 
 enum class PacketType : uint8_t {
     MovementInputPacket,
-    MovementUpdate,
     ClientLoginPacket,
     SpawnBatchPacket,
     PlayerSpawnPacket,
@@ -26,6 +25,20 @@ struct MovementInputPacket {
     std::vector<MovementInput> inputs;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MovementInputPacket& pkt) {
+    os << "MovementInputPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "tick: " << pkt.tick << "\n";
+    print_indent(os);
+    os << "inputs: ";
+    print_container(os, pkt.inputs);
+    os << unindent();
+    print_indent(os);
+    os <<"}\n";
+    return os;
+}
+
 struct ClientLoginPacket {
     static constexpr PacketType id = PacketType::ClientLoginPacket;
     std::string name;
@@ -33,23 +46,81 @@ struct ClientLoginPacket {
     Vector3 rot;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const ClientLoginPacket& pkt) {
+    os << "ClientLoginPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "name: " << pkt.name << "\n";
+    print_indent(os);
+    os << "pos: " << pkt.pos << "\n";
+    print_indent(os);
+    os << "rot: " << pkt.rot << "\n";
+    os << unindent();
+    os <<"}\n";
+    return os;
+}
+
 struct SpawnBatchPacket {
     static constexpr PacketType id = PacketType::SpawnBatchPacket;
     uint32_t local_player_id;
     std::vector<PlayerSpawnState> spawn_states;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const SpawnBatchPacket& pkt) {
+    os << "SpawnBatchPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "local_player_id: " << pkt.local_player_id << "\n";
+    print_indent(os);
+    os << "spawn_states: ";
+    print_container(os, pkt.spawn_states);
+    os << unindent();
+    os <<"}\n";
+    return os;
+}
+
 struct PlayerSpawnPacket {
     static constexpr PacketType id = PacketType::PlayerSpawnPacket;
     PlayerSpawnState spawn_state;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const PlayerSpawnPacket& pkt) {
+    os << "PlayerSpawnPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "spawn_state: " << pkt.spawn_state << "\n";
+    os << unindent();
+    os << "}\n";
+    return os;
+}
 
 struct MovementUpdateBatchPacket {
     static constexpr PacketType id = PacketType::MovementUpdateBatchPacket;
     std::vector<MovementUpdate> move_updates;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MovementUpdateBatchPacket& pkt) {
+    os << "MovementUpdateBatchPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "move_updates: ";
+    print_container(os, pkt.move_updates);
+    os << unindent();
+    os << "}\n";
+    return os;
+}
+
 struct DisconnectPacket {
     static constexpr PacketType id = PacketType::DisconnectPacket;
     uint32_t network_id;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const DisconnectPacket& pkt) {
+    os << "DisconnectPacket{\n";
+    os << indent();
+    print_indent(os);
+    os << "network_id: " << pkt.network_id << "\n";
+    os << unindent();
+    os << "}\n";
+    return os;
+}

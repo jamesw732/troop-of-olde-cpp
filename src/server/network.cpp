@@ -64,7 +64,6 @@ void Network::process_events() {
                 RecvPacket recv_packet{entity, packet_data};
                 // To be handled by PacketHandler
                 packets.push_back(recv_packet);
-                dbg("Received event");
                 log(in_log_file, packet_data, size);
                 break;
             }
@@ -104,7 +103,6 @@ void Network::process_events() {
 void Network::queue_data_unreliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
     auto netid_peer = impl->netid_to_peer.find(network_id);
     if (netid_peer == impl->netid_to_peer.end()) {
-        dbg("Failed to find peer");
         return;
     }
     ENetPeer* peer = netid_peer->second;
@@ -116,7 +114,6 @@ void Network::queue_data_unreliable(const NetworkId& network_id, const Buffer& b
 void Network::queue_data_reliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
     auto netid_peer = impl->netid_to_peer.find(network_id);
     if (netid_peer == impl->netid_to_peer.end()) {
-        dbg("Failed to find peer");
         return;
     }
     ENetPeer* peer = netid_peer->second;
@@ -130,8 +127,11 @@ void Network::send_network_buffer() {
 }
 
 void Network::open_log_files() {
-    out_log_file.open("server-out.bin", std::ios_base::binary | std::ios_base::app);
-    in_log_file.open("server-in.bin", std::ios_base::binary | std::ios_base::app);
+    out_log_file.open("server-out.bin", std::ios_base::binary);
+    in_log_file.open("server-in.bin", std::ios_base::binary);
+    // Replace above with these if you want to append rather than replace
+    /* out_log_file.open("server-out.bin", std::ios_base::binary | std::ios_base::app); */
+    /* in_log_file.open("server-in.bin", std::ios_base::binary | std::ios_base::app); */
 }
 
 void Network::close_log_files() {

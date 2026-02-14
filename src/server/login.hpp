@@ -27,7 +27,6 @@ inline void register_batch_spawn_system(flecs::world& world, Network& network) {
             //     std::cout << spawn_state.network_id.id << std::endl;
             //     std::cout << vector3_to_string(spawn_state.pos.val) << std::endl;
             // }
-            dbg("Sending spawn packet", local_player_id.id);
             auto [buffer, size] = serialize(spawns);
             network.queue_data_reliable(local_player_id, buffer, size);
             // Remove login packet from entity

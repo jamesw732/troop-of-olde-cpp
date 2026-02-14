@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 
-#include "dbg.h"
 #include "raylib.h"
 
 #include "util.hpp"
@@ -27,8 +26,8 @@ inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {
 
 
 inline void print_mesh_vertices(const Mesh& mesh) {
-    dbg(mesh.vertexCount);
-    dbg(mesh.triangleCount);
+    std::cout << mesh.vertexCount << "\n";
+    std::cout << mesh.triangleCount << "\n";
     float* vertices = mesh.vertices;
     for (int i = 0; i < mesh.vertexCount; i += 3) {
         Vector3 v = Vector3{
@@ -36,6 +35,6 @@ inline void print_mesh_vertices(const Mesh& mesh) {
             vertices[i + 1],
             vertices[i + 2]
         };
-        dbg(v);
+        std::cout << v << "\n";
     }
 }

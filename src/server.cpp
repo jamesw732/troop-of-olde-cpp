@@ -71,7 +71,6 @@ int main()
         world.progress(dt);
         network.send_network_buffer();
     }
-    dbg("Stopping server");
     network.close_log_files();
 
     return 0;

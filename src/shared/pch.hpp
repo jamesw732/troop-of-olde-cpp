@@ -18,9 +18,3 @@
 #include "raylib.h"
 #include "external/cgltf.h"
 #include "flecs.h"
-
-#ifdef DEBUG
-    #include "dbg.h"
-#else
-    #define dbg(...) ((void)0)
-#endif

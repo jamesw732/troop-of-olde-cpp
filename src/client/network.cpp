@@ -117,8 +117,11 @@ void Network::disconnect() {
 }
 
 void Network::open_log_files() {
-    out_log_file.open("client-out.bin", std::ios_base::binary | std::ios_base::app);
-    in_log_file.open("client-in.bin", std::ios_base::binary | std::ios_base::app);
+    out_log_file.open("client-out.bin", std::ios_base::binary);
+    in_log_file.open("client-in.bin", std::ios_base::binary);
+    // Replace above with these if you want to append rather than replace
+    /* out_log_file.open("client-out.bin", std::ios_base::binary | std::ios_base::app); */
+    /* in_log_file.open("client-in.bin", std::ios_base::binary | std::ios_base::app); */
 }
 
 void Network::close_log_files() {
