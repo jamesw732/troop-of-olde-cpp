@@ -13,6 +13,11 @@
 #include "../shared/util.hpp"
 
 
+/*
+ * Process movement inputs from a MovementInputPacket and reset local prediction if new packet.
+ *
+ * TODO: Consider adding a "Predicting" component for characters, to refactor predictions
+ */
 inline void register_movement_system(flecs::world& world) {
     world.system<SimPosition, SimRotation, Gravity, Grounded, ClientMoveTick, MovementInputPacket,
         PredPosition, PredRotation, PredGravity, PredGrounded>()
@@ -51,6 +56,11 @@ inline void register_movement_system(flecs::world& world) {
     );
 }
 
+/*
+ * Sends the current state of the world to all clients.
+ * State differs between clients, local player has the actual simulated state, but
+ * remote players have their predicted state.
+ */
 inline void register_movement_networking_system(flecs::world& world, Network& network) {
     world.system<NetworkId, ClientMoveTick, SimPosition, SimRotation, Gravity, Grounded>()
         .with<Connected>()
@@ -65,8 +75,14 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
         {
             MovementUpdateBatchPacket batch;
             batch.move_updates.clear();
-            MovementUpdate move_update{network_id.id, ack_tick.val, pos.val, rot.val, gravity.val, grounded.val};
-            // Send simulated position for remote clients, only send data for inputs we received for local player
+            MovementUpdate move_update{
+                network_id.id,
+                ack_tick.val,
+                pos.val,
+                rot.val,
+                gravity.val,
+                grounded.val
+           };
             batch.move_updates.push_back(move_update);
             world.query<NetworkId, ClientMoveTick, PredPosition, PredRotation, PredGravity, PredGrounded>()
                 .each([&]
@@ -77,6 +93,9 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                      PredGravity& pred_gravity,
                      PredGrounded& pred_grounded)
                 {
+                    if (remote_network_id.id == network_id.id) {
+                        return;
+                    }
                     MovementUpdate remote_move_update{
                         remote_network_id.id,
                         remote_ack_tick.val,
@@ -94,6 +113,15 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
     );
 }
 
+/*
+ * Updates a temporary prediction of each player's state by assuming a zero MovementInput
+ *
+ * TODO: Consider predicting with most recent movement input
+ * Also consider predicting client-side for remote players
+ * Also consider making this not so reliant on system order. If this goes between
+ * the normal movement system and movement networking system, the advertised state will be wrong.
+ * Is it possible to make this idempotent?
+ */
 inline void register_movement_prediction_system(flecs::world& world) {
     world.system<PredPosition, PredRotation, PredGravity, PredGrounded>()
         .interval(MOVE_UPDATE_RATE)
@@ -104,9 +132,14 @@ inline void register_movement_prediction_system(flecs::world& world) {
             PredGrounded& grounded
             )
         {
-            // TODO: Consider predicting with most recent movement input
-            // Also consider predicting client-side for remote players
-            tick_movement(world, pos.val, rot.val.y, MovementInput{0, 0, 0, 0, 0}, gravity.val, grounded.val);
+            tick_movement(
+                world,
+                pos.val,
+                rot.val.y,
+                MovementInput{},
+                gravity.val,
+                grounded.val
+            );
         }
     );
 }

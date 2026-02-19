@@ -29,7 +29,7 @@ class PacketHandler {
         auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
         switch (pkt_type) {
             case PacketType::SpawnBatchPacket: {
-                // We just entered world
+                // We just entered world and need world's whole state
                 SpawnBatchPacket spawn_batch;
                 des.object(spawn_batch);
                 for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
@@ -61,7 +61,7 @@ class PacketHandler {
             }
 
             case PacketType::PlayerSpawnPacket: {
-                // Remote player entered world
+                // Remote player entered world and we need that new player's state
                 PlayerSpawnPacket spawn_packet;
                 des.object(spawn_packet);
                 PlayerSpawnState spawn_state = spawn_packet.spawn_state;
@@ -88,8 +88,24 @@ class PacketHandler {
             case PacketType::MovementUpdateBatchPacket: {
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
-                // TODO: Consider reworking packet handling to not store containers in ECS table
-                world.set<MovementUpdateBatchPacket>(batch);
+#ifndef DISABLE_SERVER
+                auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
+                for (MovementUpdate move_update: batch.move_updates) {
+                    auto netid_entity = netid_to_entity.find(move_update.network_id);
+                    if (netid_entity == netid_to_entity.end()) {
+                        continue;
+                    }
+                    flecs::entity e = netid_entity->second;
+                    if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) {
+                        continue;
+                    }
+                    e.set<AckTick>({move_update.ack_tick});
+                    e.set<SimPosition>({move_update.pos});
+                    e.set<SimRotation>({move_update.rot});
+                    e.set<Gravity>({move_update.gravity});
+                    e.set<Grounded>({move_update.grounded});
+                }
+#endif
                 break;
             }
 

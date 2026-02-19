@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cstring>
 
-// TODO: Consider making PCH for this file
 #include "raylib.h"
 #include "raymath.h"
 #include "utils.h"

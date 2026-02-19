@@ -8,11 +8,11 @@ struct NeedsSpawnBatch {};
 struct NeedsSpawnBroadcast {};
 
 struct PredPosition {
-    Vector3 val;
+    Vector3 val{};
 };
 
 struct PredRotation {
-    Vector3 val;
+    Vector3 val{};
 };
 
 struct PredGravity {

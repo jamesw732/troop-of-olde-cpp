@@ -20,33 +20,6 @@
 /* #define DISABLE_SERVER */
 
 
-inline void register_movement_recv_system(flecs::world& world) {
-    world.system<MovementUpdateBatchPacket>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&] (MovementUpdateBatchPacket& batch) {
-            // TODO: introduce more lag for remote players to smooth movement
-#ifndef DISABLE_SERVER
-            auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
-            for (MovementUpdate move_update: batch.move_updates) {
-                auto netid_entity = netid_to_entity.find(move_update.network_id);
-                if (netid_entity == netid_to_entity.end()) {
-                    continue;
-                }
-                flecs::entity e = netid_entity->second;
-                if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) {
-                    continue;
-                }
-                e.set<AckTick>({move_update.ack_tick});
-                e.set<SimPosition>({move_update.pos});
-                e.set<SimRotation>({move_update.rot});
-                e.set<Gravity>({move_update.gravity});
-                e.set<Grounded>({move_update.grounded});
-            }
-#endif
-        }
-    );
-}
-
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
     world.system<SimPosition, SimRotation, Gravity, Grounded, AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)

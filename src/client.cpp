@@ -75,7 +75,6 @@ int main()
     terrain.set<Scale>({{10, 10, 10}});
 
     auto ManualPhase = world.entity("ManualPhase");
-    register_movement_recv_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_handler, input_buffer);
     register_movement_system(world, input_buffer);
@@ -84,8 +83,6 @@ int main()
     register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world, input_handler);
-    // auto render_terrain_sys = register_terrain_render_system(world, camera, ManualPhase);
-    // auto render_sys = register_character_render_system(world, camera, ManualPhase);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
