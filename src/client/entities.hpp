@@ -12,22 +12,30 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<NetworkId>();
     entity.add<AckTick>();
 
+    entity.add<SimPosition>();
+    entity.add<SimRotation>();
+    entity.add<SimGrounded>();
+    entity.add<SimGravity>();
+
+    entity.add<PredPosition>();
+    entity.add<PredRotation>();
+    entity.add<PredGrounded>();
+    entity.add<PredGravity>();
+
+    entity.add<PrevPredPosition>();
+    entity.add<PrevPredRotation>();
+
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();
-    entity.add<SimPosition>();
-    entity.add<PrevSimPosition>();
     entity.add<RenderRotation>();
-    entity.add<SimRotation>();
-    entity.add<PrevSimRotation>();
+
     entity.add<Scale>();
     entity.add<Color>();
     entity.add<ModelType>();
 
-    entity.add<Grounded>();
-    entity.add<Gravity>();
-
     entity.add<CamRotation>();
     entity.add<CamDistance>();
+
     return entity;
 }
 
@@ -38,15 +46,19 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<NetworkId>();
     entity.add<AckTick>();
 
+    entity.add<PredPosition>();
+    entity.add<PredRotation>();
+
+    entity.add<PrevPredPosition>();
+    entity.add<PrevPredRotation>();
+
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();
-    entity.add<SimPosition>();
-    entity.add<PrevSimPosition>();
     entity.add<RenderRotation>();
-    entity.add<SimRotation>();
-    entity.add<PrevSimRotation>();
+
     entity.add<Scale>();
     entity.add<Color>();
     entity.add<ModelType>();
+
     return entity;
 }

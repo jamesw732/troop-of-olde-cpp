@@ -9,6 +9,42 @@
 #include "raylib-util.hpp"
 
 
+struct SimPosition {
+    Vector3 val{};
+};
+
+struct SimRotation {
+    Vector3 val{};
+};
+
+struct Scale {
+    Vector3 val{1, 1, 1};
+};
+
+struct SimGravity {
+    float val = 0;
+};
+
+struct SimGrounded {
+    bool val = false;
+};
+
+struct PredPosition {
+    Vector3 val{};
+};
+
+struct PredRotation {
+    Vector3 val{};
+};
+
+struct PredGravity {
+    float val = 0;
+};
+
+struct PredGrounded {
+    bool val = false;
+};
+
 struct Character {};
 
 struct DisplayName {
@@ -47,26 +83,6 @@ inline bool operator==(MovementInput input1, MovementInput input2) {
         && input1.jump == input2.jump && input1.mouse_rot_y == input2.mouse_rot_y
         && input1.rot_y == input2.mouse_rot_y;
 }
-
-struct SimPosition {
-    Vector3 val{0};
-};
-
-struct SimRotation {
-    Vector3 val{0};
-};
-
-struct Scale {
-    Vector3 val{1, 1, 1};
-};
-
-struct Gravity {
-    float val = 0;
-};
-
-struct Grounded {
-    bool val = false;
-};
 
 struct ModelType {
     std::string name;

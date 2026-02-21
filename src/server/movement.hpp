@@ -19,14 +19,14 @@
  * TODO: Consider adding a "Predicting" component for characters, to refactor predictions
  */
 inline void register_movement_system(flecs::world& world) {
-    world.system<SimPosition, SimRotation, Gravity, Grounded, ClientMoveTick, MovementInputPacket,
+    world.system<SimPosition, SimRotation, SimGravity, SimGrounded, ClientMoveTick, MovementInputPacket,
         PredPosition, PredRotation, PredGravity, PredGrounded>()
         .interval(MOVE_UPDATE_RATE)
         .each([&world]
            (SimPosition& pos,
             SimRotation& rot,
-            Gravity& gravity,
-            Grounded& grounded,
+            SimGravity& gravity,
+            SimGrounded& grounded,
             ClientMoveTick& ack_tick,
             MovementInputPacket& packet,
             PredPosition& pred_pos,
@@ -62,7 +62,7 @@ inline void register_movement_system(flecs::world& world) {
  * remote players have their predicted state.
  */
 inline void register_movement_networking_system(flecs::world& world, Network& network) {
-    world.system<NetworkId, ClientMoveTick, SimPosition, SimRotation, Gravity, Grounded>()
+    world.system<NetworkId, ClientMoveTick, SimPosition, SimRotation, SimGravity, SimGrounded>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&]
@@ -70,8 +70,8 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
               ClientMoveTick& ack_tick,
               SimPosition& pos,
               SimRotation& rot,
-              Gravity& gravity,
-              Grounded& grounded)
+              SimGravity& gravity,
+              SimGrounded& grounded)
         {
             MovementUpdateBatchPacket batch;
             batch.move_updates.clear();

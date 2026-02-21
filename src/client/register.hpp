@@ -5,9 +5,9 @@
 
 inline void register_client_components(flecs::world world) {
     world.component<LerpTimer>();
-    world.component<PrevSimPosition>();
+    world.component<PrevPredPosition>();
     world.component<RenderPosition>();
-    world.component<PrevSimRotation>();
+    world.component<PrevPredRotation>();
     world.component<RenderRotation>();
     world.component<CamRotation>();
     world.component<CamDistance>();

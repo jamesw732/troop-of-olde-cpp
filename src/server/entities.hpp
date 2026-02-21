@@ -25,7 +25,7 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<PredGravity>();
     entity.add<PredGrounded>();
 
-    entity.add<Gravity>();
-    entity.add<Grounded>();
+    entity.add<SimGravity>();
+    entity.add<SimGrounded>();
     return entity;
 }

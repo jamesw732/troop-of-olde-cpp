@@ -21,13 +21,19 @@
 
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<SimPosition, SimRotation, Gravity, Grounded, AckTick, LocalPlayer>()
+    world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
+                 PredPosition, PredRotation, PredGravity, PredGrounded,
+                 AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world](
                 SimPosition& pos,
                 SimRotation& rot,
-                Gravity& gravity,
-                Grounded& grounded,
+                SimGravity& gravity,
+                SimGrounded& grounded,
+                PredPosition& pred_pos,
+                PredRotation& pred_rot,
+                PredGravity& pred_gravity,
+                PredGrounded& pred_grounded,
                 AckTick& new_ack_tick,
                 LocalPlayer)
         {
@@ -35,6 +41,11 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
                 return;
             }
+            // Server authoritative state becomes base for new prediction
+            pred_pos.val = pos.val;
+            pred_rot.val = rot.val;
+            pred_gravity.val = gravity.val;
+            pred_grounded.val = grounded.val;
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
 #ifndef DISABLE_SERVER
@@ -63,13 +74,13 @@ inline void register_movement_system(
         flecs::world& world,
         InputBuffer& input_buffer)
 {
-    world.system<SimPosition, SimRotation, Gravity, Grounded, LocalPlayer>()
+    world.system<PredPosition, PredRotation, SimGravity, SimGrounded, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world]
-           (SimPosition& pos,
-            SimRotation& rot,
-            Gravity& gravity,
-            Grounded& grounded,
+           (PredPosition& pos,
+            PredRotation& rot,
+            SimGravity& gravity,
+            SimGrounded& grounded,
             LocalPlayer)
         {
             tick_movement(world, pos.val, rot.val.y, input_buffer.back(), gravity.val, grounded.val);
@@ -125,9 +136,9 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 }
 
 inline void register_movement_lerp_reset_system(flecs::world& world) {
-    world.system<RenderPosition, PrevSimPosition, RenderRotation, PrevSimRotation, LerpTimer>()
+    world.system<RenderPosition, PrevPredPosition, RenderRotation, PrevPredRotation, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([] (RenderPosition& cur_pos, PrevSimPosition& prev_pos, RenderRotation& cur_rot, PrevSimRotation& prev_rot, LerpTimer& timer) {
+        .each([] (RenderPosition& cur_pos, PrevPredPosition& prev_pos, RenderRotation& cur_rot, PrevPredRotation& prev_rot, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = cur_pos.val;
             prev_rot.val = cur_rot.val;
@@ -136,16 +147,16 @@ inline void register_movement_lerp_reset_system(flecs::world& world) {
 }
 
 inline void register_movement_lerp_system(flecs::world& world) {
-    world.system<RenderPosition, SimPosition, PrevSimPosition,
-        RenderRotation, SimRotation, PrevSimRotation,
+    world.system<RenderPosition, PredPosition, PrevPredPosition,
+        RenderRotation, PredRotation, PrevPredRotation,
         LerpTimer>()
         .each([] (
                 RenderPosition& pos,
-                SimPosition& target_pos,
-                PrevSimPosition& prev_pos,
+                PredPosition& target_pos,
+                PrevPredPosition& prev_pos,
                 RenderRotation& rot,
-                SimRotation& target_rot,
-                PrevSimRotation& prev_rot,
+                PredRotation& target_rot,
+                PrevPredRotation& prev_rot,
                 LerpTimer& timer)
         {
             float dt = GetFrameTime();

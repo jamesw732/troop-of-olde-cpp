@@ -9,7 +9,7 @@
 
 struct LocalPlayer {};
 
-struct PrevSimPosition {
+struct PrevPredPosition {
     Vector3 val{};
 };
 
@@ -21,7 +21,7 @@ struct RenderRotation {
     Vector3 val{};
 };
 
-struct PrevSimRotation {
+struct PrevPredRotation {
     Vector3 val{};
 };
 

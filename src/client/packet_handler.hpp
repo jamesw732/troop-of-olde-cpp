@@ -40,12 +40,12 @@ class PacketHandler {
                     else {
                         entity = create_remote_player(world);
                     }
-                    entity.set<SimPosition>({spawn_state.pos});
+                    entity.set<PredPosition>({spawn_state.pos});
                     entity.set<RenderPosition>({spawn_state.pos});
-                    entity.set<PrevSimPosition>({spawn_state.pos});
-                    entity.set<SimRotation>({spawn_state.rot});
+                    entity.set<PrevPredPosition>({spawn_state.pos});
+                    entity.set<PredRotation>({spawn_state.rot});
                     entity.set<RenderRotation>({spawn_state.rot});
-                    entity.set<PrevSimRotation>({spawn_state.rot});
+                    entity.set<PrevPredRotation>({spawn_state.rot});
                     entity.set<NetworkId>({spawn_state.network_id});
                     entity.set<DisplayName>({spawn_state.name});
                     entity.set<CamRotation>({30.0});
@@ -66,13 +66,13 @@ class PacketHandler {
                 des.object(spawn_packet);
                 PlayerSpawnState spawn_state = spawn_packet.spawn_state;
                 flecs::entity entity = create_remote_player(world);
-                entity.set<RenderPosition>({spawn_state.pos});
-                entity.set<SimPosition>({spawn_state.pos});
-                entity.set<PrevSimPosition>({spawn_state.pos});
-                entity.set<SimRotation>({spawn_state.rot});
-                entity.set<RenderRotation>({spawn_state.rot});
-                entity.set<PrevSimRotation>({spawn_state.rot});
                 entity.set<NetworkId>({spawn_state.network_id});
+                entity.set<PredPosition>({spawn_state.pos});
+                entity.set<PredRotation>({spawn_state.rot});
+                entity.set<PrevPredPosition>({spawn_state.pos});
+                entity.set<PrevPredRotation>({spawn_state.rot});
+                entity.set<RenderPosition>({spawn_state.pos});
+                entity.set<RenderRotation>({spawn_state.rot});
                 entity.set<DisplayName>({spawn_state.name});
                 entity.set<Color>(RED);
                 entity.set<ModelType>({"cube"});
@@ -102,8 +102,8 @@ class PacketHandler {
                     e.set<AckTick>({move_update.ack_tick});
                     e.set<SimPosition>({move_update.pos});
                     e.set<SimRotation>({move_update.rot});
-                    e.set<Gravity>({move_update.gravity});
-                    e.set<Grounded>({move_update.grounded});
+                    e.set<SimGravity>({move_update.gravity});
+                    e.set<SimGrounded>({move_update.grounded});
                 }
 #endif
                 break;
