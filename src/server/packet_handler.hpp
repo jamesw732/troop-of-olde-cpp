@@ -31,7 +31,8 @@ class PacketHandler {
             case PacketType::MovementInputPacket: {
                 MovementInputPacket input_packet;
                 des.object(input_packet);
-                player.set<MovementInputPacket>(input_packet);
+                player.set<RecvMoveTick>({input_packet.tick});
+                player.set<InputBuffer>({input_packet.size, input_packet.inputs});
                 break;
             }
 

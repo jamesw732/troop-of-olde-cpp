@@ -49,7 +49,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             pred_grounded.val = grounded.val;
             // If new tick, perform client-side reconciliation
             input_buffer.flushUpTo(new_ack_tick.val);
-            for (int i = 0; i <= input_buffer.size; i++) {
+            for (int i = 0; i < input_buffer.size; i++) {
                 std::optional<MovementInput> opt = input_buffer.get_at(i);
                 if (!opt) {
                     continue;
@@ -97,14 +97,20 @@ inline void register_movement_system(
     );
 }
 
-inline void register_movement_transmit_system(flecs::world& world, Network& network, InputBuffer& input_buffer,
-        uint16_t& tick) {
+inline void register_movement_transmit_system(
+    flecs::world& world,
+    Network& network,
+    InputBuffer& input_buffer,
+    uint16_t& tick)
+{
     world.system()
         .interval(MOVE_UPDATE_RATE)
         .each([&network, &input_buffer, &tick]() {
+            // TODO: Make this packet persistent, no need to make a new one every tick
             MovementInputPacket pkt;
             pkt.tick = tick;
-            input_buffer.copy_to_vector(pkt.inputs);
+            pkt.size = input_buffer.size;
+            input_buffer.copy_to_array(pkt.inputs);
             auto [buffer, size] = serialize(pkt);
             network.queue_data_unreliable(buffer, size);
             }

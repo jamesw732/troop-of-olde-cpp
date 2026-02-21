@@ -1,6 +1,5 @@
 # Right now:
-- Refactor code to be more cache and ECS friendly
-    - Make server-side input buffers persistent components
+- Figure out bug where landing seems to be janky
 
 - Can jump through the wall with >90 degree incline. Consider a fix for this, or just never
 generate meshes with this property.

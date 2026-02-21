@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "components.hpp"
+#include "const.hpp"
+#include "util.hpp"
 
 enum class PacketType : uint8_t {
     MovementInputPacket,
@@ -21,8 +23,8 @@ struct MovementInputPacket {
     static constexpr PacketType id = PacketType::MovementInputPacket;
     // The current movement tick, last movement tick in the buffer
     uint16_t tick = 0;
-    // All movement inputs in the buffer
-    std::vector<MovementInput> inputs;
+    uint16_t size = 0;
+    std::array<MovementInput, MAX_INPUT_BUFFER> inputs{};
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementInputPacket& pkt) {
@@ -32,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInputPacket& pkt
     os << "tick: " << pkt.tick << "\n";
     print_indent(os);
     os << "inputs: ";
-    print_container(os, pkt.inputs);
+    print_array(os, pkt.inputs, pkt.size);
     os << unindent();
     print_indent(os);
     os <<"}\n";
@@ -73,7 +75,7 @@ inline std::ostream& operator<<(std::ostream& os, const SpawnBatchPacket& pkt) {
     os << "local_player_id: " << pkt.local_player_id << "\n";
     print_indent(os);
     os << "spawn_states: ";
-    print_container(os, pkt.spawn_states);
+    print_vector(os, pkt.spawn_states);
     os << unindent();
     os <<"}\n";
     return os;
@@ -104,7 +106,7 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdateBatchPacke
     os << indent();
     print_indent(os);
     os << "move_updates: ";
-    print_container(os, pkt.move_updates);
+    print_vector(os, pkt.move_updates);
     os << unindent();
     os << "}\n";
     return os;

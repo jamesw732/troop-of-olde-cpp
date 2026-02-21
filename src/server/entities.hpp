@@ -10,14 +10,10 @@
 
 inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<Character>();
-    entity.add<SimPosition>();
-    entity.add<SimRotation>();
-    entity.add<Scale>();
-    entity.add<MovementInputPacket>();
-    entity.add<Connected>();
-    entity.add<ClientMoveTick>();
     entity.add<DisplayName>();
+
     entity.add<NetworkId>();
+    entity.add<Connected>();
     entity.add<NeedsSpawnBroadcast>();
 
     entity.add<PredPosition>();
@@ -25,7 +21,15 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<PredGravity>();
     entity.add<PredGrounded>();
 
+    entity.add<SimPosition>();
+    entity.add<SimRotation>();
     entity.add<SimGravity>();
     entity.add<SimGrounded>();
+    entity.add<Scale>();
+
+    entity.add<CurMoveTick>();
+    entity.add<RecvMoveTick>();
+    entity.add<InputBuffer>();
+
     return entity;
 }

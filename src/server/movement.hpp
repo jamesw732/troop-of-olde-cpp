@@ -14,44 +14,41 @@
 
 
 /*
- * Process movement inputs from a MovementInputPacket and reset local prediction if new packet.
+ * Process movement inputs from an InputBuffer and reset local prediction if new packet.
  *
  * TODO: Consider adding a "Predicting" component for characters, to refactor predictions
  */
 inline void register_movement_system(flecs::world& world) {
-    world.system<SimPosition, SimRotation, SimGravity, SimGrounded, ClientMoveTick, MovementInputPacket,
-        PredPosition, PredRotation, PredGravity, PredGrounded>()
+    world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
+            CurMoveTick, RecvMoveTick, InputBuffer,
+            PredPosition, PredRotation, PredGravity, PredGrounded>()
         .interval(MOVE_UPDATE_RATE)
         .each([&world]
-           (SimPosition& pos,
-            SimRotation& rot,
-            SimGravity& gravity,
-            SimGrounded& grounded,
-            ClientMoveTick& ack_tick,
-            MovementInputPacket& packet,
-            PredPosition& pred_pos,
-            PredRotation& pred_rot,
-            PredGravity& pred_gravity,
-            PredGrounded& pred_grounded
-            )
+           (SimPosition& pos, SimRotation& rot, SimGravity& gravity, SimGrounded& grounded,
+            CurMoveTick& prev_tick, RecvMoveTick& recv_tick, InputBuffer& input_buffer,
+            PredPosition& pred_pos, PredRotation& pred_rot, PredGravity& pred_gravity,
+            PredGrounded& pred_grounded)
         {
-            uint16_t start_tick = packet.tick - (packet.inputs.size() - 1);
-            int const dif = (int) (ack_tick.val - start_tick);
+            uint16_t start_tick = recv_tick.val - (input_buffer.size - 1);
+            int const dif = (int) (prev_tick.val - start_tick);
             // Precondition: start tick is at most 1 more than stored tick
             // If not satisfied, process whole buffer and hope for the best
             int start_idx = std::max(0, dif + 1);
-            for (auto it = packet.inputs.begin() + start_idx; it != packet.inputs.end(); ++it)
-            {
-                auto input = *it;
+            std::cout << "Received tick: " << (int) recv_tick.val << "\n";
+            std::cout << "Stored tick: " << (int) prev_tick.val << "\n";
+            std::cout << "Start idx: " << (int) start_idx << "\n";
+            for (int i = start_idx; i < input_buffer.size; i++) {
+                MovementInput input = input_buffer.inputs[i];
                 tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
             }
-            if (ack_tick.val < packet.tick) {
-                pred_pos.val = pos.val;
-                pred_rot.val = rot.val;
-                pred_gravity.val = gravity.val;
-                pred_grounded.val = grounded.val;
+            if (prev_tick.val >= recv_tick.val) {
+                return;
             }
-            ack_tick.val = packet.tick;
+            pred_pos.val = pos.val;
+            pred_rot.val = rot.val;
+            pred_gravity.val = gravity.val;
+            pred_grounded.val = grounded.val;
+            prev_tick.val = recv_tick.val;
         }
     );
 }
@@ -62,16 +59,12 @@ inline void register_movement_system(flecs::world& world) {
  * remote players have their predicted state.
  */
 inline void register_movement_networking_system(flecs::world& world, Network& network) {
-    world.system<NetworkId, ClientMoveTick, SimPosition, SimRotation, SimGravity, SimGrounded>()
+    world.system<NetworkId, CurMoveTick, SimPosition, SimRotation, SimGravity, SimGrounded>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&]
-             (NetworkId& network_id,
-              ClientMoveTick& ack_tick,
-              SimPosition& pos,
-              SimRotation& rot,
-              SimGravity& gravity,
-              SimGrounded& grounded)
+             (NetworkId& network_id, CurMoveTick& ack_tick,
+              SimPosition& pos, SimRotation& rot, SimGravity& gravity, SimGrounded& grounded)
         {
             MovementUpdateBatchPacket batch;
             batch.move_updates.clear();
@@ -84,10 +77,11 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 grounded.val
            };
             batch.move_updates.push_back(move_update);
-            world.query<NetworkId, ClientMoveTick, PredPosition, PredRotation, PredGravity, PredGrounded>()
+            world.query<NetworkId, CurMoveTick,
+                PredPosition, PredRotation, PredGravity, PredGrounded>()
                 .each([&]
                     (NetworkId& remote_network_id,
-                     ClientMoveTick& remote_ack_tick,
+                     CurMoveTick& remote_ack_tick,
                      PredPosition& pred_pos,
                      PredRotation& pred_rot,
                      PredGravity& pred_gravity,

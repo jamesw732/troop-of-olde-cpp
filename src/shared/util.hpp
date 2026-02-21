@@ -85,13 +85,33 @@ inline void print_indent(std::ostream& os) {
 }
 
 template <typename T>
-inline void print_container(std::ostream& os, std::vector<T> container) {
+inline void print_vector(std::ostream& os, std::vector<T> container) {
     os << "{\n";
     os << indent();
     for (auto it = container.begin(); it != container.end(); it++) {
         print_indent(os);
         os << *it;
         if (it != std::prev(container.end())) {
+            os << ",\n";
+        }
+    }
+    os << "\n";
+    os << unindent();
+    print_indent(os);
+    os <<"}\n";
+}
+
+template <typename T, size_t n>
+inline void print_array(std::ostream& os, std::array<T, n> array, size_t size = 0) {
+    if (size == 0) {
+        size = array.size();
+    }
+    os << "{\n";
+    os << indent();
+    for (int i = 0; i < size; i++) {
+        print_indent(os);
+        os << array[i];
+        if (i < size) {
             os << ",\n";
         }
     }

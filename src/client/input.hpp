@@ -64,8 +64,8 @@ inline CameraInput get_camera_input() {
 struct InputBuffer {
     // Start with rollover to be consistent with server acking tick 0 to start
     uint16_t ack_tick = -1;
-    size_t start_idx = 0;
-    size_t size = 0;
+    uint16_t start_idx = 0;
+    uint16_t size = 0;
     bool full = false;
     std::array<MovementInput, MAX_INPUT_BUFFER> buffer;
 
@@ -117,7 +117,7 @@ struct InputBuffer {
      */
     void flushUpTo(uint16_t new_ack_tick) {
         int16_t num_to_flush = (int16_t) (new_ack_tick - ack_tick);
-        if (num_to_flush < 0 || num_to_flush > buffer.size()) {
+        if (num_to_flush <= 0 || num_to_flush > buffer.size()) {
             return;
         }
         for (int i = 0; i < num_to_flush; i++) {
@@ -133,6 +133,15 @@ struct InputBuffer {
                 continue;
             }
             vec.push_back(*opt);
+        }
+    }
+    void copy_to_array(std::array<MovementInput, MAX_INPUT_BUFFER>& array) {
+        for (int i = 0; i <= size; i++) {
+            std::optional<MovementInput> opt = get_at(i);
+            if (!opt) {
+                continue;
+            }
+            array[i] = *opt;
         }
     }
 };

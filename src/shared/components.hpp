@@ -54,9 +54,9 @@ struct DisplayName {
 struct MovementInput {
     int8_t x = 0;
     int8_t z = 0;
+    bool jump = false;
     int8_t rot_y = 0;
     int16_t mouse_rot_y = 0;
-    bool jump = false;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
@@ -90,10 +90,6 @@ struct ModelType {
 
 struct ModelPointer {
     Model* model;
-};
-
-struct ClientMoveTick {
-    uint16_t val = 0;
 };
 
 struct PlayerSpawnState {
