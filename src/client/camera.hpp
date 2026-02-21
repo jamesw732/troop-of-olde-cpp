@@ -26,10 +26,10 @@ inline void process_camera_input(const CameraInput& input, CamRotation& rot, Cam
     dist.val = Clamp(dist.val + input.scroll, 0, 20);
 }
 
-inline void register_camera_input_system(flecs::world& world, InputHandler& input_handler) {
+inline void register_camera_input_system(flecs::world& world) {
     world.system<CamRotation, CamDistance, LocalPlayer>()
-        .each([&input_handler] (CamRotation& rot, CamDistance& dist, LocalPlayer) {
-            process_camera_input(input_handler.get_camera_input(), rot, dist);
+        .each([] (CamRotation& rot, CamDistance& dist, LocalPlayer) {
+            process_camera_input(get_camera_input(), rot, dist);
         }
     );
 }
