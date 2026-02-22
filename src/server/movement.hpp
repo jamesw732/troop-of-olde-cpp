@@ -34,9 +34,6 @@ inline void register_movement_system(flecs::world& world) {
             // Precondition: start tick is at most 1 more than stored tick
             // If not satisfied, process whole buffer and hope for the best
             int start_idx = std::max(0, dif + 1);
-            std::cout << "Received tick: " << (int) recv_tick.val << "\n";
-            std::cout << "Stored tick: " << (int) prev_tick.val << "\n";
-            std::cout << "Start idx: " << (int) start_idx << "\n";
             for (int i = start_idx; i < input_buffer.size; i++) {
                 MovementInput input = input_buffer.inputs[i];
                 tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);

@@ -33,6 +33,8 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInputPacket& pkt
     print_indent(os);
     os << "tick: " << pkt.tick << "\n";
     print_indent(os);
+    os << "size: " << pkt.size << "\n";
+    print_indent(os);
     os << "inputs: ";
     print_array(os, pkt.inputs, pkt.size);
     os << unindent();

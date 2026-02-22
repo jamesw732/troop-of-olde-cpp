@@ -111,7 +111,7 @@ inline void print_array(std::ostream& os, std::array<T, n> array, size_t size = 
     for (int i = 0; i < size; i++) {
         print_indent(os);
         os << array[i];
-        if (i < size) {
+        if (i < size - 1) {
             os << ",\n";
         }
     }

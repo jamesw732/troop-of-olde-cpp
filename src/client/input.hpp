@@ -117,7 +117,7 @@ struct InputBuffer {
      */
     void flushUpTo(uint16_t new_ack_tick) {
         int16_t num_to_flush = (int16_t) (new_ack_tick - ack_tick);
-        if (num_to_flush <= 0 || num_to_flush > buffer.size()) {
+        if (num_to_flush <= 0 || num_to_flush > size) {
             return;
         }
         for (int i = 0; i < num_to_flush; i++) {
@@ -127,7 +127,7 @@ struct InputBuffer {
     }
 
     void copy_to_vector(std::vector<MovementInput>& vec) {
-        for (int i = 0; i <= size; i++) {
+        for (int i = 0; i < size; i++) {
             std::optional<MovementInput> opt = get_at(i);
             if (!opt) {
                 continue;
@@ -136,7 +136,7 @@ struct InputBuffer {
         }
     }
     void copy_to_array(std::array<MovementInput, MAX_INPUT_BUFFER>& array) {
-        for (int i = 0; i <= size; i++) {
+        for (int i = 0; i < size; i++) {
             std::optional<MovementInput> opt = get_at(i);
             if (!opt) {
                 continue;

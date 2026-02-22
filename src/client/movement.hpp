@@ -47,7 +47,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             pred_rot.val = rot.val;
             pred_gravity.val = gravity.val;
             pred_grounded.val = grounded.val;
-            // If new tick, perform client-side reconciliation
+            // If new tick, perform client-side prediction
             input_buffer.flushUpTo(new_ack_tick.val);
             for (int i = 0; i < input_buffer.size; i++) {
                 std::optional<MovementInput> opt = input_buffer.get_at(i);
@@ -55,7 +55,14 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                     continue;
                 }
                 MovementInput input = *opt;
-                tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
+                tick_movement(
+                    world,
+                    pred_pos.val,
+                    pred_rot.val.y,
+                    input,
+                    pred_gravity.val,
+                    pred_grounded.val
+                );
             }
 #endif
         }
