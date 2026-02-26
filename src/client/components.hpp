@@ -33,6 +33,10 @@ struct AckTick {
     uint16_t val{static_cast<uint16_t>(-1)};
 };
 
+struct RecvAckTick {
+    uint16_t val{static_cast<uint16_t>(-1)};
+};
+
 struct NetworkMap {
     std::unordered_map<uint32_t, flecs::entity> netid_to_entity;
 };

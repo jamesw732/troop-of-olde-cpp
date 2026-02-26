@@ -74,6 +74,7 @@ int main()
     terrain.set<Scale>({{10, 10, 10}});
 
     auto ManualPhase = world.entity("ManualPhase");
+    register_movement_prediction_reset_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_buffer);
     register_movement_system(world, input_buffer);

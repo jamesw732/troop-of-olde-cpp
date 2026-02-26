@@ -20,6 +20,40 @@
 /* #define DISABLE_SERVER */
 
 
+inline void register_movement_prediction_reset_system(flecs::world world) {
+    world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
+                 PredPosition, PredRotation, PredGravity, PredGrounded,
+                 AckTick, RecvAckTick>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&world](
+                SimPosition& pos,
+                SimRotation& rot,
+                SimGravity& gravity,
+                SimGrounded& grounded,
+                PredPosition& pred_pos,
+                PredRotation& pred_rot,
+                PredGravity& pred_gravity,
+                PredGrounded& pred_grounded,
+                AckTick& old_ack_tick,
+                RecvAckTick& new_ack_tick
+                )
+        {
+#ifndef DISABLE_SERVER
+            // If old tick, don't copy
+            if ((int16_t) (new_ack_tick.val - old_ack_tick.val) <= 0) {
+                return;
+            }
+            old_ack_tick.val = new_ack_tick.val;
+            // Server authoritative state becomes base for new prediction
+            pred_pos.val = pos.val;
+            pred_rot.val = rot.val;
+            pred_gravity.val = gravity.val;
+            pred_grounded.val = grounded.val;
+        }
+    );
+#endif
+}
+
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
                  PredPosition, PredRotation, PredGravity, PredGrounded,
@@ -37,17 +71,12 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                 AckTick& new_ack_tick,
                 LocalPlayer)
         {
+#ifndef DISABLE_SERVER
             // If old tick, skip reconciliation
             if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
                 return;
             }
-#ifndef DISABLE_SERVER
-            // Server authoritative state becomes base for new prediction
-            pred_pos.val = pos.val;
-            pred_rot.val = rot.val;
-            pred_gravity.val = gravity.val;
-            pred_grounded.val = grounded.val;
-            // If new tick, perform client-side prediction
+            // If new tick, perform client-side prediction on un-acked inputs
             input_buffer.flushUpTo(new_ack_tick.val);
             for (int i = 0; i < input_buffer.size; i++) {
                 std::optional<MovementInput> opt = input_buffer.get_at(i);
@@ -113,7 +142,6 @@ inline void register_movement_transmit_system(
     world.system()
         .interval(MOVE_UPDATE_RATE)
         .each([&network, &input_buffer, &tick]() {
-            // TODO: Make this packet persistent, no need to make a new one every tick
             MovementInputPacket pkt;
             pkt.tick = tick;
             pkt.size = input_buffer.size;

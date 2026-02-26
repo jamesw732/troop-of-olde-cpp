@@ -1,6 +1,4 @@
 # Right now:
-- Figure out bug where landing seems to be janky
-
 - Can jump through the wall with >90 degree incline. Consider a fix for this, or just never
 generate meshes with this property.
 

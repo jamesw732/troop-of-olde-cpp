@@ -9,8 +9,10 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<Character>();
     entity.add<LocalPlayer>();
     entity.add<DisplayName>();
+
     entity.add<NetworkId>();
     entity.add<AckTick>();
+    entity.add<RecvAckTick>();
 
     entity.add<SimPosition>();
     entity.add<SimRotation>();
@@ -43,11 +45,20 @@ inline flecs::entity create_remote_player(flecs::world world) {
     auto entity = world.entity();
     entity.add<Character>();
     entity.add<DisplayName>();
+
     entity.add<NetworkId>();
     entity.add<AckTick>();
+    entity.add<RecvAckTick>();
+
+    entity.add<SimPosition>();
+    entity.add<SimRotation>();
+    entity.add<SimGrounded>();
+    entity.add<SimGravity>();
 
     entity.add<PredPosition>();
     entity.add<PredRotation>();
+    entity.add<PredGrounded>();
+    entity.add<PredGravity>();
 
     entity.add<PrevPredPosition>();
     entity.add<PrevPredRotation>();

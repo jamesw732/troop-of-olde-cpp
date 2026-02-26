@@ -91,6 +91,9 @@ class PacketHandler {
 #ifndef DISABLE_SERVER
                 auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
                 for (MovementUpdate move_update: batch.move_updates) {
+                    /* if (!netid_to_entity.contains(move_update.network_id)) { */
+                    /*     continue; */
+                    /* } */
                     auto netid_entity = netid_to_entity.find(move_update.network_id);
                     if (netid_entity == netid_to_entity.end()) {
                         continue;
@@ -99,7 +102,7 @@ class PacketHandler {
                     if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) {
                         continue;
                     }
-                    e.set<AckTick>({move_update.ack_tick});
+                    e.set<RecvAckTick>({move_update.ack_tick});
                     e.set<SimPosition>({move_update.pos});
                     e.set<SimRotation>({move_update.rot});
                     e.set<SimGravity>({move_update.gravity});

@@ -54,7 +54,6 @@ int main()
 
     register_movement_system(world);
     register_movement_networking_system(world, network);
-    register_movement_prediction_system(world);
 
     register_batch_spawn_system(world, network);
     register_spawn_broadcast_system(world, network);

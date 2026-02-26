@@ -15,8 +15,6 @@
 
 /*
  * Process movement inputs from an InputBuffer and reset local prediction if new packet.
- *
- * TODO: Consider adding a "Predicting" component for characters, to refactor predictions
  */
 inline void register_movement_system(flecs::world& world) {
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
@@ -38,9 +36,19 @@ inline void register_movement_system(flecs::world& world) {
                 MovementInput input = input_buffer.inputs[i];
                 tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
             }
+            // If we didn't get a new tick, predict with an empty input
             if (prev_tick.val >= recv_tick.val) {
+                tick_movement(
+                    world,
+                    pred_pos.val,
+                    pred_rot.val.y,
+                    {},
+                    pred_gravity.val,
+                    pred_grounded.val
+                );
                 return;
             }
+            // Otherwise, reset prediction to simulated values
             pred_pos.val = pos.val;
             pred_rot.val = rot.val;
             pred_gravity.val = gravity.val;
@@ -100,37 +108,6 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
             );
             auto [buffer, size] = serialize(batch);
             network.queue_data_unreliable(network_id, buffer, size);
-        }
-    );
-}
-
-/*
- * Updates a temporary prediction of each player's state by assuming a zero MovementInput
- *
- * TODO: Consider predicting with most recent movement input
- * Also consider predicting client-side for remote players
- * Also consider making this not so reliant on system order. If this goes between
- * the normal movement system and movement networking system, the advertised state will be wrong.
- * Is it possible to make this idempotent?
- */
-inline void register_movement_prediction_system(flecs::world& world) {
-    world.system<PredPosition, PredRotation, PredGravity, PredGrounded>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&world]
-           (PredPosition& pos,
-            PredRotation& rot,
-            PredGravity& gravity,
-            PredGrounded& grounded
-            )
-        {
-            tick_movement(
-                world,
-                pos.val,
-                rot.val.y,
-                MovementInput{},
-                gravity.val,
-                grounded.val
-            );
         }
     );
 }
