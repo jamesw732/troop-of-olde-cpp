@@ -33,38 +33,28 @@ inline void register_camera_input_system(flecs::world& world) {
     );
 }
 
-// Updates the camera's position from character's rotation values
-inline void update_camera(flecs::world& world, Camera3D& camera) {
-    auto local_player = world.lookup("LocalPlayer");
-    // Should CamRotation and CamDistance really be local_player components?
-    // Should this be in a flecs query for LocalPlayer?
-    if (!local_player.has<RenderPosition>()
-        || !local_player.has<RenderRotation>()
-        || !local_player.has<Scale>()
-        || !local_player.has<CamRotation>()
-        || !local_player.has<CamDistance>()) {
-        return;
-    }
-    RenderPosition player_pos = local_player.get<RenderPosition>();
-    RenderRotation player_rot = local_player.get<RenderRotation>();
-    Scale player_scale = local_player.get<Scale>();
-    CamRotation cam_rotation = local_player.get<CamRotation>();
-    CamDistance cam_distance = local_player.get<CamDistance>();
-    float y_rot = (player_rot.val.y + cam_rotation.y) * PI / 180;
-    float polar_rot = (90 - cam_rotation.x) * PI / 180;
-    Vector3 sphere_coords{
-        sin(polar_rot) * sin(y_rot),
-        cos(polar_rot),
-        sin(polar_rot) * cos(y_rot)
-    };
-    Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.5f, 0});
-    camera.position = Vector3Add(focus_pos, Vector3Scale(sphere_coords, cam_distance.val));
-    RayCollision camera_collision = find_closest_collision(
-        world, focus_pos,
-        Vector3Subtract(camera.position, focus_pos)
+// Updates the camera's position from character's position and rotation values
+inline void register_camera_update_system(flecs::world& world, Camera3D& camera) {
+    world.system<LocalPlayer, RenderPosition, RenderRotation, Scale, CamRotation, CamDistance>()
+         .each([&] (LocalPlayer, RenderPosition player_pos, RenderRotation player_rot, Scale player_scale,
+                    CamRotation cam_rotation, CamDistance cam_distance) {
+            float y_rot = (player_rot.val.y + cam_rotation.y) * PI / 180;
+            float polar_rot = (90 - cam_rotation.x) * PI / 180;
+            Vector3 sphere_coords{
+                sin(polar_rot) * sin(y_rot),
+                cos(polar_rot),
+                sin(polar_rot) * cos(y_rot)
+            };
+            Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.5f, 0});
+            camera.position = Vector3Add(focus_pos, Vector3Scale(sphere_coords, cam_distance.val));
+            RayCollision camera_collision = find_closest_collision(
+                world, focus_pos,
+                Vector3Subtract(camera.position, focus_pos)
+            );
+            if (camera_collision.hit && camera_collision.distance < cam_distance.val) {
+                camera.position = camera_collision.point;
+            }
+            camera.target = focus_pos;
+        }
     );
-    if (camera_collision.hit && camera_collision.distance < cam_distance.val) {
-        camera.position = camera_collision.point;
-    }
-    camera.target = focus_pos;
 }

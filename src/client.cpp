@@ -83,6 +83,7 @@ int main()
     register_movement_lerp_reset_system(world);
     register_movement_lerp_system(world);
     register_camera_input_system(world);
+    register_camera_update_system(world, camera);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     register_disconnect_system(world);
 
@@ -94,7 +95,6 @@ int main()
         packet_handler.handle_packets(network.packets);
         // Progress all fixed-timestep ECS timers
         world.progress(dt);
-        update_camera(world, camera);
         // Do rendering
         BeginDrawing();
             // Draw the UI
