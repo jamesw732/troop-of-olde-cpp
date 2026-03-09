@@ -21,6 +21,10 @@ struct RenderRotation {
     Vector3 val{};
 };
 
+struct RenderOffset {
+    Vector3 val{};
+};
+
 struct PrevPredRotation {
     Vector3 val{};
 };

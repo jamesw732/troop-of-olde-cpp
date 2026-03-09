@@ -84,10 +84,6 @@ inline bool operator==(MovementInput input1, MovementInput input2) {
         && input1.rot_y == input2.mouse_rot_y;
 }
 
-struct ModelType {
-    std::string name;
-};
-
 struct ModelPointer {
     Model* model;
 };

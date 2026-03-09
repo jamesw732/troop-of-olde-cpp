@@ -4,12 +4,13 @@
 #include "../shared/serialize.hpp"
 
 
-class PacketHandler {
-  public:
+struct PacketHandler {
     flecs::world world;
+    std::unordered_map<std::string, Model>& loaded_models;
     std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
 
-    PacketHandler(flecs::world& w) : world(w) {};
+    PacketHandler(flecs::world& w, std::unordered_map<std::string, Model>& m)
+        : world(w), loaded_models(m) {};
 
     void handle_packets(std::deque<std::vector<uint8_t>>& packets) {
         while (true) {
@@ -50,7 +51,9 @@ class PacketHandler {
                     entity.set<DisplayName>({spawn_state.name});
                     entity.set<CamRotation>({30.0});
                     entity.set<Color>(RED);
-                    entity.set<ModelType>({"cube"});
+                    entity.set<RenderOffset>({0, entity.get<Scale>().val.y / 2, 0});
+                    // Hardcode cube model
+                    entity.set<ModelPointer>({&loaded_models.at("cube")});
                     netid_to_entity[spawn_state.network_id] = entity;
                 }
                 // std::cout << "Batch Spawn Packet: " << '\n';
@@ -75,7 +78,9 @@ class PacketHandler {
                 entity.set<RenderRotation>({spawn_state.rot});
                 entity.set<DisplayName>({spawn_state.name});
                 entity.set<Color>(RED);
-                entity.set<ModelType>({"cube"});
+                entity.set<RenderOffset>({0, entity.get<Scale>().val.y / 2, 0});
+                // Hardcode cube model
+                entity.set<ModelPointer>({&loaded_models.at("cube")});
                 netid_to_entity[spawn_state.network_id] = entity;
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';

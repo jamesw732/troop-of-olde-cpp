@@ -36,14 +36,14 @@ int main()
     std::unordered_map<std::string, Model> loaded_meshes;
     loaded_meshes.reserve(128);
 
-    Model world_model = LoadServerModel(MODEL_DIR "sample_world.glb");
+    loaded_meshes["sample_world"] = LoadServerModel(MODEL_DIR "sample_world.glb");
+    loaded_meshes["cube"] = LoadServerModel((MODEL_DIR "cube.glb"));
+    loaded_meshes["quad"] = LoadServerModel((MODEL_DIR "quad.glb"));
     /* print_mesh_vertices(*world_model.meshes); */
 
-    loaded_meshes["sample_world"] = world_model;
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
-    terrain.set<ModelType>({"mesh"});
-    terrain.set<ModelPointer>({&world_model});
+    terrain.set<ModelPointer>({&loaded_meshes["sample_world"]});
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();
     terrain.add<Scale>();

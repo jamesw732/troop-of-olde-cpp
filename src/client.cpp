@@ -46,8 +46,6 @@ int main()
     network.queue_data_reliable(buffer, size);
     network.send_network_buffer();
 
-    PacketHandler packet_handler(world);
-
     InputBuffer input_buffer;
     uint16_t movement_tick = 0;
     float dt = 0;
@@ -59,11 +57,12 @@ int main()
     loaded_models.reserve(128);
 
     loaded_models["sample_world"] = LoadModel((MODEL_DIR "sample_world.glb"));
+    loaded_models["cube"] = LoadModel((MODEL_DIR "cube.glb"));
+    loaded_models["quad"] = LoadModel((MODEL_DIR "quad.glb"));
     /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
-    terrain.set<ModelType>({"mesh"});
     terrain.set<ModelPointer>({&loaded_models["sample_world"]});
     terrain.add<Scale>();
     terrain.add<SimPosition>();
@@ -85,7 +84,10 @@ int main()
     register_camera_input_system(world);
     register_camera_update_system(world, camera);
     auto render_sys = register_render_system(world, camera, ManualPhase);
+    auto render_offset_sys = register_render_with_offset_system(world, camera, ManualPhase);
     register_disconnect_system(world);
+
+    PacketHandler packet_handler(world, loaded_models);
 
     // Main game loop
     while (!WindowShouldClose())
@@ -108,6 +110,7 @@ int main()
             DrawFPS(10, 10);
             // Draw each entity in the scene
             render_sys.run();
+            render_offset_sys.run();
         EndDrawing();
         // Send all messages to server
         network.send_network_buffer();

@@ -9,42 +9,11 @@
 #include "const.hpp"
 #include "raylib-util.hpp"
 
-/*
- * Get collision between a ray and a single mesh, in simulation space
- */
-inline RayCollision get_ray_collision(Ray ray, flecs::entity e) {
-    if (!e.has<ModelType>()) {
-        assert(false);
-        return RayCollision{false};
-    }
-    Vector3 const pos = e.get<SimPosition>().val;
-    Vector3 const rot = e.get<SimRotation>().val;
-    Vector3 const scale = e.get<Scale>().val;
+inline Matrix get_transformation_matrix(const Vector3 pos, const Vector3 rot, const Vector3 scale) {
     Matrix const m_scale = MatrixScale(scale.x, scale.y, scale.z);
     Matrix const m_rot   = MatrixRotateXYZ({rot.x, rot.y, rot.z});
     Matrix const m_trans = MatrixTranslate(pos.x, pos.y, pos.z);
-
-    Matrix const transform = MatrixMultiply(MatrixMultiply(m_scale, m_rot), m_trans);
-    // TODO: Rather than treat this as a separate case, just store a 3d quad as a Mesh
-    // and use GetRayCollisionMesh
-    if (e.get<ModelType>().name == "3d_quad") {
-        Vector3 const local_corners[4] = {
-            {-0.5F, 0.0F, -0.5F}, // bottom-left
-            { 0.5F, 0.0F, -0.5F}, // bottom-right
-            { 0.5F, 0.0F,  0.5F}, // top-right
-            {-0.5F, 0.0F,  0.5F}  // top-left
-        };
-        Vector3 world_corners[4];
-        for (int i = 0; i < 4; i++) {
-            world_corners[i] = Vector3Transform(local_corners[i], transform);
-        }
-        return GetRayCollisionQuad(ray, world_corners[0], world_corners[1], world_corners[2], world_corners[3]);
-    }
-    if (e.get<ModelType>().name == "mesh") {
-        // Just look at first mesh, may eventually need to use multiple
-        return GetRayCollisionMesh(ray, *e.get<ModelPointer>().model->meshes, transform);
-    }
-    return RayCollision{false};
+    return MatrixMultiply(MatrixMultiply(m_scale, m_rot), m_trans);
 }
 
 inline RayCollision find_closest_collision(
@@ -59,13 +28,18 @@ inline RayCollision find_closest_collision(
         .normal={0, 1, 0}
     };
     // Find the closest collision, if there are multiple
-    world.query<Terrain, ModelType>()
-        .each([&] (flecs::entity e, const Terrain&, const ModelType&) {
+    world.query<Terrain, ModelPointer, SimPosition, SimRotation, Scale>()
+        .each([&] (
+            Terrain, const ModelPointer& model,
+            SimPosition mesh_pos, SimRotation mesh_rot, Scale mesh_scale)
+        {
             Ray ray{pos, Vector3Normalize(dir)};
-            const RayCollision collision = get_ray_collision(ray, e);
+            Matrix transform = get_transformation_matrix(mesh_pos.val, mesh_rot.val, mesh_scale.val);
+            const RayCollision collision = GetRayCollisionMesh(ray, *model.model->meshes, transform);
             if(!collision.hit || closest_collision.distance <= collision.distance) return;
             closest_collision = collision;
-        });
+        }
+    );
     return closest_collision;
 }
 

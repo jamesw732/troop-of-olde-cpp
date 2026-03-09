@@ -48,15 +48,16 @@ inline flecs::system register_render_system(
     Camera3D& camera,
     flecs::entity phase)
 {
-    return world.system<RenderPosition, RenderRotation, Scale, Color, ModelType>()
+    return world.system<ModelPointer, RenderPosition, RenderRotation, Scale, Color>()
         .kind(phase)
+        .with<RenderOffset>().oper(flecs::Not)
         .each([&camera] (
-            flecs::entity e,
-            RenderPosition& pos,
-            RenderRotation& rot,
-            Scale& scale,
-            Color& color,
-            ModelType& model_type)
+            const ModelPointer model,
+            const RenderPosition pos,
+            const RenderRotation rot,
+            const Scale scale,
+            const Color color
+            )
         {
             BeginMode3D(camera);
                 rlPushMatrix();
@@ -65,29 +66,41 @@ inline flecs::system register_render_system(
                     rlRotatef(rot.val.y, 0, 1, 0);
                     rlRotatef(rot.val.z, 0, 0, 1);
                     rlScalef(scale.val.x, scale.val.y, scale.val.z);
-                    if (model_type.name == "cube") {
-                        DrawCube({0, scale.val.y / 2, 0}, 1, 1, 1, color);
-                        DrawCubeWires({0, scale.val.y / 2, 0}, 1, 1, 1, get_wire_color(color));
-                    }
-                    else if (model_type.name == "3d_quad") {
-                        DrawTriangle3D(
-                            {-1.0 / 2, 0, -1.0 / 2},
-                            {-1.0 / 2, 0, 1.0 / 2},
-                            {1.0 / 2, 0, -1.0 / 2},
-                            color
-                        );
-                        DrawTriangle3D(
-                            {1.0 / 2, 0, 1.0 / 2},
-                            {1.0 / 2, 0, -1.0 / 2},
-                            {-1.0 / 2, 0, 1.0 / 2},
-                            color
-                        );
-                    }
-                    else if (model_type.name == "mesh") {
-                        ModelPointer model = e.get<ModelPointer>();
-                        DrawModel(*model.model, {}, 1, color);
-                        DrawMeshWire(*model.model->meshes, {}, BLACK);
-                    }
+                    DrawModel(*model.model, {}, 1, color);
+                    DrawMeshWire(*model.model->meshes, {}, BLACK);
+                    /* } */
+                rlPopMatrix();
+            EndMode3D();
+        }
+    );
+}
+
+inline flecs::system register_render_with_offset_system(
+    flecs::world& world,
+    Camera3D& camera,
+    flecs::entity phase)
+{
+    return world.system<ModelPointer, RenderPosition, RenderRotation, Scale, Color, RenderOffset>()
+        .kind(phase)
+        .each([&camera] (
+            const ModelPointer model,
+            const RenderPosition pos,
+            const RenderRotation rot,
+            const Scale scale,
+            const Color color,
+            const RenderOffset offset
+            )
+        {
+            BeginMode3D(camera);
+                rlPushMatrix();
+                    rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
+                    rlTranslatef(offset.val.x, offset.val.y, offset.val.z);
+                    rlRotatef(rot.val.x, 1, 0, 0);
+                    rlRotatef(rot.val.y, 0, 1, 0);
+                    rlRotatef(rot.val.z, 0, 0, 1);
+                    rlScalef(scale.val.x, scale.val.y, scale.val.z);
+                    DrawModel(*model.model, {}, 1, color);
+                    DrawMeshWire(*model.model->meshes, {}, BLACK);
                 rlPopMatrix();
             EndMode3D();
         }
