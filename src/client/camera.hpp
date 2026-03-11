@@ -39,11 +39,11 @@ inline void register_camera_update_system(flecs::world& world, Camera3D& camera)
          .each([&] (LocalPlayer, RenderPosition player_pos, RenderRotation player_rot, Scale player_scale,
                     CamRotation cam_rotation, CamDistance cam_distance) {
             float y_rot = (player_rot.val.y + cam_rotation.y) * PI / 180;
-            float polar_rot = (90 - cam_rotation.x) * PI / 180;
+            float x_rot = (90 - cam_rotation.x) * PI / 180;
             Vector3 sphere_coords{
-                sin(polar_rot) * sin(y_rot),
-                cos(polar_rot),
-                sin(polar_rot) * cos(y_rot)
+                -sin(x_rot) * sin(y_rot),
+                cos(x_rot),
+                -sin(x_rot) * cos(y_rot)
             };
             Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.5f, 0});
             camera.position = Vector3Add(focus_pos, Vector3Scale(sphere_coords, cam_distance.val));

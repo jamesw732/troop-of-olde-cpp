@@ -59,6 +59,7 @@ int main()
     loaded_models["sample_world"] = LoadModel((MODEL_DIR "sample_world.glb"));
     loaded_models["cube"] = LoadModel((MODEL_DIR "cube.glb"));
     loaded_models["quad"] = LoadModel((MODEL_DIR "quad.glb"));
+    loaded_models["humanoid"] = LoadModel((MODEL_DIR "humanoid.glb"));
     /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
     auto terrain = world.entity("World");

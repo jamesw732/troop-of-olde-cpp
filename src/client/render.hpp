@@ -59,6 +59,8 @@ inline flecs::system register_render_system(
             const Color color
             )
         {
+            /* BoundingBox box = GetModelBoundingBox(*model.model); */
+            /* std::cout << box.min << ", " << box.max << "\n"; */
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
@@ -91,6 +93,9 @@ inline flecs::system register_render_with_offset_system(
             const RenderOffset offset
             )
         {
+            /* BoundingBox box = GetModelBoundingBox(*model.model); */
+            /* std::cout << box.min << ", " << box.max << "\n"; */
+            
             BeginMode3D(camera);
                 rlPushMatrix();
                     rlTranslatef(pos.val.x, pos.val.y, pos.val.z);

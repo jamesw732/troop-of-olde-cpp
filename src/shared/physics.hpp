@@ -72,6 +72,7 @@ inline Vector3 process_collision(
     int max_depth = 3
 )
 {
+    // TODO: Figure out what to do about clipping through negative-incline surfaces
     if (depth > max_depth) {
         return Vector3{};
     }

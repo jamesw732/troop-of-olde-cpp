@@ -16,7 +16,7 @@ inline Vector3 process_movement_input(
     float& gravity,
     bool& grounded)
 {
-    Vector3 disp{(float) input.x, 0, (float) input.z};
+    Vector3 disp{(float) -input.x, 0, (float) -input.z};
     disp = Vector3Normalize(disp);
     disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
     disp = Vector3Scale(disp, 0.25);

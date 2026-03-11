@@ -30,7 +30,6 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();
     entity.add<RenderRotation>();
-    entity.add<RenderOffset>();
 
     entity.add<Scale>();
     entity.add<Color>();
@@ -67,7 +66,6 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();
     entity.add<RenderRotation>();
-    entity.add<RenderOffset>();
 
     entity.add<Scale>();
     entity.add<Color>();
