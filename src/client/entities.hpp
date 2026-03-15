@@ -28,6 +28,11 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<PrevPredPosition>();
     entity.add<PrevPredRotation>();
 
+    entity.add<RecvPosition>();
+    entity.add<RecvRotation>();
+    entity.add<RecvGrounded>();
+    entity.add<RecvGravity>();
+
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();
     entity.add<RenderRotation>();
@@ -67,6 +72,11 @@ inline flecs::entity create_remote_player(flecs::world world) {
 
     entity.add<PrevPredPosition>();
     entity.add<PrevPredRotation>();
+
+    entity.add<RecvPosition>();
+    entity.add<RecvRotation>();
+    entity.add<RecvGravity>();
+    entity.add<RecvGrounded>();
 
     entity.add<LerpTimer>();
     entity.add<RenderPosition>();

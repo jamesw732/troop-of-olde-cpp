@@ -19,6 +19,34 @@
 
 /* #define DISABLE_SERVER */
 
+inline void register_movement_recv_system(flecs::world world) {
+    world.system<AckTick, RecvAckTick,
+                 SimPosition, SimRotation, SimGravity, SimGrounded,
+                 RecvPosition, RecvRotation, RecvGravity, RecvGrounded>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([] (
+                AckTick ack_tick,
+                RecvAckTick recv_ack_tick,
+                SimPosition& sim_pos,
+                SimRotation& sim_rot,
+                SimGravity& sim_grav,
+                SimGrounded& sim_grounded,
+                RecvPosition recv_pos,
+                RecvRotation recv_rot,
+                RecvGravity recv_grav,
+                RecvGrounded recv_grounded
+            )
+        {
+            if ((int16_t) (recv_ack_tick.val - ack_tick.val) <= 0) {
+                return;
+            }
+            sim_pos.val = recv_pos.val;
+            sim_rot.val = recv_rot.val;
+            sim_grav.val = recv_grav.val;
+            sim_grounded.val = recv_grounded.val;
+        }
+    );
+}
 
 inline void register_movement_prediction_reset_system(flecs::world world) {
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
@@ -36,7 +64,7 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
                 PredGrounded& pred_grounded,
                 AckTick& old_ack_tick,
                 RecvAckTick& new_ack_tick
-                )
+            )
         {
 #ifndef DISABLE_SERVER
             // If old tick, don't copy

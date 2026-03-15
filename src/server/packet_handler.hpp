@@ -3,10 +3,15 @@
 #include "network.hpp"
 #include "entities.hpp"
 
-class PacketHandler {
-  private:
+
+/*
+ * This struct acts as a shallow boundary between networking data and ECS data
+ * Game logic should be extremely minimal in this file
+ * The desired pattern is to store received networking data in "intermediary" ECS components,
+ * to be processed later in a system like any other component would.
+ */
+struct PacketHandler {
     flecs::world world;
-  public:
     PacketHandler(flecs::world& w) : world(w) {};
 
     void handle_packets(std::deque<RecvPacket>& packets) {

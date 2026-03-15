@@ -3,7 +3,12 @@
 #include "../shared/packets.hpp"
 #include "../shared/serialize.hpp"
 
-
+/*
+ * This struct acts as a shallow boundary between networking data and ECS data
+ * Game logic should be extremely minimal in this file
+ * The desired pattern is to store received networking data in "intermediary" ECS components,
+ * to be processed later in a system like any other component would.
+ */
 struct PacketHandler {
     flecs::world world;
     std::unordered_map<std::string, Model>& loaded_models;
@@ -102,15 +107,14 @@ struct PacketHandler {
                         continue;
                     }
                     flecs::entity e = netid_entity->second;
-                    if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) {
-                        continue;
-                    }
+                    /* if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) { */
+                    /*     continue; */
+                    /* } */
                     e.set<RecvAckTick>({move_update.ack_tick});
-                    // Should these be RecvPosition etc instead of SimPosition?
-                    e.set<SimPosition>({move_update.pos});
-                    e.set<SimRotation>({move_update.rot});
-                    e.set<SimGravity>({move_update.gravity});
-                    e.set<SimGrounded>({move_update.grounded});
+                    e.set<RecvPosition>({move_update.pos});
+                    e.set<RecvRotation>({move_update.rot});
+                    e.set<RecvGravity>({move_update.gravity});
+                    e.set<RecvGrounded>({move_update.grounded});
                     e.set<RecvLocomotionState>({move_update.movement_state});
                 }
 #endif

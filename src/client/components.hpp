@@ -41,6 +41,22 @@ struct RecvAckTick {
     uint16_t val{static_cast<uint16_t>(-1)};
 };
 
+struct RecvPosition {
+    Vector3 val{};
+};
+
+struct RecvRotation {
+    Vector3 val{};
+};
+
+struct RecvGravity {
+    float val;
+};
+
+struct RecvGrounded {
+    bool val;
+};
+
 struct NetworkMap {
     std::unordered_map<uint32_t, flecs::entity> netid_to_entity;
 };
