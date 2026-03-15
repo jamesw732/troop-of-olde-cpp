@@ -1,6 +1,7 @@
 #include "flecs.h"
 
 #include "components.hpp"
+#include "../shared/animation_components.hpp"
 #include "../shared/components.hpp"
 #include "../shared/packets.hpp"
 
@@ -38,6 +39,10 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<CamRotation>();
     entity.add<CamDistance>();
 
+    entity.add<LocomotionState>();
+    entity.add<AnimationTimer>();
+    entity.add<RecvLocomotionState>();
+
     return entity;
 }
 
@@ -70,6 +75,10 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<Scale>();
     entity.add<Color>();
     entity.add<ModelPointer>();
+
+    entity.add<LocomotionState>();
+    entity.add<AnimationTimer>();
+    entity.add<RecvLocomotionState>();
 
     return entity;
 }

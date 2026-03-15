@@ -1,5 +1,6 @@
 #include "shared/pch.hpp"
 
+#include "client/animation.hpp"
 #include "client/camera.hpp"
 #include "client/components.hpp"
 #include "client/disconnect.hpp"
@@ -84,6 +85,8 @@ int main()
     register_movement_lerp_system(world);
     register_camera_input_system(world);
     register_camera_update_system(world, camera);
+    register_animation_tick_system(world, input_buffer);
+    register_animation_recv_system(world);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     auto render_offset_sys = register_render_with_offset_system(world, camera, ManualPhase);
     register_disconnect_system(world);

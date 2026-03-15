@@ -5,6 +5,7 @@
 
 #include "raylib.h"
 
+#include "animation_components.hpp"
 #include "network_components.hpp"
 #include "raylib-util.hpp"
 
@@ -57,6 +58,19 @@ struct MovementInput {
     bool jump = false;
     int8_t rot_y = 0;
     int16_t mouse_rot_y = 0;
+
+    bool get_forward() const {
+        return z < 0;
+    }
+    bool get_backward() const {
+        return z > 0;
+    }
+    bool get_strafe_r() const {
+        return x > 0;
+    }
+    bool get_strafe_l() const {
+        return x < 0;
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
@@ -120,6 +134,7 @@ struct MovementUpdate {
     Vector3 rot;
     float gravity;
     bool grounded;
+    LocomotionState movement_state;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {
@@ -137,6 +152,8 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) 
     os << "gravity: " << update.gravity << "\n";
     print_indent(os);
     os << "grounded: " << update.grounded << "\n";
+    print_indent(os);
+    os << "movement_state: " << (int) update.movement_state << "\n";
     os << unindent();
     print_indent(os);
     os << "}";

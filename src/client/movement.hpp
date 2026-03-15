@@ -55,15 +55,10 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
-                 PredPosition, PredRotation, PredGravity, PredGrounded,
+    world.system<PredPosition, PredRotation, PredGravity, PredGrounded,
                  AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world](
-                SimPosition& pos,
-                SimRotation& rot,
-                SimGravity& gravity,
-                SimGrounded& grounded,
                 PredPosition& pred_pos,
                 PredRotation& pred_rot,
                 PredGravity& pred_gravity,
@@ -86,9 +81,9 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                 MovementInput input = *opt;
                 tick_movement(
                     world,
+                    input,
                     pred_pos.val,
                     pred_rot.val.y,
-                    input,
                     pred_gravity.val,
                     pred_grounded.val
                 );
@@ -114,13 +109,13 @@ inline void register_movement_system(
         flecs::world& world,
         InputBuffer& input_buffer)
 {
-    world.system<PredPosition, PredRotation, SimGravity, SimGrounded, LocalPlayer>()
+    world.system<PredPosition, PredRotation, PredGravity, PredGrounded, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer, &world]
            (PredPosition& pos,
             PredRotation& rot,
-            SimGravity& gravity,
-            SimGrounded& grounded,
+            PredGravity& gravity,
+            PredGrounded& grounded,
             LocalPlayer)
         {
             std::optional<MovementInput> opt = input_buffer.back();
@@ -128,7 +123,7 @@ inline void register_movement_system(
                 return;
             }
             MovementInput input = *opt;
-            tick_movement(world, pos.val, rot.val.y, input, gravity.val, grounded.val);
+            tick_movement(world, input, pos.val, rot.val.y, gravity.val, grounded.val);
         }
     );
 }
@@ -178,11 +173,11 @@ inline void register_movement_lerp_system(flecs::world& world) {
         LerpTimer>()
         .each([] (
                 RenderPosition& pos,
-                PredPosition& target_pos,
-                PrevPredPosition& prev_pos,
+                const PredPosition& target_pos,
+                const PrevPredPosition& prev_pos,
                 RenderRotation& rot,
-                PredRotation& target_rot,
-                PrevPredRotation& prev_rot,
+                const PredRotation& target_rot,
+                const PrevPredRotation& prev_rot,
                 LerpTimer& timer)
         {
             float dt = GetFrameTime();

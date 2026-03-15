@@ -125,4 +125,5 @@ void serialize(S& s, MovementUpdate& move_update) {
     s.object(move_update.rot);
     s.value4b(move_update.gravity);
     s.value1b(move_update.grounded);
+    s.value1b(move_update.movement_state);
 }

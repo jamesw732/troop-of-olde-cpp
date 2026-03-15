@@ -1,4 +1,6 @@
 #pragma once
+#include "optional"
+
 #include "raylib.h"
 
 #include "../shared/components.hpp"
@@ -11,6 +13,14 @@ struct NeedsSpawnBroadcast {};
 struct InputBuffer {
     size_t size = 0;
     std::array<MovementInput, MAX_INPUT_BUFFER> inputs{};
+
+    std::optional<MovementInput> back() {
+        if (size == 0 || size > MAX_INPUT_BUFFER) {
+            return std::nullopt;
+        }
+        return inputs[size - 1];
+
+    }
 };
 
 struct RecvMoveTick {

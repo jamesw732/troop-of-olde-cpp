@@ -106,10 +106,12 @@ struct PacketHandler {
                         continue;
                     }
                     e.set<RecvAckTick>({move_update.ack_tick});
+                    // Should these be RecvPosition etc instead of SimPosition?
                     e.set<SimPosition>({move_update.pos});
                     e.set<SimRotation>({move_update.rot});
                     e.set<SimGravity>({move_update.gravity});
                     e.set<SimGrounded>({move_update.grounded});
+                    e.set<RecvLocomotionState>({move_update.movement_state});
                 }
 #endif
                 break;

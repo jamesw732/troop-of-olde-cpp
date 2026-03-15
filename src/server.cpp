@@ -3,6 +3,7 @@
 
 #include "shared/pch.hpp"
 
+#include "server/animation.hpp"
 #include "server/components.hpp"
 #include "server/disconnect.hpp"
 #include "server/network.hpp"
@@ -53,6 +54,7 @@ int main()
     register_components(world);
 
     register_movement_system(world);
+    register_animation_tick_system(world);
     register_movement_networking_system(world, network);
 
     register_batch_spawn_system(world, network);
