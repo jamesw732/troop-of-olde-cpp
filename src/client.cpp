@@ -7,6 +7,7 @@
 #include "client/fonts.hpp"
 #include "client/input.hpp"
 #include "client/network.hpp"
+#include "client/models.hpp"
 #include "client/movement.hpp"
 #include "client/packet_handler.hpp"
 #include "client/render.hpp"
@@ -54,18 +55,16 @@ int main()
     register_components(world);
     register_client_components(world);
 
-    std::unordered_map<std::string, Model> loaded_models;
+    std::unordered_map<std::string, ModelAsset> loaded_models;
     loaded_models.reserve(128);
 
-    loaded_models["sample_world"] = LoadModel((MODEL_DIR "sample_world.glb"));
-    loaded_models["cube"] = LoadModel((MODEL_DIR "cube.glb"));
-    loaded_models["quad"] = LoadModel((MODEL_DIR "quad.glb"));
-    loaded_models["humanoid"] = LoadModel((MODEL_DIR "humanoid.glb"));
+    load_all_models(loaded_models);
+
     /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
-    terrain.set<ModelPointer>({&loaded_models["sample_world"]});
+    terrain.set<ModelPointer>({&loaded_models["sample_world"].model});
     terrain.add<Scale>();
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();

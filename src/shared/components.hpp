@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 
 #include "raylib.h"
 
@@ -98,8 +99,18 @@ inline bool operator==(MovementInput input1, MovementInput input2) {
         && input1.rot_y == input2.mouse_rot_y;
 }
 
+// The loaded asset
+struct ModelAsset {
+    Model model;
+    std::unordered_map<std::string, ModelAnimation> animations;
+};
+
 struct ModelPointer {
     Model* model;
+};
+
+struct ModelAnimations {
+    std::unordered_map<std::string, ModelAnimation>* map;
 };
 
 struct PlayerSpawnState {

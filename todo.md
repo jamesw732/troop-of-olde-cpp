@@ -1,6 +1,9 @@
 # Right now:
 
 ## Animate character movement
+- Animation loading
+    - New map of string (model name) to map of string (animation name) to ModelAnimation
+    - Wrap LoadModelAnimations to insert a model's animations into animation map
 - Animation state machine
     - Decide how to increment AnimationTimer - standalone simple system?
 - Compute poses

@@ -3,7 +3,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "utils.h"
+#include "config.h"
 #include "external/cgltf.h"
 
 #include "mesh_loader.hpp"

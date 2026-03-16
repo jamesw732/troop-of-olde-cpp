@@ -11,10 +11,10 @@
  */
 struct PacketHandler {
     flecs::world world;
-    std::unordered_map<std::string, Model>& loaded_models;
+    std::unordered_map<std::string, ModelAsset>& loaded_models;
     std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
 
-    PacketHandler(flecs::world& w, std::unordered_map<std::string, Model>& m)
+    PacketHandler(flecs::world& w, std::unordered_map<std::string, ModelAsset>& m)
         : world(w), loaded_models(m) {};
 
     void handle_packets(std::deque<std::vector<uint8_t>>& packets) {
@@ -57,7 +57,8 @@ struct PacketHandler {
                     entity.set<CamRotation>({30.0});
                     entity.set<Color>(RED);
                     // Hardcode cube model
-                    entity.set<ModelPointer>({&loaded_models.at("humanoid")});
+                    entity.set<ModelPointer>({&loaded_models.at("humanoid").model});
+                    entity.set<ModelAnimations>({&loaded_models.at("humanoid").animations});
                     netid_to_entity[spawn_state.network_id] = entity;
                 }
                 // std::cout << "Batch Spawn Packet: " << '\n';
@@ -83,7 +84,7 @@ struct PacketHandler {
                 entity.set<DisplayName>({spawn_state.name});
                 entity.set<Color>(RED);
                 // Hardcode cube model
-                entity.set<ModelPointer>({&loaded_models.at("humanoid")});
+                entity.set<ModelPointer>({&loaded_models.at("humanoid").model});
                 netid_to_entity[spawn_state.network_id] = entity;
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';

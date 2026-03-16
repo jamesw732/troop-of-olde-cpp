@@ -21,7 +21,6 @@ inline void register_animation_tick_system(flecs::world& world) {
             MovementInput input = *opt;
             LocomotionState new_movement_state = get_locomotion_state(input);
             movement_state = new_movement_state;
-            std::cout << anim_labels[(size_t) movement_state] << "\n";
         }
     );
 }
