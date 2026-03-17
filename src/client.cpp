@@ -87,10 +87,10 @@ int main()
     register_camera_update_system(world, camera);
     register_animation_tick_system(world, input_buffer);
     register_animation_recv_system(world);
-    register_character_pose_system(world);
-    auto render_sys = register_render_system(world, camera, ManualPhase);
-    auto render_offset_sys = register_render_with_offset_system(world, camera, ManualPhase);
     register_disconnect_system(world);
+    auto render_sys = register_render_system(world, camera, ManualPhase);
+    auto anim_render_sys = register_animation_render_system(world, camera, ManualPhase);
+    auto anim_timer_sys = register_animation_timer_system(world, ManualPhase);
 
     PacketHandler packet_handler(world, loaded_models);
 
@@ -115,8 +115,9 @@ int main()
             DrawFPS(10, 10);
             // Draw each entity in the scene
             render_sys.run();
-            render_offset_sys.run();
+            anim_render_sys.run();
         EndDrawing();
+        anim_timer_sys.run();
         // Send all messages to server
         network.send_network_buffer();
     }

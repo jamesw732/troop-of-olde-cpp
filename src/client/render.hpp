@@ -6,6 +6,7 @@
 #include "rlgl.h"
 
 #include "../shared/components.hpp"
+#include "../shared/const.hpp"
 #include "components.hpp"
 
 inline Color get_wire_color(Color cube_color) {
@@ -43,6 +44,18 @@ inline void DrawMeshWire(const Mesh& mesh, const Vector3& pos, const Color& colo
     }
 }
 
+inline void RenderModel(Model model, Vector3 pos, Vector3 rot, Vector3 scale, Color color) {
+        rlPushMatrix();
+            rlTranslatef(pos.x, pos.y, pos.z);
+            rlRotatef(rot.x, 1, 0, 0);
+            rlRotatef(rot.y, 0, 1, 0);
+            rlRotatef(rot.z, 0, 0, 1);
+            rlScalef(scale.x, scale.y, scale.z);
+            DrawModel(model, {}, 1, color);
+            DrawModelWires(model, {}, 1, BLACK);
+        rlPopMatrix();
+}
+
 inline flecs::system register_render_system(
     flecs::world& world,
     Camera3D& camera,
@@ -50,7 +63,7 @@ inline flecs::system register_render_system(
 {
     return world.system<ModelPointer, RenderPosition, RenderRotation, Scale, Color>()
         .kind(phase)
-        .with<RenderOffset>().oper(flecs::Not)
+        .without<ModelAnimations>()
         .each([&camera] (
             const ModelPointer model,
             const RenderPosition pos,
@@ -59,55 +72,37 @@ inline flecs::system register_render_system(
             const Color color
             )
         {
-            /* BoundingBox box = GetModelBoundingBox(*model.model); */
-            /* std::cout << box.min << ", " << box.max << "\n"; */
             BeginMode3D(camera);
-                rlPushMatrix();
-                    rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
-                    rlRotatef(rot.val.x, 1, 0, 0);
-                    rlRotatef(rot.val.y, 0, 1, 0);
-                    rlRotatef(rot.val.z, 0, 0, 1);
-                    rlScalef(scale.val.x, scale.val.y, scale.val.z);
-                    DrawModel(*model.model, {}, 1, color);
-                    DrawModelWires(*model.model, {}, 1, BLACK);
-                    /* DrawMeshWire(*model.model->meshes, {}, BLACK); */
-                    /* } */
-                rlPopMatrix();
+                RenderModel(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();
         }
     );
 }
 
-inline flecs::system register_render_with_offset_system(
+inline flecs::system register_animation_render_system(
     flecs::world& world,
     Camera3D& camera,
     flecs::entity phase)
 {
-    return world.system<ModelPointer, RenderPosition, RenderRotation, Scale, Color, RenderOffset>()
+    return world.system<ModelPointer, ModelAnimations, LocomotionState, AnimationTimer,
+                        RenderPosition, RenderRotation, Scale, Color>()
         .kind(phase)
         .each([&camera] (
             const ModelPointer model,
+            const ModelAnimations& anims,
+            const LocomotionState& movement_state,
+            AnimationTimer& timer,
             const RenderPosition pos,
             const RenderRotation rot,
             const Scale scale,
-            const Color color,
-            const RenderOffset offset
+            const Color color
             )
         {
-            /* BoundingBox box = GetModelBoundingBox(*model.model); */
-            /* std::cout << box.min << ", " << box.max << "\n"; */
-            
+            std::string anim_name = anim_names[(size_t) movement_state];
+            ModelAnimation anim = anims.map->at(anim_name);
+            UpdateModelAnimation(*model.model, anim, timer.time * ANIMATION_FPS);
             BeginMode3D(camera);
-                rlPushMatrix();
-                    rlTranslatef(pos.val.x, pos.val.y, pos.val.z);
-                    rlTranslatef(offset.val.x, offset.val.y, offset.val.z);
-                    rlRotatef(rot.val.x, 1, 0, 0);
-                    rlRotatef(rot.val.y, 0, 1, 0);
-                    rlRotatef(rot.val.z, 0, 0, 1);
-                    rlScalef(scale.val.x, scale.val.y, scale.val.z);
-                    DrawModel(*model.model, {}, 1, color);
-                    DrawModelWires(*model.model, {}, 1, BLACK);
-                rlPopMatrix();
+                RenderModel(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();
         }
     );
