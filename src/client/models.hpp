@@ -19,6 +19,7 @@ inline void load_model_with_animations(
     ModelAnimation* animations = LoadModelAnimations(filename.c_str(), num_animations);
     for (int i = 0; i < *num_animations; i++) {
         ModelAnimation* animation = animations + i;
+        /* std::cout << animation->name << "\n"; */
         animation_map[animation->name] = *animation;
     }
     asset.animations = animation_map;

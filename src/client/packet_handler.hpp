@@ -56,7 +56,7 @@ struct PacketHandler {
                     entity.set<DisplayName>({spawn_state.name});
                     entity.set<CamRotation>({30.0});
                     entity.set<Color>(RED);
-                    // Hardcode cube model
+                    // Hardcode model
                     entity.set<ModelPointer>({&loaded_models.at("humanoid").model});
                     entity.set<ModelAnimations>({&loaded_models.at("humanoid").animations});
                     netid_to_entity[spawn_state.network_id] = entity;
@@ -83,8 +83,9 @@ struct PacketHandler {
                 entity.set<RenderRotation>({spawn_state.rot});
                 entity.set<DisplayName>({spawn_state.name});
                 entity.set<Color>(RED);
-                // Hardcode cube model
+                // Hardcode model
                 entity.set<ModelPointer>({&loaded_models.at("humanoid").model});
+                entity.set<ModelAnimations>({&loaded_models.at("humanoid").animations});
                 netid_to_entity[spawn_state.network_id] = entity;
                 // std::cout << "Single Spawn Packet: " << '\n';
                 // std::cout << spawn_state.network_id.id << '\n';

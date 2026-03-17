@@ -69,7 +69,8 @@ inline flecs::system register_render_system(
                     rlRotatef(rot.val.z, 0, 0, 1);
                     rlScalef(scale.val.x, scale.val.y, scale.val.z);
                     DrawModel(*model.model, {}, 1, color);
-                    DrawMeshWire(*model.model->meshes, {}, BLACK);
+                    DrawModelWires(*model.model, {}, 1, BLACK);
+                    /* DrawMeshWire(*model.model->meshes, {}, BLACK); */
                     /* } */
                 rlPopMatrix();
             EndMode3D();
@@ -105,7 +106,7 @@ inline flecs::system register_render_with_offset_system(
                     rlRotatef(rot.val.z, 0, 0, 1);
                     rlScalef(scale.val.x, scale.val.y, scale.val.z);
                     DrawModel(*model.model, {}, 1, color);
-                    DrawMeshWire(*model.model->meshes, {}, BLACK);
+                    DrawModelWires(*model.model, {}, 1, BLACK);
                 rlPopMatrix();
             EndMode3D();
         }

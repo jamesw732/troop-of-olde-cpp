@@ -21,7 +21,6 @@ inline void register_animation_tick_system(flecs::world& world, InputBuffer& inp
             }
             movement_state = new_movement_state;
             timer.time = 0;
-            // TODO: Move current pose over to previous pose here
         }
     );
 }
@@ -42,9 +41,14 @@ inline void register_animation_recv_system(flecs::world& world) {
 }
 
 inline void register_character_pose_system(flecs::world& world) {
-    world.system<ModelPointer, LocomotionState, AnimationTimer>()
-        .each([] (ModelPointer& model, const LocomotionState& movement_state, AnimationTimer& timer) {
-
+    world.system<ModelPointer, ModelAnimations, LocomotionState, AnimationTimer>()
+        .each([] (ModelPointer& model, ModelAnimations& anims,
+                  const LocomotionState& movement_state, AnimationTimer& timer)
+        {
+            std::string anim_name = anim_names[(size_t) movement_state];
+            ModelAnimation anim = anims.map->at(anim_name);
+            UpdateModelAnimation(*model.model, anim, timer.time * ANIMATION_FPS);
+            timer.time += GetFrameTime();
         }
     );
 }

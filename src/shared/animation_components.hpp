@@ -17,17 +17,28 @@ struct RecvLocomotionState {
     LocomotionState state{};
 };
 
-// The name of the animation baked into the model
+// Temporary names compatible with bad model
 constexpr const char* anim_names[(std::size_t)LocomotionState::Count] = {
-    "idle",
-    "forward",
-    "forward",
-    "forward",
-    "forward",
-    "idle",
-    "idle",
-    "idle"
+    "Idle",
+    "RunCycle",
+    "RunCycle",
+    "RunCycle",
+    "RunCycle",
+    "Idle",
+    "Idle",
+    "Idle"
 };
+// The name of the animation baked into the model
+/* constexpr const char* anim_names[(std::size_t)LocomotionState::Count] = { */
+/*     "idle", */
+/*     "forward", */
+/*     "forward", */
+/*     "forward", */
+/*     "forward", */
+/*     "idle", */
+/*     "idle", */
+/*     "idle" */
+/* }; */
 
 // Just a printable label for the animations
 constexpr const char* anim_labels[(std::size_t)LocomotionState::Count] = {
