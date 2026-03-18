@@ -13,10 +13,6 @@ enum class LocomotionState: uint8_t {
     Count
 };
 
-struct RecvLocomotionState {
-    LocomotionState state{};
-};
-
 // Temporary names compatible with bad model
 constexpr const char* anim_names[(std::size_t)LocomotionState::Count] = {
     "Idle",
@@ -53,6 +49,26 @@ constexpr const char* anim_labels[(std::size_t)LocomotionState::Count] = {
 };
 
 
-struct AnimationTimer {
-    float time = 0;
+struct CurLocomotionState {
+    LocomotionState state{};
+};
+
+struct PrevLocomotionState {
+    LocomotionState state{};
+};
+
+struct RecvLocomotionState {
+    LocomotionState state{};
+};
+
+struct AnimationFrame {
+    float frame = 0;
+};
+
+struct PrevAnimationFrame {
+    float frame = 0;
+};
+
+struct BlendFactor {
+    float val = 0;
 };

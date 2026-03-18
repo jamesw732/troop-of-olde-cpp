@@ -90,7 +90,8 @@ int main()
     register_disconnect_system(world);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     auto anim_render_sys = register_animation_render_system(world, camera, ManualPhase);
-    auto anim_timer_sys = register_animation_timer_system(world, ManualPhase);
+    auto anim_frame_sys = register_animation_frame_system(world, ManualPhase);
+    auto anim_blend_sys = register_animation_blend_system(world, ManualPhase);
 
     PacketHandler packet_handler(world, loaded_models);
 
@@ -117,7 +118,8 @@ int main()
             render_sys.run();
             anim_render_sys.run();
         EndDrawing();
-        anim_timer_sys.run();
+        anim_frame_sys.run();
+        anim_blend_sys.run();
         // Send all messages to server
         network.send_network_buffer();
     }

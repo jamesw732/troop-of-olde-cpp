@@ -45,9 +45,12 @@ inline flecs::entity create_local_player(flecs::world world) {
     entity.add<CamDistance>();
 
     entity.add<ModelAnimations>();
-    entity.add<LocomotionState>();
-    entity.add<AnimationTimer>();
+    entity.add<CurLocomotionState>();
+    entity.add<PrevLocomotionState>();
     entity.add<RecvLocomotionState>();
+    entity.add<AnimationFrame>();
+    entity.add<PrevAnimationFrame>();
+    entity.add<BlendFactor>();
 
     return entity;
 }
@@ -88,9 +91,12 @@ inline flecs::entity create_remote_player(flecs::world world) {
     entity.add<Color>();
 
     entity.add<ModelAnimations>();
-    entity.add<LocomotionState>();
-    entity.add<AnimationTimer>();
+    entity.add<CurLocomotionState>();
+    entity.add<PrevLocomotionState>();
     entity.add<RecvLocomotionState>();
+    entity.add<AnimationFrame>();
+    entity.add<PrevAnimationFrame>();
+    entity.add<BlendFactor>();
 
     return entity;
 }

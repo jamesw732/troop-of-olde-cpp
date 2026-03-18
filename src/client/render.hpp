@@ -84,23 +84,36 @@ inline flecs::system register_animation_render_system(
     Camera3D& camera,
     flecs::entity phase)
 {
-    return world.system<ModelPointer, ModelAnimations, LocomotionState, AnimationTimer,
+    return world.system<ModelPointer, ModelAnimations,
+                        CurLocomotionState, AnimationFrame,
+                        PrevLocomotionState, PrevAnimationFrame,
+                        BlendFactor,
                         RenderPosition, RenderRotation, Scale, Color>()
         .kind(phase)
         .each([&camera] (
             const ModelPointer model,
-            const ModelAnimations& anims,
-            const LocomotionState& movement_state,
-            AnimationTimer& timer,
+            const ModelAnimations anims,
+            const CurLocomotionState movement_state,
+            const AnimationFrame frame,
+            const PrevLocomotionState prev_movement_state,
+            const PrevAnimationFrame prev_frame,
+            const BlendFactor alpha,
             const RenderPosition pos,
             const RenderRotation rot,
             const Scale scale,
             const Color color
             )
         {
-            std::string anim_name = anim_names[(size_t) movement_state];
+            std::string anim_name = anim_names[(size_t) movement_state.state];
+            std::string prev_anim_name = anim_names[(size_t) prev_movement_state.state];
             ModelAnimation anim = anims.map->at(anim_name);
-            UpdateModelAnimation(*model.model, anim, timer.time * ANIMATION_FPS);
+            ModelAnimation prev_anim = anims.map->at(prev_anim_name);
+            UpdateModelAnimationEx(
+                *model.model,
+                prev_anim, prev_frame.frame,
+                anim, frame.frame,
+                alpha.val
+            );
             BeginMode3D(camera);
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();
