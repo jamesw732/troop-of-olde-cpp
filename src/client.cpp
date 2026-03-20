@@ -24,7 +24,7 @@ int main()
 {
     int const targetFPS = 60;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);
+    SetTargetFPS(targetFPS);
     // Initialize window attributes
     const int screenWidth = 800;
     const int screenHeight = 450;
@@ -78,20 +78,21 @@ int main()
     register_movement_prediction_reset_system(world);
     register_movement_reconcile_system(world, input_buffer);
     register_movement_input_system(world, input_buffer);
+    register_camera_input_system(world);
     register_movement_system(world, input_buffer);
     register_movement_transmit_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_movement_lerp_reset_system(world);
-    register_movement_lerp_system(world);
-    register_camera_input_system(world);
-    register_camera_update_system(world, camera);
     register_animation_tick_system(world, input_buffer);
     register_animation_recv_system(world);
-    register_disconnect_system(world);
+    register_movement_lerp_system(world);
+    register_character_mouse_rotation_system(world);
+    register_camera_update_system(world, camera);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     auto anim_render_sys = register_animation_render_system(world, camera, ManualPhase);
     auto anim_frame_sys = register_animation_frame_system(world, ManualPhase);
     auto anim_blend_sys = register_animation_blend_system(world, ManualPhase);
+    register_disconnect_system(world);
 
     PacketHandler packet_handler(world, loaded_models);
 

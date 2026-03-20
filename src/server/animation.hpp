@@ -14,11 +14,8 @@ inline void register_animation_tick_system(flecs::world& world) {
     world.system<InputBuffer, LocomotionState>()
         .interval(MOVE_UPDATE_RATE)
         .each([] (InputBuffer& input_buffer, LocomotionState& movement_state) {
-            std::optional<MovementInput> opt = input_buffer.back();
-            if (!opt) {
-                return;
-            }
-            MovementInput input = *opt;
+            if (input_buffer.empty()) return;
+            MovementInput input = input_buffer.back();
             LocomotionState new_movement_state = get_locomotion_state(input);
             movement_state = new_movement_state;
         }

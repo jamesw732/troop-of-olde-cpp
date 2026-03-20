@@ -102,11 +102,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             // If new tick, perform client-side prediction on un-acked inputs
             input_buffer.flushUpTo(new_ack_tick.val);
             for (int i = 0; i < input_buffer.size; i++) {
-                std::optional<MovementInput> opt = input_buffer.get_at(i);
-                if (!opt) {
-                    continue;
-                }
-                MovementInput input = *opt;
+                MovementInput& input = input_buffer.get_at(i);
                 tick_movement(
                     world,
                     input,
@@ -121,14 +117,30 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
     );
 }
 
+inline void register_character_mouse_rotation_system(flecs::world& world) {
+    // Aggregate mouse rotation data each frame
+    // Note for future self: It isn't possible to apply this frame-by-frame due to LERPing lag
+    world.system<MouseRotationY>()
+        .each([](MouseRotationY& mouse_rot_y) {
+            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
+                mouse_rot_y.val += GetMouseDelta().x;
+            }
+        }
+    );
+}
+
 inline void register_movement_input_system(
         flecs::world& world,
         InputBuffer& input_buffer)
 {
-    world.system()
+    world.system<MouseRotationY>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer]() {
-            input_buffer.push(get_movement_input());
+        .each([&input_buffer](MouseRotationY& mouse_rot_y) {
+            // TODO: Consider sampling movement inputs each frame, and aggregate into one big one
+            MovementInput input = get_movement_input();
+            input.mouse_rot_y = mouse_rot_y.val;
+            input_buffer.push(input);
+            mouse_rot_y.val = 0;
         }
     );
 }
@@ -146,11 +158,8 @@ inline void register_movement_system(
             PredGrounded& grounded,
             LocalPlayer)
         {
-            std::optional<MovementInput> opt = input_buffer.back();
-            if (!opt) {
-                return;
-            }
-            MovementInput input = *opt;
+            if (input_buffer.empty()) return;
+            MovementInput& input = input_buffer.back();
             tick_movement(world, input, pos.val, rot.val.y, gravity.val, grounded.val);
         }
     );

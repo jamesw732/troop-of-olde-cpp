@@ -43,6 +43,7 @@ inline flecs::entity create_local_player(flecs::world world) {
 
     entity.add<CamRotation>();
     entity.add<CamDistance>();
+    entity.add<MouseRotationY>();
 
     entity.add<ModelAnimations>();
     entity.add<CurLocomotionState>();

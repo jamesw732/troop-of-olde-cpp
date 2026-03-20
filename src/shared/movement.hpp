@@ -48,6 +48,7 @@ inline void tick_movement(
     update_gravity(gravity, grounded);
     Vector3 disp = get_input_displacement(input, rot);
     apply_input_rotation(input, rot);
+    // TODO: Let the player jump if they recently left the ground
     apply_input_jump(input, gravity, grounded);
     disp.y += gravity;
     Vector3 collision_disp = process_collision(world, pos, disp, Vector3Length(disp));

@@ -12,6 +12,10 @@
 #include "../shared/raylib-util.hpp"
 
 
+/*
+ * Get per-movement-tick inputs which impact the character's position, rotation, or velocity
+ * NOTE: This does not sample MovementInput.mouse_y_rot, which is a per-frame metric
+ */
 inline MovementInput get_movement_input() {
     MovementInput input;
     if (IsKeyDown(KEY_W)) {
@@ -32,13 +36,11 @@ inline MovementInput get_movement_input() {
     if (IsKeyDown(KEY_D)) {
         input.rot_y--;
     }
-    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
-        input.mouse_rot_y = GetMouseDelta().x;
-    }
     input.jump = IsKeyDown(KEY_SPACE);
     return input;
 }
 
+// Inputs made which impact the camera's (but not character's!) position or rotation
 inline CameraInput get_camera_input() {
     CameraInput input;
     if (IsKeyDown(KEY_UP)) {
@@ -69,14 +71,17 @@ struct InputBuffer {
     bool full = false;
     std::array<MovementInput, MAX_INPUT_BUFFER> buffer;
 
-    std::optional<MovementInput> get_at(size_t i) {
-        if (i >= size) {
-            return std::nullopt;
-        }
+    const bool empty() {
+        return size == 0;
+    }
+
+    MovementInput& get_at(size_t i) {
+        assert(i < size && !empty());
         return buffer[(start_idx + i) % MAX_INPUT_BUFFER];
     }
 
-    void set_at(MovementInput input, size_t i) {
+    void set_at(const MovementInput& input, size_t i) {
+        /* assert(i < size && !empty()); */
         buffer[(start_idx + i) % MAX_INPUT_BUFFER] = input;
     }
 
@@ -90,12 +95,9 @@ struct InputBuffer {
         size++;
     }
 
-    std::optional<MovementInput> pop() {
-        std::optional<MovementInput> opt = get_at(0);
-        if (!opt) {
-            return std::nullopt;
-        }
-        MovementInput input = *opt;
+    MovementInput& pop() {
+        assert(!empty());
+        MovementInput& input = get_at(0);
 
         start_idx++;
         start_idx %= MAX_INPUT_BUFFER;
@@ -103,12 +105,9 @@ struct InputBuffer {
         return input;
     }
 
-    std::optional<MovementInput> back() {
+    MovementInput& back() {
+        assert(!empty());
         return get_at(size - 1);
-    }
-
-    const bool empty() {
-        return size == 0;
     }
 
     /*
@@ -128,20 +127,12 @@ struct InputBuffer {
 
     void copy_to_vector(std::vector<MovementInput>& vec) {
         for (int i = 0; i < size; i++) {
-            std::optional<MovementInput> opt = get_at(i);
-            if (!opt) {
-                continue;
-            }
-            vec.push_back(*opt);
+            vec.push_back(get_at(i));
         }
     }
     void copy_to_array(std::array<MovementInput, MAX_INPUT_BUFFER>& array) {
         for (int i = 0; i < size; i++) {
-            std::optional<MovementInput> opt = get_at(i);
-            if (!opt) {
-                continue;
-            }
-            array[i] = *opt;
+            array[i] = get_at(i);
         }
     }
 };

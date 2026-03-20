@@ -13,11 +13,8 @@ inline void register_animation_tick_system(flecs::world& world, InputBuffer& inp
         .each([&input_buffer] (CurLocomotionState& movement_state, AnimationFrame& frame,
                     PrevLocomotionState& prev_movement_state, PrevAnimationFrame& prev_frame,
                     BlendFactor& alpha) {
-            std::optional<MovementInput> opt = input_buffer.back();
-            if (!opt) {
-                return;
-            }
-            MovementInput input = *opt;
+            if (input_buffer.empty()) return;
+            MovementInput input = input_buffer.back();
             LocomotionState new_movement_state = get_locomotion_state(input);
             /* std::cout << anim_labels[(size_t) new_movement_state] << "\n"; */
             if (movement_state.state == new_movement_state) {

@@ -72,3 +72,8 @@ struct CamRotation {
 struct CamDistance {
     float val = 10;
 };
+
+// Since inputs are sampled once per tick, we need to separately track mouse rotation on a per-frame basis
+struct MouseRotationY {
+    float val = 0;
+};

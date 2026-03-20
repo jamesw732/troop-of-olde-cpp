@@ -104,6 +104,7 @@ inline flecs::system register_animation_render_system(
             const Color color
             )
         {
+            // TODO: implement half-body animations, once needed
             std::string anim_name = anim_names[(size_t) movement_state.state];
             std::string prev_anim_name = anim_names[(size_t) prev_movement_state.state];
             ModelAnimation anim = anims.map->at(anim_name);

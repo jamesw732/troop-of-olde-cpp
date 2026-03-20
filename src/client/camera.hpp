@@ -12,7 +12,7 @@
 
 
 inline void process_camera_input(const CameraInput& input, CamRotation& rot, CamDistance& dist) {
-    float new_rot_x = rot.x + 100 * input.rot_x * GetFrameTime();
+    float new_rot_x = rot.x + input.rot_x;
     new_rot_x += input.mouse_rot.x;
     new_rot_x = Clamp(new_rot_x, -88, 88);
     rot.x = new_rot_x;
@@ -35,7 +35,8 @@ inline void register_camera_input_system(flecs::world& world) {
 
 // Updates the camera's position from character's position and rotation values
 inline void register_camera_update_system(flecs::world& world, Camera3D& camera) {
-    world.system<LocalPlayer, RenderPosition, RenderRotation, Scale, CamRotation, CamDistance>()
+    world.system<LocalPlayer, RenderPosition, RenderRotation, Scale,
+                 CamRotation, CamDistance>()
          .each([&] (LocalPlayer, RenderPosition player_pos, RenderRotation player_rot, Scale player_scale,
                     CamRotation cam_rotation, CamDistance cam_distance) {
             float y_rot = (player_rot.val.y + cam_rotation.y) * PI / 180;
