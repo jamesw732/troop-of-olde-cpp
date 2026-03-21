@@ -9,39 +9,17 @@
 #include "../shared/const.hpp"
 #include "components.hpp"
 
-inline Color get_wire_color(Color cube_color) {
-    float brightness = 0.299f * cube_color.r + 0.587f * cube_color.g + 0.114f * cube_color.b;
+inline Color get_wire_color(Color base_color) {
+    float brightness = 0.299f * base_color.r + 0.587f * base_color.g + 0.114f * base_color.b;
     float factor = (brightness < 128) ? 1.5f : 0.5f;
     Color wire_color = {
-        (unsigned char)fminf(cube_color.r * factor, 255.0f),
-        (unsigned char)fminf(cube_color.g * factor, 255.0f),
-        (unsigned char)fminf(cube_color.b * factor, 255.0f),
-        cube_color.a
+        (unsigned char)fminf(base_color.r * factor, 255.0f),
+        (unsigned char)fminf(base_color.g * factor, 255.0f),
+        (unsigned char)fminf(base_color.b * factor, 255.0f),
+        base_color.a
     };
     return wire_color;
 
-}
-
-inline void DrawMeshWire(const Mesh& mesh, const Vector3& pos, const Color& color)
-{
-    // vertices are stored as [x, y, z, x, y, z, ...]
-    const float* v = mesh.vertices;
-    const unsigned short* idx = mesh.indices;
-
-    for (int i = 0; i < mesh.triangleCount; i++)
-    {
-        unsigned short a = idx[i*3 + 0];
-        unsigned short b = idx[i*3 + 1];
-        unsigned short c = idx[i*3 + 2];
-
-        Vector3 A = { v[a*3 + 0], v[a*3 + 1], v[a*3 + 2] };
-        Vector3 B = { v[b*3 + 0], v[b*3 + 1], v[b*3 + 2] };
-        Vector3 C = { v[c*3 + 0], v[c*3 + 1], v[c*3 + 2] };
-
-        DrawLine3D(A, B, color);
-        DrawLine3D(B, C, color);
-        DrawLine3D(C, A, color);
-    }
 }
 
 inline void RenderModel(Model model, Vector3 pos, Vector3 rot, Vector3 scale, Color color) {
@@ -52,7 +30,17 @@ inline void RenderModel(Model model, Vector3 pos, Vector3 rot, Vector3 scale, Co
             rlRotatef(rot.z, 0, 0, 1);
             rlScalef(scale.x, scale.y, scale.z);
             DrawModel(model, {}, 1, color);
-            DrawModelWires(model, {}, 1, BLACK);
+        rlPopMatrix();
+}
+
+inline void RenderModelWires(Model model, Vector3 pos, Vector3 rot, Vector3 scale, Color color) {
+        rlPushMatrix();
+            rlTranslatef(pos.x, pos.y, pos.z);
+            rlRotatef(rot.x, 1, 0, 0);
+            rlRotatef(rot.y, 0, 1, 0);
+            rlRotatef(rot.z, 0, 0, 1);
+            rlScalef(scale.x, scale.y, scale.z);
+            DrawModelWires(model, {}, 1, get_wire_color(color));
         rlPopMatrix();
 }
 
@@ -74,6 +62,7 @@ inline flecs::system register_render_system(
         {
             BeginMode3D(camera);
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);
+                RenderModelWires(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();
         }
     );
@@ -109,16 +98,17 @@ inline flecs::system register_animation_render_system(
             std::string prev_anim_name = anim_names[(size_t) prev_movement_state.state];
             ModelAnimation anim = anims.map->at(anim_name);
             ModelAnimation prev_anim = anims.map->at(prev_anim_name);
+            float render_frame = fmodf(frame.frame, anim.keyframeCount - 2);
             if (alpha.val < 1.0) {
                 UpdateModelAnimationEx(
                     *model.model,
                     prev_anim, prev_frame.frame,
-                    anim, frame.frame,
+                    anim, render_frame,
                     alpha.val
                 );
             }
             else {
-                UpdateModelAnimation(*model.model, anim, frame.frame);
+                UpdateModelAnimation(*model.model, anim, render_frame);
             }
             BeginMode3D(camera);
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);

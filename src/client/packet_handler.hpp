@@ -55,7 +55,7 @@ struct PacketHandler {
                     entity.set<NetworkId>({spawn_state.network_id});
                     entity.set<DisplayName>({spawn_state.name});
                     entity.set<CamRotation>({30.0});
-                    entity.set<Color>(RED);
+                    entity.set<Color>(ORANGE);
                     // Hardcode model
                     entity.set<ModelPointer>({&loaded_models.at("paladin").model});
                     entity.set<ModelAnimations>({&loaded_models.at("paladin").animations});
@@ -82,7 +82,7 @@ struct PacketHandler {
                 entity.set<RenderPosition>({spawn_state.pos});
                 entity.set<RenderRotation>({spawn_state.rot});
                 entity.set<DisplayName>({spawn_state.name});
-                entity.set<Color>(RED);
+                entity.set<Color>(ORANGE);
                 // Hardcode model
                 entity.set<ModelPointer>({&loaded_models.at("paladin").model});
                 entity.set<ModelAnimations>({&loaded_models.at("paladin").animations});

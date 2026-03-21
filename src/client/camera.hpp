@@ -46,7 +46,7 @@ inline void register_camera_update_system(flecs::world& world, Camera3D& camera)
                 cos(x_rot),
                 -sin(x_rot) * cos(y_rot)
             };
-            Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.5f, 0});
+            Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.75f, 0});
             camera.position = Vector3Add(focus_pos, Vector3Scale(sphere_coords, cam_distance.val));
             RayCollision camera_collision = find_closest_collision(
                 world, focus_pos,
