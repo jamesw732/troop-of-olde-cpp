@@ -33,5 +33,6 @@ inline void load_all_models(std::unordered_map<std::string, ModelAsset>& loaded_
     loaded_models["quad"] = {LoadModel((MODEL_DIR "quad.glb"))};
 
     load_model_with_animations(loaded_models, "humanoid");
+    load_model_with_animations(loaded_models, "paladin");
 }
 

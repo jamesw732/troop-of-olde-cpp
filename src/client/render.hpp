@@ -109,12 +109,17 @@ inline flecs::system register_animation_render_system(
             std::string prev_anim_name = anim_names[(size_t) prev_movement_state.state];
             ModelAnimation anim = anims.map->at(anim_name);
             ModelAnimation prev_anim = anims.map->at(prev_anim_name);
-            UpdateModelAnimationEx(
-                *model.model,
-                prev_anim, prev_frame.frame,
-                anim, frame.frame,
-                alpha.val
-            );
+            if (alpha.val < 1.0) {
+                UpdateModelAnimationEx(
+                    *model.model,
+                    prev_anim, prev_frame.frame,
+                    anim, frame.frame,
+                    alpha.val
+                );
+            }
+            else {
+                UpdateModelAnimation(*model.model, anim, frame.frame);
+            }
             BeginMode3D(camera);
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();

@@ -40,6 +40,7 @@ int main()
     loaded_meshes["sample_world"] = LoadServerModel(MODEL_DIR "sample_world.glb");
     loaded_meshes["cube"] = LoadServerModel((MODEL_DIR "cube.glb"));
     loaded_meshes["humanoid"] = LoadServerModel((MODEL_DIR "humanoid.glb"));
+    loaded_meshes["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
     /* print_mesh_vertices(*world_model.meshes); */
 
     auto terrain = world.entity("World");

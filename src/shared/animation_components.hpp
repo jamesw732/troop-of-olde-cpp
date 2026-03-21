@@ -14,33 +14,23 @@ enum class LocomotionState: uint8_t {
 };
 
 // Temporary names compatible with bad model
+// TODO: Blend between movement directions
 constexpr const char* anim_names[(std::size_t)LocomotionState::Count] = {
     "Idle",
-    "RunCycle",
-    "RunCycle",
-    "RunCycle",
-    "RunCycle",
-    "Idle",
+    "RunForward",
+    "RunBackward",
+    "StrafeLeft",
+    "StrafeRight",
+    "Jump",
     "Idle",
     "Idle"
 };
-// The name of the animation baked into the model
-/* constexpr const char* anim_names[(std::size_t)LocomotionState::Count] = { */
-/*     "idle", */
-/*     "forward", */
-/*     "forward", */
-/*     "forward", */
-/*     "forward", */
-/*     "idle", */
-/*     "idle", */
-/*     "idle" */
-/* }; */
 
 // Just a printable label for the animations
 constexpr const char* anim_labels[(std::size_t)LocomotionState::Count] = {
     "Idle",
-    "Forward",
-    "Backward",
+    "Run Forward",
+    "Run Backward",
     "Strafe Left",
     "Strafe Right",
     "Jump",
