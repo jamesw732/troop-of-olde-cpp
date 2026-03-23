@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+#include "raylib.h"
+
 enum class LocomotionState: uint8_t {
     Idle,
     Forward,
@@ -38,6 +40,10 @@ constexpr const char* anim_labels[(std::size_t)LocomotionState::Count] = {
     "Land"
 };
 
+struct Pose{
+    int bone_count = 0;
+    ModelAnimPose transforms = nullptr;
+};
 
 struct CurLocomotionState {
     LocomotionState state{};
