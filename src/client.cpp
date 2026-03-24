@@ -85,13 +85,15 @@ int main()
     register_movement_lerp_reset_system(world);
     register_animation_tick_system(world, input_buffer);
     register_animation_recv_system(world);
+    register_animation_frame_system(world);
+    register_locomotion_pose_system(world);
+    register_set_render_pose_system(world);
+    register_locomotion_blend_system(world);
     register_movement_lerp_system(world);
     register_character_mouse_rotation_system(world);
     register_camera_update_system(world, camera);
     auto render_sys = register_render_system(world, camera, ManualPhase);
     auto anim_render_sys = register_animation_render_system(world, camera, ManualPhase);
-    auto anim_frame_sys = register_animation_frame_system(world, ManualPhase);
-    auto anim_blend_sys = register_animation_blend_system(world, ManualPhase);
     register_disconnect_system(world);
 
     PacketHandler packet_handler(world, loaded_models);
@@ -119,8 +121,6 @@ int main()
             render_sys.run();
             anim_render_sys.run();
         EndDrawing();
-        anim_frame_sys.run();
-        anim_blend_sys.run();
         // Send all messages to server
         network.send_network_buffer();
     }

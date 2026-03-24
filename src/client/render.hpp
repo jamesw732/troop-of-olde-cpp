@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#include "../shared/animation.hpp"
 #include "../shared/components.hpp"
 #include "../shared/const.hpp"
 #include "components.hpp"
@@ -73,43 +74,18 @@ inline flecs::system register_animation_render_system(
     Camera3D& camera,
     flecs::entity phase)
 {
-    return world.system<ModelPointer, ModelAnimations,
-                        CurLocomotionState, AnimationFrame,
-                        PrevLocomotionState, PrevAnimationFrame,
-                        BlendFactor,
-                        RenderPosition, RenderRotation, Scale, Color>()
+    return world.system<ModelPointer, RenderPose, RenderPosition, RenderRotation, Scale, Color>()
         .kind(phase)
         .each([&camera] (
             const ModelPointer model,
-            const ModelAnimations anims,
-            const CurLocomotionState movement_state,
-            const AnimationFrame frame,
-            const PrevLocomotionState prev_movement_state,
-            const PrevAnimationFrame prev_frame,
-            const BlendFactor alpha,
+            const RenderPose pose,
             const RenderPosition pos,
             const RenderRotation rot,
             const Scale scale,
             const Color color
             )
         {
-            // TODO: implement half-body animations, once needed
-            std::string anim_name = anim_names[(size_t) movement_state.state];
-            std::string prev_anim_name = anim_names[(size_t) prev_movement_state.state];
-            ModelAnimation anim = anims.map->at(anim_name);
-            ModelAnimation prev_anim = anims.map->at(prev_anim_name);
-            float render_frame = fmodf(frame.frame, anim.keyframeCount - 2);
-            if (alpha.val < 1.0) {
-                UpdateModelAnimationEx(
-                    *model.model,
-                    prev_anim, prev_frame.frame,
-                    anim, render_frame,
-                    alpha.val
-                );
-            }
-            else {
-                UpdateModelAnimation(*model.model, anim, render_frame);
-            }
+            update_model_pose(*model.model, pose.pose);
             BeginMode3D(camera);
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);
             EndMode3D();

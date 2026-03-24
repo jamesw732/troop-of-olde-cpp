@@ -27,7 +27,6 @@ inline LocomotionState get_locomotion_state(const MovementInput& input) {
 
 inline Pose sample_pose_from_anim(const ModelAnimation& anim, float frame) {
     Pose pose;
-    pose.bone_count = anim.boneCount;
 
     // Update model animated bones transform matrices for a given frame
     if ((anim.keyframeCount > 0) && (anim.keyframePoses != NULL))
@@ -37,71 +36,65 @@ inline Pose sample_pose_from_anim(const ModelAnimation& anim, float frame) {
         int nextFrame = currentFrame + 1;
         float blend = frame - currentFrame;
         blend = Clamp(blend, 0.0f, 1.0f);
-        if (currentFrame >= anim.keyframeCount) currentFrame = fmodf(currentFrame, anim.keyframeCount);
-        if (nextFrame >= anim.keyframeCount) nextFrame = fmodf(nextFrame, anim.keyframeCount);
+        if (currentFrame >= anim.keyframeCount) currentFrame = currentFrame % anim.keyframeCount;
+        if (nextFrame >= anim.keyframeCount) nextFrame = nextFrame % anim.keyframeCount;
 
         // Update all bone transformations
         for (int boneIndex = 0; boneIndex < anim.boneCount; boneIndex++)
         {
             // Compute interpolated pose between current and next frame
-            pose.transforms[boneIndex].translation = Vector3Lerp(
+            Transform transform;
+            transform.translation = Vector3Lerp(
                 anim.keyframePoses[currentFrame][boneIndex].translation,
                 anim.keyframePoses[nextFrame][boneIndex].translation, blend);
-            pose.transforms[boneIndex].rotation = QuaternionSlerp(
+            transform.rotation = QuaternionSlerp(
                 anim.keyframePoses[currentFrame][boneIndex].rotation,
                 anim.keyframePoses[nextFrame][boneIndex].rotation, blend);
-            pose.transforms[boneIndex].scale = Vector3Lerp(
+            transform.scale = Vector3Lerp(
                 anim.keyframePoses[currentFrame][boneIndex].scale,
                 anim.keyframePoses[nextFrame][boneIndex].scale, blend);
+            pose.transforms.push_back(transform);
         }
     }
 
     return pose;
 }
 
-inline Pose blend_poses(const Pose& pose_a, const Pose& pose_b, float alpha) {
-    Pose new_pose;
-    if (pose_a.bone_count == pose_b.bone_count) {
-        return new_pose;
+inline Pose blend_poses(const Pose& from_pose, const Pose& to_pose, float alpha) {
+    if (from_pose.transforms.size() != to_pose.transforms.size()) {
+        return to_pose;
     }
-    new_pose.bone_count = pose_a.bone_count;
+    Pose new_pose;
+    int bone_count = from_pose.transforms.size();
     alpha = Clamp(alpha, 0.0, 1.0);
-    float blend_a = alpha;
-    float blend_b = 1 - alpha;
-    for (int boneIndex = 0; boneIndex < pose_a.bone_count; boneIndex++) {
+    for (int boneIndex = 0; boneIndex < bone_count; boneIndex++) {
         // Get frame-interpolation for first animation
-        Vector3 frame_a_trans = Vector3Lerp(
-            pose_a.transforms[boneIndex].translation,
-            pose_a.transforms[boneIndex].translation, blend_a);
-        Quaternion frame_a_rot = QuaternionSlerp(
-            pose_a.transforms[boneIndex].rotation,
-            pose_a.transforms[boneIndex].rotation, blend_a);
-        Vector3 frame_a_scale = Vector3Lerp(
-            pose_a.transforms[boneIndex].scale,
-            pose_a.transforms[boneIndex].scale, blend_a);
+        Vector3 from_pose_trans = from_pose.transforms[boneIndex].translation;
+        Quaternion from_pose_rot = from_pose.transforms[boneIndex].rotation;
+        Vector3 from_pose_scale = from_pose.transforms[boneIndex].scale;
 
         // Get frame-interpolation for second animation
-        Vector3 frame_b_trans = Vector3Lerp(
-            pose_b.transforms[boneIndex].translation,
-            pose_b.transforms[boneIndex].translation, blend_b);
-        Quaternion frame_b_rot = QuaternionSlerp(
-            pose_b.transforms[boneIndex].rotation,
-            pose_b.transforms[boneIndex].rotation, blend_b);
-        Vector3 frame_b_scale = Vector3Lerp(
-            pose_b.transforms[boneIndex].scale,
-            pose_b.transforms[boneIndex].scale, blend_b);
+        Vector3 to_pose_trans = to_pose.transforms[boneIndex].translation;
+        Quaternion to_pose_rot = to_pose.transforms[boneIndex].rotation;
+        Vector3 to_pose_scale = to_pose.transforms[boneIndex].scale;
 
         // Compute interpolated pose between both animations frames
         // NOTE: Storing animation frame data in model.currentPose
-        new_pose.transforms[boneIndex].translation = Vector3Lerp(frame_a_trans, frame_b_trans, alpha);
-        new_pose.transforms[boneIndex].rotation = QuaternionSlerp(frame_a_rot, frame_b_rot, alpha);
-        new_pose.transforms[boneIndex].scale = Vector3Lerp(frame_a_scale, frame_b_scale, alpha);
+        Transform transform;
+        transform.translation = Vector3Lerp(from_pose_trans, to_pose_trans, alpha);
+        transform.rotation = QuaternionSlerp(from_pose_rot, to_pose_rot, alpha);
+        transform.scale = Vector3Lerp(from_pose_scale, to_pose_scale, alpha);
+
+        new_pose.transforms.push_back(transform);
     }
-    return Pose{};
+    return new_pose;
 }
 
 inline void update_model_pose(Model model, Pose pose) {
     if (model.boneMatrices == NULL) return;
+    /* std::cout << "Pose bone count: " << pose.transforms.size() << "\n"; */
+    /* std::cout << "Model bone count: " << model.skeleton.boneCount << "\n"; */
+    if (pose.transforms.size() != model.skeleton.boneCount) return;
 
     // Update model animated bones transform matrices for a given frame
     if ((model.skeleton.bones != NULL))

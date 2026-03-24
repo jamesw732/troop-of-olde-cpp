@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vector>
 
 #include "raylib.h"
 
@@ -41,15 +42,22 @@ constexpr const char* anim_labels[(std::size_t)LocomotionState::Count] = {
 };
 
 struct Pose{
-    int bone_count = 0;
-    ModelAnimPose transforms = nullptr;
+    std::vector<Transform> transforms{};
+};
+
+struct RenderPose {
+    Pose pose;
+};
+
+struct CurLocomotionPose {
+    Pose pose;
+};
+
+struct PrevLocomotionPose {
+    Pose pose;
 };
 
 struct CurLocomotionState {
-    LocomotionState state{};
-};
-
-struct PrevLocomotionState {
     LocomotionState state{};
 };
 
@@ -61,10 +69,7 @@ struct AnimationFrame {
     float frame = 0;
 };
 
-struct PrevAnimationFrame {
-    float frame = 0;
-};
-
-struct BlendFactor {
+// The amount we're interpolating between the previous locomotion pose and current locomotion pose
+struct LocomotionBlendFactor {
     float val = 0;
 };
