@@ -77,6 +77,7 @@ inline void add_character_components(flecs::entity entity) {
     entity.add<LocomotionBlendFactor>();
 
     entity.add<RenderPose>();
+    entity.add<LocomotionBlendSpace>();
     entity.add<CurLocomotionPose>();
     entity.add<PrevLocomotionPose>();
 }

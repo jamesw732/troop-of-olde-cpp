@@ -116,6 +116,7 @@ void Network::disconnect() {
     }
 }
 
+// TODO: Fix logging with multiple clients
 void Network::open_log_files() {
     out_log_file.open("client-out.bin", std::ios_base::binary);
     in_log_file.open("client-in.bin", std::ios_base::binary);

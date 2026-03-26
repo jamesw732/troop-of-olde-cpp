@@ -9,10 +9,11 @@
 #include "physics.hpp"
 #include "components.hpp"
 #include "util.hpp"
+#include "raylib-const.hpp"
 
 
 inline Vector3 get_input_displacement(const MovementInput& input, float rot) {
-    Vector3 disp{(float) -input.x, 0, (float) -input.z};
+    Vector3 disp{FORWARD.x * (float) input.x, 0, FORWARD.z * (float) input.z};
     disp = Vector3Normalize(disp);
     disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
     disp = Vector3Scale(disp, 0.25);

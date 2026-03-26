@@ -25,6 +25,24 @@ inline LocomotionState get_locomotion_state(const MovementInput& input) {
     return LocomotionState::Idle;
 }
 
+inline LocomotionBlendSpace get_blend_space_from_input(const MovementInput input) {
+    LocomotionBlendSpace out{};
+    if (input.get_forward()) {
+        out.wF = 1;
+    }
+    if (input.get_backward()) {
+        out.wB = 1;
+    }
+    if (input.get_strafe_l()) {
+        out.wL = 1;
+    }
+    if (input.get_strafe_r()) {
+        out.wR = 1;
+    }
+    out.normalize();
+    return out;
+}
+
 inline Pose sample_pose_from_anim(const ModelAnimation& anim, float frame) {
     Pose pose;
 

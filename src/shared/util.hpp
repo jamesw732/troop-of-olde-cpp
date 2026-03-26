@@ -20,6 +20,10 @@ using Buffer = std::vector<uint8_t>;
 using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
 using InputAdapter = bitsery::InputBufferAdapter<uint8_t*>;
 
+inline bool is_close(float a, float b, float tol=1e-5f) {
+    return std::abs(a - b) < tol;
+}
+
 inline void print_buffer(const std::vector<uint8_t>& buffer, const size_t& size) {
     int i = 0;
     for (uint8_t byte: buffer) {

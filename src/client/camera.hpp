@@ -7,6 +7,7 @@
 
 #include "../shared/const.hpp"
 #include "../shared/physics.hpp"
+#include "../shared/raylib-const.hpp"
 #include "components.hpp"
 #include "input.hpp"
 
@@ -42,9 +43,9 @@ inline void register_camera_update_system(flecs::world& world, Camera3D& camera)
             float y_rot = (player_rot.val.y + cam_rotation.y) * PI / 180;
             float x_rot = (90 - cam_rotation.x) * PI / 180;
             Vector3 sphere_coords{
-                -sin(x_rot) * sin(y_rot),
+                FORWARD.x * sin(x_rot) * sin(y_rot),
                 cos(x_rot),
-                -sin(x_rot) * cos(y_rot)
+                FORWARD.z * sin(x_rot) * cos(y_rot)
             };
             Vector3 focus_pos = Vector3Add(player_pos.val, {0, player_scale.val.y * 0.75f, 0});
             camera.position = Vector3Add(focus_pos, Vector3Scale(sphere_coords, cam_distance.val));

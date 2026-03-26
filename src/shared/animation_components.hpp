@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
@@ -72,4 +73,34 @@ struct AnimationFrame {
 // The amount we're interpolating between the previous locomotion pose and current locomotion pose
 struct LocomotionBlendFactor {
     float val = 0;
+};
+
+struct LocomotionBlendSpace {
+    float wF = 0;
+    float wB = 0;
+    float wL = 0;
+    float wR = 0;
+
+    float total() {
+        return wF + wB + wL + wR;
+    }
+
+    void normalize() {
+        float tot = total();
+        if (tot == 0.0) {
+            return;
+        }
+        wF = wF / tot;
+        wB = wB / tot;
+        wL = wL / tot;
+        wR = wR / tot;
+    }
+
+    bool is_close(const LocomotionBlendSpace other) {
+        float eps = 1e-5f;
+        return std::abs(wF - other.wF) < eps
+            && std::abs(wB - other.wB) < eps
+            && std::abs(wL - other.wL) < eps
+            && std::abs(wR - other.wR) < eps;
+    }
 };
