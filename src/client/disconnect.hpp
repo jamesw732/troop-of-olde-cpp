@@ -4,8 +4,8 @@
 
 #include "flecs.h"
 
-#include "../shared/components.hpp"
 #include "components.hpp"
+#include "../shared/network_components.hpp"
 
 inline void register_disconnect_system(flecs::world& world) {
     world.system<NetworkId, const Disconnected>()

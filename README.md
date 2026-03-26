@@ -18,6 +18,27 @@ Assuming you have MinGW installed, from the root of the repository run:
 `cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-toolchain.cmake`
 This will generate build scripts for compiling with MinGW, and you should be able to proceed normally.
 
+I have had some trouble with clangd while using MinGW, it seems to get very confused by the conflicting
+environment. This .clangd works for me:
+```
+CompileFlags:
+  Add: [
+    -std=c++20,
+    -I/abs/path/to/repo/root/deps/bitsery/include,
+    -I/abs/path/to/repo/root/deps/raylib/src,
+    -I/abs/path/to/repo/root/deps/enet/include,
+    -I/abs/path/to/repo/root/deps/flecs/include
+]
+  Remove: [-include, build/CMakeFile/pch.dir/pch.hpp/gch]
+
+QueryDriver:
+  - /usr/bin/x86_64-w64-mingw32-*
+
+Diagnostics:
+  Suppress:
+    - clang-diagnostic-unused-include
+```
+
 ## Main Executables
 ```
 mkdir build    (if not on WSL)

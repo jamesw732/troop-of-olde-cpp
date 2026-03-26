@@ -1,6 +1,4 @@
 #pragma once
-#include "flecs.h"
-
 #include "../shared/animation.hpp"
 #include "../shared/const.hpp"
 #include "input.hpp"

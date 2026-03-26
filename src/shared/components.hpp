@@ -7,7 +7,6 @@
 #include "raylib.h"
 
 #include "animation_components.hpp"
-#include "network_components.hpp"
 #include "raylib-util.hpp"
 
 

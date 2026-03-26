@@ -1,10 +1,7 @@
 #include <atomic>
 #include <csignal>
 
-#include "shared/pch.hpp"
-
 #include "server/animation.hpp"
-#include "server/components.hpp"
 #include "server/disconnect.hpp"
 #include "server/network.hpp"
 #include "server/mesh_loader.hpp"
@@ -12,10 +9,7 @@
 #include "server/login.hpp"
 #include "server/packet_handler.hpp"
 #include "shared/components.hpp"
-#include "shared/const.hpp"
-#include "shared/util.hpp"
 #include "shared/register.hpp"
-#include "shared/serialize.hpp"
 
 std::atomic<bool> running{true};
 

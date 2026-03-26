@@ -2,10 +2,9 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "flecs.h"
 #include "raylib.h"
+#include "flecs.h"
 
-#include "../shared/components.hpp"
 
 struct LocalPlayer {};
 

@@ -1,5 +1,3 @@
-#include "shared/pch.hpp"
-
 #include "client/animation.hpp"
 #include "client/camera.hpp"
 #include "client/components.hpp"
@@ -13,11 +11,8 @@
 #include "client/render.hpp"
 #include "client/register.hpp"
 #include "shared/components.hpp"
-#include "shared/const.hpp"
-#include "shared/movement.hpp"
 #include "shared/register.hpp"
 #include "shared/serialize.hpp"
-#include "shared/util.hpp"
 
 
 int main()

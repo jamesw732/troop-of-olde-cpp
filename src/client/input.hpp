@@ -1,15 +1,12 @@
 #pragma once
 #include <cstdint>
-#include <deque>
 #include <iostream>
-#include <optional>
 
 #include "raylib.h"
 
 #include "components.hpp"
 #include "../shared/components.hpp"
 #include "../shared/const.hpp"
-#include "../shared/raylib-util.hpp"
 
 
 /*

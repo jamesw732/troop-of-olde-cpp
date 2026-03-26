@@ -2,7 +2,6 @@
 #include <iostream>
 #include <tuple>
 
-#include "flecs.h"
 #include "raylib.h"
 
 #include "const.hpp"
