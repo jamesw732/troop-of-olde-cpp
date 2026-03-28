@@ -117,7 +117,7 @@ struct PacketHandler {
                     e.set<RecvRotation>({move_update.rot});
                     e.set<RecvGravity>({move_update.gravity});
                     e.set<RecvGrounded>({move_update.grounded});
-                    e.set<RecvLocomotionState>({move_update.movement_state});
+                    e.set<RecvLocomotionBlendSpace>({move_update.blend_space});
                 }
 #endif
                 break;

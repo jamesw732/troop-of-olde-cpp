@@ -66,13 +66,13 @@ inline void register_movement_system(flecs::world& world) {
 inline void register_movement_networking_system(flecs::world& world, Network& network) {
     world.system<NetworkId, CurMoveTick,
         SimPosition, SimRotation, SimGravity, SimGrounded,
-        LocomotionState>()
+        LocomotionBlendSpace>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&]
              (NetworkId& network_id, CurMoveTick& ack_tick,
               SimPosition& pos, SimRotation& rot, SimGravity& gravity, SimGrounded& grounded,
-              LocomotionState local_movement_state)
+              LocomotionBlendSpace blend_space)
         {
             MovementUpdateBatchPacket batch;
             batch.move_updates.clear();
@@ -83,20 +83,20 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 rot.val,
                 gravity.val,
                 grounded.val,
-                local_movement_state
+                blend_space
            };
             batch.move_updates.push_back(move_update);
             world.query<NetworkId, CurMoveTick,
                 PredPosition, PredRotation, PredGravity, PredGrounded,
-                LocomotionState>()
+                LocomotionBlendSpace>()
                 .each([&]
-                    (NetworkId& remote_network_id,
-                     CurMoveTick& remote_ack_tick,
-                     PredPosition& pred_pos,
-                     PredRotation& pred_rot,
-                     PredGravity& pred_gravity,
-                     PredGrounded& pred_grounded,
-                     LocomotionState remote_movement_state)
+                    (NetworkId remote_network_id,
+                     CurMoveTick remote_ack_tick,
+                     PredPosition pred_pos,
+                     PredRotation pred_rot,
+                     PredGravity pred_gravity,
+                     PredGrounded pred_grounded,
+                     LocomotionBlendSpace remote_blend_space)
                 {
                     if (remote_network_id.id == network_id.id) {
                         return;
@@ -108,7 +108,7 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                         pred_rot.val,
                         pred_gravity.val,
                         pred_grounded.val,
-                        remote_movement_state
+                        remote_blend_space
                     };
                     batch.move_updates.push_back(remote_move_update);
                 }

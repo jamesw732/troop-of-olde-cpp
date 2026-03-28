@@ -111,3 +111,7 @@ struct LocomotionBlendSpace {
             || (wL > eps && other.wL > eps) || (wR > eps && other.wR > eps);
     }
 };
+
+struct RecvLocomotionBlendSpace {
+    LocomotionBlendSpace blend_space{};
+};

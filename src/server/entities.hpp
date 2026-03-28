@@ -1,12 +1,10 @@
 #pragma once
-#include <iostream>
-
 #include "flecs.h"
 
 #include "components.hpp"
 #include "../shared/animation_components.hpp"
 #include "../shared/components.hpp"
-#include "../shared/packets.hpp"
+#include "../shared/network_components.hpp"
 
 
 inline flecs::entity add_character_components(flecs::entity entity) {
@@ -32,7 +30,7 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<RecvMoveTick>();
     entity.add<InputBuffer>();
 
-    entity.add<LocomotionState>();
+    entity.add<LocomotionBlendSpace>();
 
     return entity;
 }

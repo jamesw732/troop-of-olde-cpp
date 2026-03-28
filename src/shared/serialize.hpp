@@ -124,5 +124,13 @@ void serialize(S& s, MovementUpdate& move_update) {
     s.object(move_update.rot);
     s.value4b(move_update.gravity);
     s.value1b(move_update.grounded);
-    s.value1b(move_update.movement_state);
+    s.object(move_update.blend_space);
+}
+
+template<typename S>
+void serialize(S& s, LocomotionBlendSpace& blend_space) {
+    s.value4b(blend_space.wF);
+    s.value4b(blend_space.wB);
+    s.value4b(blend_space.wL);
+    s.value4b(blend_space.wR);
 }

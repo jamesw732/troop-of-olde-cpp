@@ -144,7 +144,7 @@ struct MovementUpdate {
     Vector3 rot;
     float gravity;
     bool grounded;
-    LocomotionState movement_state;
+    LocomotionBlendSpace blend_space;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) {
@@ -163,7 +163,19 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) 
     print_indent(os);
     os << "grounded: " << update.grounded << "\n";
     print_indent(os);
-    os << "movement_state: " << (int) update.movement_state << "\n";
+    os << "blend_space: " << "{\n";
+    os << indent();
+    print_indent(os);
+    os << "wF: " << update.blend_space.wF << "\n";
+    print_indent(os);
+    os << "wB: " << update.blend_space.wB << "\n";
+    print_indent(os);
+    os << "wL: " << update.blend_space.wL << "\n";
+    print_indent(os);
+    os << "wR: " << update.blend_space.wR << "\n";
+    os << unindent();
+    print_indent(os);
+    os << "}\n";
     os << unindent();
     print_indent(os);
     os << "}";

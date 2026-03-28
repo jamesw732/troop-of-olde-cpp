@@ -34,23 +34,25 @@ inline void register_locomotion_tick_system(flecs::world& world, InputBuffer& in
 
 // Updates animation state for remote players
 inline void register_animation_recv_system(flecs::world& world) {
-    world.system<RecvLocomotionState, CurLocomotionState, LocomotionPhase,
+    world.system<RecvLocomotionBlendSpace, LocomotionBlendSpace, LocomotionPhase,
                  CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor>()
         .without<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([] (RecvLocomotionState recv_state,
-                  CurLocomotionState& movement_state, LocomotionPhase& phase,
+        .each([] (RecvLocomotionBlendSpace recv_blend_space,
+                  LocomotionBlendSpace& blend_space, LocomotionPhase& phase,
                   CurLocomotionPose cur_pose, PrevLocomotionPose& prev_pose,
                   LocomotionBlendFactor& alpha) {
-            // TODO: Update this to use blend space
-            /* std::cout << anim_labels[(size_t) recv_state.state] << "\n"; */
-            if (recv_state.state == movement_state.state) {
+            LocomotionBlendSpace new_blend_space = recv_blend_space.blend_space;
+            if (new_blend_space.is_close(blend_space)) {
                 return;
             }
             // If new state, move current state and reset
             prev_pose.pose = cur_pose.pose;
-            movement_state.state = recv_state.state;
+            blend_space = recv_blend_space.blend_space;
             phase.phase = 0;
+            if (new_blend_space.has_common_weight(blend_space)) {
+                return;
+            }
             alpha.val = 0;
         }
     );
