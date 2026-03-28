@@ -3,7 +3,7 @@
 #include "components.hpp"
 #include "../shared/animation_components.hpp"
 #include "../shared/components.hpp"
-#include "../shared/packets.hpp"
+#include "../shared/network_components.hpp"
 
 void add_character_components(flecs::entity entity);
 
@@ -72,7 +72,7 @@ inline void add_character_components(flecs::entity entity) {
     entity.add<CurLocomotionState>();
     entity.add<RecvLocomotionState>();
 
-    entity.add<AnimationFrame>();
+    entity.add<LocomotionPhase>();
 
     entity.add<LocomotionBlendFactor>();
 

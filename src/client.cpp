@@ -78,9 +78,9 @@ int main()
     register_movement_transmit_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
     register_movement_lerp_reset_system(world);
-    register_animation_tick_system(world, input_buffer);
+    register_locomotion_tick_system(world, input_buffer);
     register_animation_recv_system(world);
-    register_animation_frame_system(world);
+    register_locomotion_phase_system(world);
     register_locomotion_pose_system(world);
     register_set_render_pose_system(world);
     register_locomotion_blend_system(world);

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "raylib.h"
+#include "raymath.h"
 
 #include "util.hpp"
 
@@ -50,4 +51,9 @@ inline void print_mesh_vertices(const Mesh& mesh) {
         };
         std::cout << v << "\n";
     }
+}
+
+inline Quaternion align(Quaternion base, Quaternion q) {
+    if (Vector4DotProduct(base, q) < 0.0f) return Vector4Negate(q);
+    return q;
 }

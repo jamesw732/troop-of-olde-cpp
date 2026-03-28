@@ -66,8 +66,9 @@ struct RecvLocomotionState {
     LocomotionState state{};
 };
 
-struct AnimationFrame {
-    float frame = 0;
+// Normalized number between 0 and 1 which represents shared clock
+struct LocomotionPhase {
+    float phase = 0;
 };
 
 // The amount we're interpolating between the previous locomotion pose and current locomotion pose

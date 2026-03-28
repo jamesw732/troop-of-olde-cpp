@@ -4,14 +4,14 @@
 #include "input.hpp"
 
 // Increments animation state machine for the local player, once per movement tick
-inline void register_animation_tick_system(flecs::world& world, InputBuffer& input_buffer) {
+inline void register_locomotion_tick_system(flecs::world& world, InputBuffer& input_buffer) {
     // TODO: Really seems unnecessary to send whole input buffer
     // Maybe go back to storing the MovementInput for the current tick?
-    world.system<LocomotionBlendSpace, AnimationFrame,
+    world.system<LocomotionBlendSpace, LocomotionPhase,
                  CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor>()
         .with<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer] (LocomotionBlendSpace& blend_space, AnimationFrame& frame,
+        .each([&input_buffer] (LocomotionBlendSpace& blend_space, LocomotionPhase& phase,
                     CurLocomotionPose cur_pose, PrevLocomotionPose& prev_pose,
                     LocomotionBlendFactor& alpha) {
             if (input_buffer.empty()) return;
@@ -24,23 +24,22 @@ inline void register_animation_tick_system(flecs::world& world, InputBuffer& inp
             prev_pose.pose = cur_pose.pose;
             blend_space = new_blend_space;
             alpha.val = 0;
-            // If it's not a completely new animation, skip resetting frame
             if (new_blend_space.has_common_weight(blend_space)) {
                 return;
             }
-            frame.frame = 0;
+            phase.phase = 0;
         }
     );
 }
 
 // Updates animation state for remote players
 inline void register_animation_recv_system(flecs::world& world) {
-    world.system<RecvLocomotionState, CurLocomotionState, AnimationFrame,
+    world.system<RecvLocomotionState, CurLocomotionState, LocomotionPhase,
                  CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor>()
         .without<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([] (RecvLocomotionState recv_state,
-                  CurLocomotionState& movement_state, AnimationFrame& frame,
+                  CurLocomotionState& movement_state, LocomotionPhase& phase,
                   CurLocomotionPose cur_pose, PrevLocomotionPose& prev_pose,
                   LocomotionBlendFactor& alpha) {
             // TODO: Update this to use blend space
@@ -51,92 +50,64 @@ inline void register_animation_recv_system(flecs::world& world) {
             // If new state, move current state and reset
             prev_pose.pose = cur_pose.pose;
             movement_state.state = recv_state.state;
-            frame.frame = 0;
+            phase.phase = 0;
             alpha.val = 0;
         }
     );
 }
 
 // Increments animation frame
-inline void register_animation_frame_system(flecs::world& world) {
-    world.system<AnimationFrame>()
-        .each([] (AnimationFrame& frame) {
-            frame.frame += GetFrameTime() * ANIMATION_FPS;
+inline void register_locomotion_phase_system(flecs::world& world) {
+    world.system<LocomotionPhase>()
+        .each([] (LocomotionPhase& phase) {
+            phase.phase += GetFrameTime() * 5 / 3; // This should eventually scale with character speed
+            phase.phase = fmodf(phase.phase, 1.0f);
         }
     );
 }
 
-inline Pose sample_pose_from_state(LocomotionState state, float frame, ModelAnimations anims) {
-    std::string anim_name = anim_names[(size_t) state];
-    ModelAnimation anim = anims.map->at(anim_name);
-    return sample_pose_from_anim(anim, frame);
-}
-
-inline Pose sample_cyclic_pose_from_state(LocomotionState state, float frame, ModelAnimations anims) {
-    std::string anim_name = anim_names[(size_t) state];
-    ModelAnimation anim = anims.map->at(anim_name);
-    // 2 is a magic number, for some reason raylib samples more keyframes than really exist
-    frame = fmodf(frame, anim.keyframeCount - 2);
-    return sample_pose_from_anim(anim, frame);
-}
-
 // Sets the locomotion pose given the locomotion state and frame
 inline void register_locomotion_pose_system(flecs::world& world) {
-    world.system<LocomotionBlendSpace, AnimationFrame, ModelAnimations, CurLocomotionPose>()
-        .each([] (LocomotionBlendSpace blend_space, AnimationFrame frame,
+    world.system<LocomotionBlendSpace, LocomotionPhase, ModelAnimations, CurLocomotionPose>()
+        .each([] (LocomotionBlendSpace blend_space, LocomotionPhase phase,
                   ModelAnimations anims, CurLocomotionPose& cur_pose) {
-            Pose idle_pose = sample_pose_from_state(LocomotionState::Idle, frame.frame, anims);
+            Pose idle_pose = sample_cyclic_pose_from_state(LocomotionState::Idle, phase.phase, anims);
             if (is_close(blend_space.total(), 0)) {
                 cur_pose.pose = idle_pose;
                 return;
             }
-            if (blend_space.wF > 0.0f) {
-                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::Forward, frame.frame, anims);
-                return;
-            }
-            if (blend_space.wB > 0.0f) {
-                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::Backward, frame.frame, anims);
-                return;
-            }
-            if (blend_space.wL > 0.0f) {
-                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims);
-                return;
-            }
-            if (blend_space.wR > 0.0f) {
-                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims);
-                return;
-            }
-            // TODO: Improve synchronization between animations
-            // The below blending code seems to work, but the animations do not render correctly
-            // due to synchronization issues
-            // This will also include synchronizing the number of keyframes in the animation
-            /* Pose fwd_pose = sample_cyclic_pose_from_state(LocomotionState::Forward, frame.frame, anims); */
-            /* Pose bwd_pose = sample_cyclic_pose_from_state(LocomotionState::Backward, frame.frame, anims); */
-            /* Pose left_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims); */
-            /* Pose right_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims); */
-            /* Pose out; */
-            /* for (int i = 0; i < fwd_pose.transforms.size(); i++) { */
-            /*     Transform transform; */
-            /*     transform.translation = */ 
-            /*           fwd_pose.transforms[i].translation * blend_space.wF */
-            /*         + bwd_pose.transforms[i].translation * blend_space.wB */
-            /*         + left_pose.transforms[i].translation * blend_space.wL */ 
-            /*         + right_pose.transforms[i].translation * blend_space.wR ; */
-            /*     transform.rotation = */ 
-            /*           fwd_pose.transforms[i].rotation * blend_space.wF */
-            /*         + bwd_pose.transforms[i].rotation * blend_space.wB */
-            /*         + left_pose.transforms[i].rotation * blend_space.wL */
-            /*         + right_pose.transforms[i].rotation * blend_space.wR; */
-            /*     transform.rotation = QuaternionNormalize(transform.rotation); */
-            /*     transform.scale = */ 
-            /*         fwd_pose.transforms[i].scale * blend_space.wF */
-            /*       + bwd_pose.transforms[i].scale * blend_space.wB */
-            /*       + left_pose.transforms[i].scale * blend_space.wL */
-            /*       + right_pose.transforms[i].scale * blend_space.wR; */
+            Pose fwd_pose = sample_cyclic_pose_from_state(LocomotionState::Forward, phase.phase, anims);
+            Pose bwd_pose = sample_cyclic_pose_from_state(LocomotionState::Backward, phase.phase, anims);
+            Pose left_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeLeft, phase.phase, anims);
+            Pose right_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeRight, phase.phase, anims);
+            Pose out;
+            for (int i = 0; i < fwd_pose.transforms.size(); i++) {
+                Transform transform;
+                transform.translation =
+                      fwd_pose.transforms[i].translation * blend_space.wF
+                    + bwd_pose.transforms[i].translation * blend_space.wB
+                    + left_pose.transforms[i].translation * blend_space.wL
+                    + right_pose.transforms[i].translation * blend_space.wR;
+                Quaternion base = fwd_pose.transforms[i].rotation;
+                Quaternion qF = base;
+                Quaternion qB = align(base, bwd_pose.transforms[i].rotation);
+                Quaternion qL = align(base, left_pose.transforms[i].rotation);
+                Quaternion qR = align(base, right_pose.transforms[i].rotation);
+                transform.rotation =
+                      qF * blend_space.wF
+                    + qB * blend_space.wB
+                    + qL * blend_space.wL
+                    + qR * blend_space.wR;
+                transform.rotation = QuaternionNormalize(transform.rotation);
+                transform.scale =
+                    fwd_pose.transforms[i].scale * blend_space.wF
+                  + bwd_pose.transforms[i].scale * blend_space.wB
+                  + left_pose.transforms[i].scale * blend_space.wL
+                  + right_pose.transforms[i].scale * blend_space.wR;
 
-            /*     out.transforms.push_back(transform); */
-            /* } */
-            /* cur_pose.pose = out; */
+                out.transforms.push_back(transform);
+            }
+            cur_pose.pose = out;
         }
     );
 }

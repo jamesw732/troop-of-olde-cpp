@@ -78,6 +78,23 @@ inline Pose sample_pose_from_anim(const ModelAnimation& anim, float frame) {
     return pose;
 }
 
+inline Pose sample_pose_from_state(LocomotionState state, float phase, ModelAnimations anims) {
+    std::string anim_name = anim_names[(size_t) state];
+    ModelAnimation anim = anims.map->at(anim_name);
+    float frame = phase * anim.keyframeCount;
+    return sample_pose_from_anim(anim, frame);
+}
+
+inline Pose sample_cyclic_pose_from_state(LocomotionState state, float phase, ModelAnimations anims) {
+    std::string anim_name = anim_names[(size_t) state];
+    ModelAnimation anim = anims.map->at(anim_name);
+    // Remove 1 keyframe worth of stalling
+    // Might need to change this to 2, not sure how raylib is sampling keyframes
+    float frame = phase * (anim.keyframeCount - 1);
+    return sample_pose_from_anim(anim, frame);
+}
+
+
 inline Pose blend_poses(const Pose& from_pose, const Pose& to_pose, float alpha) {
     if (from_pose.transforms.size() != to_pose.transforms.size()) {
         return to_pose;
