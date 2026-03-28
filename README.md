@@ -41,7 +41,7 @@ Diagnostics:
 
 ## Main Executables
 ```
-mkdir build    (if not on WSL)
+mkdir build    # if not on WSL
 cd build
 cmake ..
 make

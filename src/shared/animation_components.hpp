@@ -103,4 +103,10 @@ struct LocomotionBlendSpace {
             && std::abs(wL - other.wL) < eps
             && std::abs(wR - other.wR) < eps;
     }
+
+    bool has_common_weight(const LocomotionBlendSpace other) {
+        float eps = 1e-5f;
+        return (wF > eps && other.wF > eps) || (wB > eps && other.wB > eps)
+            || (wL > eps && other.wL > eps) || (wR > eps && other.wR > eps);
+    }
 };

@@ -23,8 +23,12 @@ inline void register_animation_tick_system(flecs::world& world, InputBuffer& inp
             // If new state, save current pose to previous pose
             prev_pose.pose = cur_pose.pose;
             blend_space = new_blend_space;
-            frame.frame = 0;
             alpha.val = 0;
+            // If it's not a completely new animation, skip resetting frame
+            if (new_blend_space.has_common_weight(blend_space)) {
+                return;
+            }
+            frame.frame = 0;
         }
     );
 }
@@ -68,6 +72,14 @@ inline Pose sample_pose_from_state(LocomotionState state, float frame, ModelAnim
     return sample_pose_from_anim(anim, frame);
 }
 
+inline Pose sample_cyclic_pose_from_state(LocomotionState state, float frame, ModelAnimations anims) {
+    std::string anim_name = anim_names[(size_t) state];
+    ModelAnimation anim = anims.map->at(anim_name);
+    // 2 is a magic number, for some reason raylib samples more keyframes than really exist
+    frame = fmodf(frame, anim.keyframeCount - 2);
+    return sample_pose_from_anim(anim, frame);
+}
+
 // Sets the locomotion pose given the locomotion state and frame
 inline void register_locomotion_pose_system(flecs::world& world) {
     world.system<LocomotionBlendSpace, AnimationFrame, ModelAnimations, CurLocomotionPose>()
@@ -79,29 +91,29 @@ inline void register_locomotion_pose_system(flecs::world& world) {
                 return;
             }
             if (blend_space.wF > 0.0f) {
-                cur_pose.pose = sample_pose_from_state(LocomotionState::Forward, frame.frame, anims);
+                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::Forward, frame.frame, anims);
                 return;
             }
             if (blend_space.wB > 0.0f) {
-                cur_pose.pose = sample_pose_from_state(LocomotionState::Backward, frame.frame, anims);
+                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::Backward, frame.frame, anims);
                 return;
             }
             if (blend_space.wL > 0.0f) {
-                cur_pose.pose = sample_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims);
+                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims);
                 return;
             }
             if (blend_space.wR > 0.0f) {
-                cur_pose.pose = sample_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims);
+                cur_pose.pose = sample_cyclic_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims);
                 return;
             }
             // TODO: Improve synchronization between animations
             // The below blending code seems to work, but the animations do not render correctly
             // due to synchronization issues
             // This will also include synchronizing the number of keyframes in the animation
-            /* Pose fwd_pose = sample_pose_from_state(LocomotionState::Forward, frame.frame, anims); */
-            /* Pose bwd_pose = sample_pose_from_state(LocomotionState::Backward, frame.frame, anims); */
-            /* Pose left_pose = sample_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims); */
-            /* Pose right_pose = sample_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims); */
+            /* Pose fwd_pose = sample_cyclic_pose_from_state(LocomotionState::Forward, frame.frame, anims); */
+            /* Pose bwd_pose = sample_cyclic_pose_from_state(LocomotionState::Backward, frame.frame, anims); */
+            /* Pose left_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeLeft, frame.frame, anims); */
+            /* Pose right_pose = sample_cyclic_pose_from_state(LocomotionState::StrafeRight, frame.frame, anims); */
             /* Pose out; */
             /* for (int i = 0; i < fwd_pose.transforms.size(); i++) { */
             /*     Transform transform; */
