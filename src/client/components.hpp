@@ -57,8 +57,8 @@ struct NetworkMap {
 };
 
 struct CameraInput {
-    int8_t rot_x = 0;
-    Vector2 mouse_rot{};
+    int8_t rot_x = 0; // Up/Down arrow rotation
+    Vector2 free_rot{}; // Camera's free rotation about character, not tied to character's real rotation
     bool reset = false;
     float scroll = 0;
 };
@@ -70,9 +70,4 @@ struct CamRotation {
 
 struct CamDistance {
     float val = 10;
-};
-
-// Since inputs are sampled once per tick, we need to separately track mouse rotation on a per-frame basis
-struct MouseRotationY {
-    float val = 0;
 };

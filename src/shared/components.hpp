@@ -53,11 +53,12 @@ struct DisplayName {
 };
 
 struct MovementInput {
+    // TODO: reduce number of bits required to store all these
     int8_t x = 0;
     int8_t z = 0;
     bool jump = false;
     int8_t rot_y = 0;
-    int16_t mouse_rot_y = 0;
+    int16_t mouse_rot_y = 0; // for maximum precision, this should be a float, but I prefer the int for determinism
 
     bool get_forward() const {
         return z < 0;

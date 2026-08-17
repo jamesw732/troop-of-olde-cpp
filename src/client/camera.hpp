@@ -13,15 +13,15 @@
 
 
 inline void process_camera_input(const CameraInput& input, CamRotation& rot, CamDistance& dist) {
-    float new_rot_x = rot.x + input.rot_x;
-    new_rot_x += input.mouse_rot.x;
+    float new_rot_x = rot.x + input.rot_x * 60 * GetFrameTime();
+    new_rot_x += input.free_rot.x;
     new_rot_x = Clamp(new_rot_x, -88, 88);
     rot.x = new_rot_x;
     if (input.reset) {
         rot.y = 0;
     }
     else {
-        rot.y -= input.mouse_rot.y;
+        rot.y -= input.free_rot.y;
     }
     dist.val = Clamp(dist.val + input.scroll, 0, 20);
 }
@@ -29,7 +29,7 @@ inline void process_camera_input(const CameraInput& input, CamRotation& rot, Cam
 inline void register_camera_input_system(flecs::world& world) {
     world.system<CamRotation, CamDistance, LocalPlayer>()
         .each([] (CamRotation& rot, CamDistance& dist, LocalPlayer) {
-            process_camera_input(get_camera_input(), rot, dist);
+            process_camera_input(read_camera_input(), rot, dist);
         }
     );
 }

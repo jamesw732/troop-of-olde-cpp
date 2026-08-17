@@ -14,7 +14,6 @@ inline flecs::entity create_local_player(flecs::world world) {
     // CAMERA
     entity.add<CamRotation>();
     entity.add<CamDistance>();
-    entity.add<MouseRotationY>();
 
     add_character_components(entity);
 
@@ -39,6 +38,8 @@ inline void add_character_components(flecs::entity entity) {
     entity.add<RecvAckTick>();
 
     // MOVEMENT
+    entity.add<MovementInput>();
+
     entity.add<SimPosition>();
     entity.add<SimRotation>();
     entity.add<SimGrounded>();

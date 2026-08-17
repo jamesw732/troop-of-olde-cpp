@@ -19,7 +19,48 @@
 
 /* #define DISABLE_SERVER */
 
+// MOVEMENT INPUT SYSTEMS
+
+inline void register_movement_input_aggregate_system(flecs::world world) {
+    // Build up the active MovementInput per-frame, to be processed per-tick
+    world.system<MovementInput>()
+        .each([] (MovementInput& input) {
+            int16_t mouse_rot_y = input.mouse_rot_y;
+            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+                mouse_rot_y += GetMouseDelta().x;
+            }
+            // TODO: actually aggregate these inputs, don't just sample and override
+            input = read_movement_input();
+            input.mouse_rot_y = mouse_rot_y;
+        }
+     );
+}
+
+inline void register_movement_input_buffer_system(flecs::world world, InputBuffer& buffer) {
+    // Save the active MovementInput to the input buffer, per-tick
+    world.system<MovementInput>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([&] (MovementInput input) {
+            buffer.push(input);
+        }
+     );
+}
+
+inline void register_movement_input_cleanup_system(flecs::world world) {
+    // Clean up the active MovementInput at the end of each tick
+    world.system<MovementInput>()
+        .interval(MOVE_UPDATE_RATE)
+        .each([] (MovementInput& input) {
+            input = {};
+        }
+     );
+}
+
+// MOVEMENT PROCESSING SYSTEMS
+
 inline void register_movement_recv_system(flecs::world world) {
+    // Overwrite all simulated state with received state.
+    // This layer is important because of responsibility, the network layer should not be touching the simulation directly
     world.system<AckTick, RecvAckTick,
                  SimPosition, SimRotation, SimGravity, SimGrounded,
                  RecvPosition, RecvRotation, RecvGravity, RecvGrounded>()
@@ -49,6 +90,7 @@ inline void register_movement_recv_system(flecs::world world) {
 }
 
 inline void register_movement_prediction_reset_system(flecs::world world) {
+    // Reset all predictions to whatever the simulation state is at the last acknowledged tick
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
                  PredPosition, PredRotation, PredGravity, PredGrounded,
                  AckTick, RecvAckTick>()
@@ -83,6 +125,7 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
+    // Rerun simulation beginning from most recent acknowledged tick
     world.system<PredPosition, PredRotation, PredGravity, PredGrounded,
                  AckTick, LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
@@ -102,7 +145,7 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
             // If new tick, perform client-side prediction on un-acked inputs
             input_buffer.flushUpTo(new_ack_tick.val);
             for (int i = 0; i < input_buffer.size; i++) {
-                MovementInput& input = input_buffer.get_at(i);
+                MovementInput input = input_buffer.get_at(i);
                 tick_movement(
                     world,
                     input,
@@ -113,54 +156,6 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                 );
             }
 #endif
-        }
-    );
-}
-
-inline void register_character_mouse_rotation_system(flecs::world& world) {
-    // Aggregate mouse rotation data each frame
-    // Note for future self: It isn't possible to apply this frame-by-frame due to LERPing lag
-    world.system<MouseRotationY>()
-        .each([](MouseRotationY& mouse_rot_y) {
-            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))  {
-                mouse_rot_y.val += GetMouseDelta().x;
-            }
-        }
-    );
-}
-
-inline void register_movement_input_system(
-        flecs::world& world,
-        InputBuffer& input_buffer)
-{
-    world.system<MouseRotationY>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer](MouseRotationY& mouse_rot_y) {
-            // TODO: Consider sampling movement inputs each frame, and aggregate into one big one
-            MovementInput input = get_movement_input();
-            input.mouse_rot_y = mouse_rot_y.val;
-            input_buffer.push(input);
-            mouse_rot_y.val = 0;
-        }
-    );
-}
-
-inline void register_movement_system(
-        flecs::world& world,
-        InputBuffer& input_buffer)
-{
-    world.system<PredPosition, PredRotation, PredGravity, PredGrounded, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer, &world]
-           (PredPosition& pos,
-            PredRotation& rot,
-            PredGravity& gravity,
-            PredGrounded& grounded,
-            LocalPlayer)
-        {
-            if (input_buffer.empty()) return;
-            MovementInput& input = input_buffer.back();
-            tick_movement(world, input, pos.val, rot.val.y, gravity.val, grounded.val);
         }
     );
 }
@@ -193,7 +188,10 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         );
 }
 
+// MOVEMENT LERP SYSTEMS
+
 inline void register_movement_lerp_reset_system(flecs::world& world) {
+    // Update previous predicted positions/rotations to what they are at the start of the tick
     world.system<RenderPosition, PrevPredPosition, RenderRotation, PrevPredRotation, LerpTimer>()
         .interval(MOVE_UPDATE_RATE)
         .each([] (RenderPosition& cur_pos, PrevPredPosition& prev_pos, RenderRotation& cur_rot, PrevPredRotation& prev_rot, LerpTimer& timer) {
@@ -205,6 +203,7 @@ inline void register_movement_lerp_reset_system(flecs::world& world) {
 }
 
 inline void register_movement_lerp_system(flecs::world& world) {
+    // Interpolate predicted positions between movement ticks
     world.system<RenderPosition, PredPosition, PrevPredPosition,
         RenderRotation, PredRotation, PrevPredRotation,
         LerpTimer>()

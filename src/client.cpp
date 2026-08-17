@@ -69,26 +69,35 @@ int main()
     terrain.set<Scale>({{10, 10, 10}});
 
     auto ManualPhase = world.entity("ManualPhase");
+
+    register_movement_input_aggregate_system(world);
+    register_movement_input_buffer_system(world, input_buffer);
+
     register_movement_recv_system(world);
+    register_movement_lerp_reset_system(world);
     register_movement_prediction_reset_system(world);
     register_movement_reconcile_system(world, input_buffer);
-    register_movement_input_system(world, input_buffer);
+
     register_camera_input_system(world);
-    register_movement_system(world, input_buffer);
+
     register_movement_transmit_system(world, network, input_buffer, movement_tick);
     register_movement_tick_system(world, movement_tick);
-    register_movement_lerp_reset_system(world);
+
     register_locomotion_tick_system(world, input_buffer);
     register_animation_recv_system(world);
     register_locomotion_phase_system(world);
     register_locomotion_pose_system(world);
     register_set_render_pose_system(world);
     register_locomotion_blend_system(world);
+
     register_movement_lerp_system(world);
-    register_character_mouse_rotation_system(world);
     register_camera_update_system(world, camera);
+
     auto render_sys = register_render_system(world, camera, ManualPhase);
     auto anim_render_sys = register_animation_render_system(world, camera, ManualPhase);
+
+    register_movement_input_cleanup_system(world);
+
     register_disconnect_system(world);
 
     PacketHandler packet_handler(world, loaded_models);

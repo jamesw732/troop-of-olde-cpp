@@ -13,7 +13,7 @@
  * Get per-movement-tick inputs which impact the character's position, rotation, or velocity
  * NOTE: This does not sample MovementInput.mouse_y_rot, which is a per-frame metric
  */
-inline MovementInput get_movement_input() {
+inline MovementInput read_movement_input() {
     MovementInput input;
     if (IsKeyDown(KEY_W)) {
         input.z--;
@@ -38,7 +38,7 @@ inline MovementInput get_movement_input() {
 }
 
 // Inputs made which impact the camera's (but not character's!) position or rotation
-inline CameraInput get_camera_input() {
+inline CameraInput read_camera_input() {
     CameraInput input;
     if (IsKeyDown(KEY_UP)) {
         input.rot_x++;
@@ -47,11 +47,11 @@ inline CameraInput get_camera_input() {
         input.rot_x--;
     }
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
-        input.mouse_rot.x = GetMouseDelta().y;
+        input.free_rot.x = GetMouseDelta().y;
     }
     else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        input.mouse_rot.x = GetMouseDelta().y;
-        input.mouse_rot.y = GetMouseDelta().x;
+        input.free_rot.x = GetMouseDelta().y;
+        input.free_rot.y = GetMouseDelta().x;
     }
     else {
         input.reset = true;
@@ -72,17 +72,17 @@ struct InputBuffer {
         return size == 0;
     }
 
-    MovementInput& get_at(size_t i) {
+    MovementInput get_at(size_t i) {
         assert(i < size && !empty());
         return buffer[(start_idx + i) % MAX_INPUT_BUFFER];
     }
 
-    void set_at(const MovementInput& input, size_t i) {
+    void set_at(const MovementInput input, size_t i) {
         /* assert(i < size && !empty()); */
         buffer[(start_idx + i) % MAX_INPUT_BUFFER] = input;
     }
 
-    void push(const MovementInput& input) {
+    void push(const MovementInput input) {
         set_at(input, size);
         if (size >= MAX_INPUT_BUFFER) {
             start_idx += size - MAX_INPUT_BUFFER + 1;
@@ -92,9 +92,9 @@ struct InputBuffer {
         size++;
     }
 
-    MovementInput& pop() {
+    MovementInput pop() {
         assert(!empty());
-        MovementInput& input = get_at(0);
+        MovementInput input = get_at(0);
 
         start_idx++;
         start_idx %= MAX_INPUT_BUFFER;
@@ -102,7 +102,7 @@ struct InputBuffer {
         return input;
     }
 
-    MovementInput& back() {
+    MovementInput back() {
         assert(!empty());
         return get_at(size - 1);
     }

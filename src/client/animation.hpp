@@ -3,8 +3,8 @@
 #include "../shared/const.hpp"
 #include "input.hpp"
 
-// Increments animation state machine for the local player, once per movement tick
 inline void register_locomotion_tick_system(flecs::world& world, InputBuffer& input_buffer) {
+    // Increment animation state machine for the local player, once per movement tick
     // TODO: Really seems unnecessary to send whole input buffer
     // Maybe go back to storing the MovementInput for the current tick?
     world.system<LocomotionBlendSpace, LocomotionPhase,
@@ -32,8 +32,8 @@ inline void register_locomotion_tick_system(flecs::world& world, InputBuffer& in
     );
 }
 
-// Updates animation state for remote players
 inline void register_animation_recv_system(flecs::world& world) {
+    // Update animation state for remote players
     world.system<RecvLocomotionBlendSpace, LocomotionBlendSpace, LocomotionPhase,
                  CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor>()
         .without<LocalPlayer>()
@@ -58,8 +58,8 @@ inline void register_animation_recv_system(flecs::world& world) {
     );
 }
 
-// Increments animation frame
 inline void register_locomotion_phase_system(flecs::world& world) {
+    // Increment animation frame
     world.system<LocomotionPhase>()
         .each([] (LocomotionPhase& phase) {
             phase.phase += GetFrameTime() * 5 / 3; // This should eventually scale with character speed
@@ -68,8 +68,8 @@ inline void register_locomotion_phase_system(flecs::world& world) {
     );
 }
 
-// Sets the locomotion pose given the locomotion state and frame
 inline void register_locomotion_pose_system(flecs::world& world) {
+    // Set the locomotion pose given the locomotion state and frame
     world.system<LocomotionBlendSpace, LocomotionPhase, ModelAnimations, CurLocomotionPose>()
         .each([] (LocomotionBlendSpace blend_space, LocomotionPhase phase,
                   ModelAnimations anims, CurLocomotionPose& cur_pose) {
@@ -114,8 +114,8 @@ inline void register_locomotion_pose_system(flecs::world& world) {
     );
 }
 
-// Sets the initial render pose so other systems can blend onto it
 inline void register_set_render_pose_system(flecs::world& world) {
+    // Set the initial render pose so other systems can blend onto it
     world.system<RenderPose, CurLocomotionPose>()
         .each([] (RenderPose& render_pose, CurLocomotionPose cur_pose) {
             render_pose.pose = cur_pose.pose;
@@ -123,8 +123,9 @@ inline void register_set_render_pose_system(flecs::world& world) {
     );
 }
 
-// Blends render pose with previous locomotion pose to smooth out animation
 inline void register_locomotion_blend_system(flecs::world& world) {
+    // Blend render pose with previous locomotion pose to smooth out animation
+    // TODO: I think the plan was to blend component-wise, but I don't see why we can't just store the previous overall pose and blend with that...
     world.system<RenderPose, PrevLocomotionPose, LocomotionBlendFactor>()
         .each([] (RenderPose& render_pose, PrevLocomotionPose prev_pose,
                   LocomotionBlendFactor& alpha) {
