@@ -1,9 +1,9 @@
 #include "flecs.h"
 
 #include "components.hpp"
-#include "../shared/animation_components.hpp"
+#include "../shared/animation-components.hpp"
 #include "../shared/components.hpp"
-#include "../shared/network_components.hpp"
+#include "../shared/network-components.hpp"
 
 void add_character_components(flecs::entity entity);
 

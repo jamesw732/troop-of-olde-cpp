@@ -66,8 +66,7 @@ void serialize(S& s, MovementInputPacket& input_packet) {
 
 template<typename S>
 void serialize(S& s, MovementInput& input) {
-    s.value1b(input.x);
-    s.value1b(input.z);
+    s.value1b(input.locomotion);
     s.value1b(input.jump);
     s.value1b(input.rot_y);
     s.value2b(input.mouse_rot_y);

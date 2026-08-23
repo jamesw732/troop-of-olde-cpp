@@ -1,7 +1,7 @@
 #include "../shared/pch-networking.hpp"
 
 #include "network.hpp"
-#include "../shared/network_components.hpp"
+#include "../shared/network-components.hpp"
 #include "../shared/const.hpp"
 #include "../shared/util.hpp"
 

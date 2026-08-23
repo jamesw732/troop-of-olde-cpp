@@ -4,18 +4,15 @@
 #include "input.hpp"
 
 inline void register_locomotion_tick_system(flecs::world& world, InputBuffer& input_buffer) {
-    // Increment animation state machine for the local player, once per movement tick
-    // TODO: Really seems unnecessary to send whole input buffer
-    // Maybe go back to storing the MovementInput for the current tick?
+    // Increment animation state machine for the local player based on their movement input, once per movement tick
     world.system<LocomotionBlendSpace, LocomotionPhase,
-                 CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor>()
+                 CurLocomotionPose, PrevLocomotionPose, LocomotionBlendFactor, MovementInput>()
         .with<LocalPlayer>()
         .interval(MOVE_UPDATE_RATE)
         .each([&input_buffer] (LocomotionBlendSpace& blend_space, LocomotionPhase& phase,
                     CurLocomotionPose cur_pose, PrevLocomotionPose& prev_pose,
-                    LocomotionBlendFactor& alpha) {
+                    LocomotionBlendFactor& alpha, MovementInput input) {
             if (input_buffer.empty()) return;
-            MovementInput input = input_buffer.back();
             LocomotionBlendSpace new_blend_space = get_blend_space_from_input(input);
             if (new_blend_space.is_close(blend_space)) {
                 return;

@@ -16,16 +16,16 @@
 inline MovementInput read_movement_input() {
     MovementInput input;
     if (IsKeyDown(KEY_W)) {
-        input.z--;
+        input.locomotion = input.locomotion | LocomotionInput::Up;
     }
     if (IsKeyDown(KEY_S)) {
-        input.z++;
+        input.locomotion = input.locomotion | LocomotionInput::Down;
     }
     if (IsKeyDown(KEY_Q)) {
-        input.x--;
+        input.locomotion = input.locomotion | LocomotionInput::Left;
     }
     if (IsKeyDown(KEY_E)) {
-        input.x++;
+        input.locomotion = input.locomotion | LocomotionInput::Right;
     }
     if (IsKeyDown(KEY_A)) {
         input.rot_y++;

@@ -6,7 +6,7 @@
 
 #include "raylib.h"
 
-#include "animation_components.hpp"
+#include "animation-components.hpp"
 #include "raylib-util.hpp"
 
 
@@ -52,25 +52,55 @@ struct DisplayName {
     std::string name;
 };
 
+enum class LocomotionInput : uint8_t {
+    None = 0,
+    Up = 1 << 0,      // W
+    Down = 1 << 1,    // A
+    Left = 1 << 2,    // S
+    Right = 1 << 3    // D
+};
+
+constexpr LocomotionInput operator|(LocomotionInput a, LocomotionInput b)
+{
+    return static_cast<LocomotionInput>(
+        static_cast<uint8_t>(a) | static_cast<uint8_t>(b)
+    );
+}
+
+constexpr LocomotionInput operator&(LocomotionInput a, LocomotionInput b)
+{
+    return static_cast<LocomotionInput>(
+        static_cast<uint8_t>(a) & static_cast<uint8_t>(b)
+    );
+}
+
+
 struct MovementInput {
     // TODO: reduce number of bits required to store all these
-    int8_t x = 0;
-    int8_t z = 0;
+    LocomotionInput locomotion = LocomotionInput::None;
     bool jump = false;
     int8_t rot_y = 0;
     int16_t mouse_rot_y = 0; // for maximum precision, this should be a float, but I prefer the int for determinism
 
+    constexpr bool has_input(LocomotionInput inputs, LocomotionInput input) const {
+        return (static_cast<uint8_t>(inputs & input) != 0);
+    }
+
     bool get_forward() const {
-        return z < 0;
+        return has_input(locomotion, LocomotionInput::Up);
+        /* return z < 0; */
     }
     bool get_backward() const {
-        return z > 0;
+        return has_input(locomotion, LocomotionInput::Down);
+        /* return z > 0; */
     }
     bool get_strafe_r() const {
-        return x > 0;
+        return has_input(locomotion, LocomotionInput::Right);
+        /* return x > 0; */
     }
     bool get_strafe_l() const {
-        return x < 0;
+        return has_input(locomotion, LocomotionInput::Left);
+        /* return x < 0; */
     }
 };
 
@@ -78,9 +108,9 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
     os << "MovementInput{\n";
     os << indent();
     print_indent(os);
-    os << "x: " << (int) input.x << "\n";
+    os << "x: " << (int) input.get_strafe_r() - (int) input.get_strafe_l() << "\n";
     print_indent(os);
-    os << "z: " << (int) input.z << "\n";
+    os << "z: " << (int) input.get_forward() - (int) input.get_backward() << "\n";
     print_indent(os);
     os << "rot_y: " << (int) input.rot_y << "\n";
     print_indent(os);
@@ -94,7 +124,7 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInput& input) {
 }
 
 inline bool operator==(MovementInput input1, MovementInput input2) {
-    return input1.x == input2.x && input1.z == input2.z
+    return input1.locomotion == input2.locomotion
         && input1.jump == input2.jump && input1.mouse_rot_y == input2.mouse_rot_y
         && input1.rot_y == input2.mouse_rot_y;
 }

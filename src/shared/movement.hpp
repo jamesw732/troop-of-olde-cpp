@@ -13,7 +13,11 @@
 
 
 inline Vector3 get_input_displacement(const MovementInput& input, float rot) {
-    Vector3 disp{FORWARD.x * (float) input.x, 0, FORWARD.z * (float) input.z};
+    Vector3 disp{
+        FORWARD.x * ((float) input.get_strafe_r() - (float) input.get_strafe_l()),
+        0,
+        FORWARD.z * (float) (input.get_forward() - (float) input.get_backward())
+    };
     disp = Vector3Normalize(disp);
     disp = Vector3RotateByAxisAngle(disp, {0, 1, 0}, rot * PI / 180);
     disp = Vector3Scale(disp, 0.25);

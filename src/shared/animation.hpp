@@ -4,7 +4,7 @@
 #include "rlgl.h"
 
 #include "components.hpp"
-#include "animation_components.hpp"
+#include "animation-components.hpp"
 
 // NOTE: Redefinition of function from Raylib's rmodels.c
 static void UpdateModelAnimationVertexBuffers(Model model);

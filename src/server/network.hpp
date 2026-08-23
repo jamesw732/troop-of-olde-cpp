@@ -6,7 +6,7 @@
 
 #include "flecs.h"
 
-#include "../shared/network_components.hpp"
+#include "../shared/network-components.hpp"
 #include "../shared/const.hpp"
 #include "../shared/util.hpp"
 
