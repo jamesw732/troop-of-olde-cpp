@@ -1,7 +1,10 @@
 # Right now:
-## Fix clangd :rage:
+- Add jumping into movement input bit pack
+- Fix tmux issues. Stop server when running, and don't try to run if compile failure
 
 # Coming soon:
+- Map/terrain generation
 
 
-## Combat???
+# Later:
+More animations? Jumping?
