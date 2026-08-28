@@ -1,9 +1,8 @@
 # Right now:
-- Add jumping into movement input bit pack
-- Fix tmux issues. Stop server when running, and don't try to run if compile failure
+- Map/terrain generation
 
 # Coming soon:
-- Map/terrain generation
+- Add jumping into movement input bit mask
 
 
 # Later:

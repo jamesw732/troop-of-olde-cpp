@@ -28,7 +28,9 @@ add_subdirectory(deps)
 # Copy asset directories to build path
 file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
 file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
+add_compile_definitions(FONT_DIR="assets/fonts/" MODEL_DIR="assets/models/" TEXTURE_DIR="assets/textures/")
 
 # PCH
 add_library(pch "${SHARED_DIR}/pch.cpp")
@@ -71,7 +73,6 @@ target_link_libraries(client PRIVATE
 )
 link_platform_libs(client)
 target_precompile_headers(client REUSE_FROM pch)
-target_compile_definitions(client PRIVATE FONT_DIR="assets/fonts/" MODEL_DIR="assets/models/")
 
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
@@ -82,9 +83,17 @@ target_link_libraries(server PRIVATE
 )
 link_platform_libs(server)
 target_precompile_headers(server REUSE_FROM pch)
+
+# Create mapgen executable, link with dependencies
+add_executable(mapgen src/mapgen.cpp)
+target_link_libraries(mapgen PRIVATE
+    raylib flecs_static bitsery dbg
+)
+
+
 # Assets
 file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
-target_compile_definitions(server PRIVATE MODEL_DIR="assets/models/")
+
 
 # Tests
 enable_testing()
