@@ -4,10 +4,8 @@
 #include "mapgen/visualizer.hpp"
 
 int main() {
-    /* Map<2, 2> map = prims<2, 2>(); */
-    /* Map<8, 8> map = prims<8, 8>(); */
     constexpr int size = 8;
-    Map<size, size> map = prims<size, size>();
+    Map map = prims(size, size);
     create_image(map);
 
 
@@ -30,11 +28,11 @@ int main() {
     /*     std::cout << "\n"; */
     /* } */
     // Test nontrivial connectedness cases
-    bool gaps[8][8] {};
-    gaps[0][0] = 1;
-    gaps[1][1] = 1;
-    assert((is_connected<8, 8>(gaps, 2, Coordinate{0, 1})));
-    assert((!is_connected<8, 8>(gaps, 2, Coordinate{0, 2})));
-    gaps[0][2] = 1;
-    assert((!is_connected<8, 8>(gaps, 2, Coordinate{0, 3})));
+    Map test_map(8, 8);
+    test_map.get({0, 0}).type = CellType::Vacant;
+    test_map.get({1, 1}).type = CellType::Vacant;
+    assert((is_connected(test_map, 2, Coordinate{0, 1})));
+    assert((!is_connected(test_map, 2, Coordinate{0, 2})));
+    test_map.get({0, 2}).type = CellType::Vacant;
+    assert((!is_connected(test_map, 2, Coordinate{0, 3})));
 }

@@ -11,13 +11,14 @@ inline Image atlas = LoadImage(TEXTURE_DIR "rooms.png");
 Rectangle get_atlas_rect(Direction direction);
 Coordinate get_atlas_coords(Direction direction);
 
-template<int x, int y>
-void create_image(Map<x, y> map) {
+void create_image(Map map) {
+    int x = map.cols;
+    int y = map.rows;
     InitWindow(1, 1, "Map Generator");
     Image map_image = GenImageColor(x * ROOM_SIZE, y * ROOM_SIZE, BLACK);
     for (int row = 0; row < y; row++) {
         for (int col = 0; col < x; col++) {
-            MapCell cell = map.grid[row][col];
+            MapCell cell = map.get({col, row});
             if (cell.type == CellType::Vacant) {
                 continue;
             }
