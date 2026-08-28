@@ -1,14 +1,16 @@
 #include <cassert>
 
 #include "mapgen/prims.hpp"
+#include "mapgen/sparse-prims.hpp"
 #include "mapgen/visualizer.hpp"
 
 int main() {
     constexpr int size = 8;
-    Map map = prims(size, size);
+    Map map = sparse_prims(size, size);
+    /* Map map = prims(size, size); */
     create_image(map);
 
-    /* std::cout << map << "\n"; */
+    std::cout << map << "\n";
 
     /* for (auto& row: map.grid) { */
     /*     for (MapCell cell: row) { */

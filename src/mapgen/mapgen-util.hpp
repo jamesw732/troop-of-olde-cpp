@@ -77,6 +77,10 @@ struct Coordinate {
         return x == other.x && y == other.y;
     }
 
+    bool operator!=(const Coordinate& other) {
+        return !(x == other.x && y == other.y);
+    }
+
     Coordinate operator-(const Coordinate& other) {
         return Coordinate{x - other.x, y - other.y};
     }
