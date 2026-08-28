@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 
-#include "mapgen.hpp"
+#include "mapgen-util.hpp"
 
 
 const int ROOM_SIZE = 64;
@@ -11,7 +11,7 @@ inline Image atlas = LoadImage(TEXTURE_DIR "rooms.png");
 Rectangle get_atlas_rect(Direction direction);
 Coordinate get_atlas_coords(Direction direction);
 
-void create_image(Map map) {
+inline void create_image(Map map) {
     int x = map.cols;
     int y = map.rows;
     InitWindow(1, 1, "Map Generator");

@@ -1,10 +1,10 @@
 #include <cassert>
 
-#include "mapgen/mapgen.hpp"
+#include "mapgen/prims.hpp"
 #include "mapgen/visualizer.hpp"
 
 int main() {
-    constexpr int size = 100;
+    constexpr int size = 8;
     Map map = prims(size, size);
     create_image(map);
 
