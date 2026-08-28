@@ -82,6 +82,12 @@ struct Coordinate {
     }
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Coordinate coords) {
+    std::cout << "(" << coords.x << ", " << coords.y << ")\n";
+    return os;
+}
+
+
 struct Map {
     int rows;
     int cols;
@@ -117,7 +123,7 @@ struct Map {
 using CoordsList = std::vector<Coordinate>;
 
 template<typename T>
-T random_choice(std::vector<T> choices, std::mt19937 gen);
+T random_choice(const std::vector<T>& choices, std::mt19937& gen);
 
 Direction get_direction_from_diff(Coordinate diff);
 
@@ -224,7 +230,7 @@ inline Map prims(int x, int y) {
 }
 
 template<typename T>
-T random_choice(std::vector<T> choices, std::mt19937 gen) {
+T random_choice(const std::vector<T>& choices, std::mt19937& gen) {
     std::uniform_int_distribution<std::size_t> dist(0, choices.size() - 1);
     return choices[dist(gen)];
 }

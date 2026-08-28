@@ -4,12 +4,11 @@
 #include "mapgen/visualizer.hpp"
 
 int main() {
-    constexpr int size = 8;
+    constexpr int size = 100;
     Map map = prims(size, size);
     create_image(map);
 
-
-    std::cout << map << "\n";
+    /* std::cout << map << "\n"; */
 
     /* for (auto& row: map.grid) { */
     /*     for (MapCell cell: row) { */
