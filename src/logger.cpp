@@ -27,6 +27,14 @@ void deserialize_log(const Buffer& file_buffer) {
         std::chrono::system_clock::time_point tp(us);
         std::time_t time = std::chrono::system_clock::to_time_t(tp);
         std::tm* tm = std::localtime(&time);
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+            tp.time_since_epoch()
+        ).count() % 1000;
+
+        std::cout << std::put_time(tm, "%Y-%m-%d %H:%M:%S")
+          << '.' << std::setfill('0') << std::setw(3) << millis
+          << '\n';
+        /* std::cout << std::put_time(tm, "%Y-%m-%d %H:%M:%S") << "\n"; */
 
         offset += sizeof(timestamp);
 
@@ -47,7 +55,6 @@ void deserialize_log(const Buffer& file_buffer) {
         bitsery::Deserializer<InputAdapter> des{payload_buffer.data(), payload_size};
         offset += payload_size;
 
-        std::cout << std::put_time(tm, "%Y-%m-%d %H:%M:%S") << "\n";
         switch (pkt_type) {
             case PacketType::MovementInputPacket: {
                 MovementInputPacket pkt;

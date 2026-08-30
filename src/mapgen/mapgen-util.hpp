@@ -7,6 +7,7 @@
 inline std::random_device rd;
 inline std::mt19937 gen(rd());
 
+constexpr int ROOM_SIZE = 10;
 
 enum class Direction : uint8_t {
     None = 0,

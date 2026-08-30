@@ -206,7 +206,7 @@ namespace
 
 inline Mesh generate_room_mesh(
     Direction exits,
-    float room_size = 10.0f,
+    float room_size = ROOM_SIZE,
     float wall_height = 2.0f,
     float door_width = 1.5f
 ) {

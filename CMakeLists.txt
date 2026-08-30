@@ -10,7 +10,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS_DEBUG "-g1 -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_DIR ${SRC_DIR}/shared)
 set(CLIENT_DIR ${SRC_DIR}/client)
@@ -98,12 +98,14 @@ add_executable(mapgen src/mapgen.cpp)
 target_link_libraries(mapgen PRIVATE
     raylib flecs_static bitsery dbg
 )
+target_link_options(mapgen PRIVATE -static)
 
 # Create roomgen executable, link with dependencies
 add_executable(roomgen src/room-meshgen.cpp)
 target_link_libraries(roomgen PRIVATE
     raylib flecs_static bitsery dbg
 )
+target_link_options(roomgen PRIVATE -static)
 
 
 # Assets
@@ -158,3 +160,10 @@ target_link_libraries(logger PRIVATE
     bitsery dbg
 )
 link_platform_libs(logger)
+target_link_options(logger PRIVATE -static)
+add_custom_command(
+    TARGET logger POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/scripts/logger.sh"
+    "$<TARGET_FILE_DIR:logger>/logger.sh"
+)

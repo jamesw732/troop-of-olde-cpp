@@ -4,7 +4,7 @@
 #include "mapgen-util.hpp"
 
 
-const int ROOM_SIZE = 64;
+const int ROOM_ICON_SIZE = 64;
 
 inline Image atlas = LoadImage(TEXTURE_DIR "rooms.png");
 

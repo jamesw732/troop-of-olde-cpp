@@ -2,6 +2,7 @@
 
 #include "network.hpp"
 #include "entities.hpp"
+#include "../shared/packets.hpp"
 
 
 /*

@@ -20,7 +20,6 @@
 /* #define DISABLE_SERVER */
 
 // MOVEMENT INPUT SYSTEMS
-
 inline void register_movement_input_aggregate_system(flecs::world world) {
     // Build up the active MovementInput per-frame, to be processed per-tick
     world.system<MovementInput>()
@@ -60,7 +59,7 @@ inline void register_movement_input_cleanup_system(flecs::world world) {
 
 inline void register_movement_recv_system(flecs::world world) {
     // Overwrite all simulated state with received state.
-    // This layer is important because of responsibility, the network layer should not be touching the simulation directly
+    // This keeps responsibilities clear, network layer does not touch simulation directly
     world.system<AckTick, RecvAckTick,
                  SimPosition, SimRotation, SimGravity, SimGrounded,
                  RecvPosition, RecvRotation, RecvGravity, RecvGrounded>()
@@ -78,7 +77,7 @@ inline void register_movement_recv_system(flecs::world world) {
                 RecvGrounded recv_grounded
             )
         {
-            if ((int16_t) (recv_ack_tick.val - ack_tick.val) <= 0) {
+            if ((int16_t) (recv_ack_tick.val - ack_tick.val) < 0) {
                 return;
             }
             sim_pos.val = recv_pos.val;
@@ -110,7 +109,7 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
         {
 #ifndef DISABLE_SERVER
             // If old tick, don't copy
-            if ((int16_t) (new_ack_tick.val - old_ack_tick.val) <= 0) {
+            if ((int16_t) (new_ack_tick.val - old_ack_tick.val) < 0) {
                 return;
             }
             old_ack_tick.val = new_ack_tick.val;
@@ -119,9 +118,9 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
             pred_rot.val = rot.val;
             pred_gravity.val = gravity.val;
             pred_grounded.val = grounded.val;
+#endif
         }
     );
-#endif
 }
 
 inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
@@ -138,8 +137,9 @@ inline void register_movement_reconcile_system(flecs::world& world, InputBuffer&
                 LocalPlayer)
         {
 #ifndef DISABLE_SERVER
+            std::cout << input_buffer.size << "\n";
             // If old tick, skip reconciliation
-            if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) <= 0) {
+            if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) < 0) {
                 return;
             }
             // If new tick, perform client-side prediction on un-acked inputs

@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "client/animation.hpp"
 #include "client/camera.hpp"
 #include "client/components.hpp"
@@ -14,6 +16,12 @@
 #include "shared/components.hpp"
 #include "shared/register.hpp"
 #include "shared/serialize.hpp"
+
+/* #ifdef _WIN32 */
+/* extern "C" { */
+/*     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001; */
+/* } */
+/* #endif */
 
 
 int main()
@@ -39,7 +47,7 @@ int main()
     flecs::world world;
     Network network;
     network.connect();
-    const ClientLoginPacket login{.name={"Player"}, .pos={0, 1, 0}, .rot={0, 0, 0}};
+    const ClientLoginPacket login{.name={"Player"}, .pos={0, 1, 0}, .rot={0, 180, 0}};
     auto [buffer, size] = serialize(login);
     network.queue_data_reliable(buffer, size);
     network.send_network_buffer();
@@ -58,16 +66,28 @@ int main()
 
     /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
-    auto terrain = world.entity("World");
-    terrain.set<Color>(GRAY);
-    terrain.set<ModelPointer>({&loaded_models["room_1"].model});
-    terrain.add<Scale>();
-    terrain.add<SimPosition>();
-    terrain.add<SimRotation>();
-    terrain.add<RenderPosition>();
-    terrain.add<RenderRotation>();
-    terrain.add<Terrain>();
-    terrain.set<Scale>({{1, 1, 1}});
+    Map map(2, 1);
+    map.grid[0] = {CellType::Normal, Direction::Right};
+    map.grid[1] = {CellType::Normal, Direction::Left};
+    for (int row = 0; row < map.rows; row++) {
+        for (int col = 0; col < map.cols; col++) {
+            MapCell cell = map.get({col, row});
+            std::string room_name = "room_" + std::to_string((int) cell.direction);
+            auto room = world.entity();
+            room.set<Color>(GRAY);
+            room.set<ModelPointer>({&loaded_models[room_name].model});
+            room.add<Scale>();
+            room.add<SimPosition>();
+            room.add<SimRotation>();
+            room.add<RenderPosition>();
+            room.add<RenderRotation>();
+            room.add<Terrain>();
+            room.set<Scale>({{1, 1, 1}});
+            Vector3 position{static_cast<float>(col * ROOM_SIZE), 0, static_cast<float>(row * ROOM_SIZE)};
+            room.set<SimPosition>({position});
+            room.set<RenderPosition>({position});
+        }
+    }
 
     auto ManualPhase = world.entity("ManualPhase");
 

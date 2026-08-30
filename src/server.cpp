@@ -1,6 +1,7 @@
 #include <atomic>
 #include <csignal>
 
+#include "mapgen/mapgen-util.hpp"
 #include "server/animation.hpp"
 #include "server/disconnect.hpp"
 #include "server/network.hpp"
@@ -28,21 +29,40 @@ int main()
     }
     PacketHandler packet_handler{world};
 
-    std::unordered_map<std::string, Model> loaded_meshes;
-    loaded_meshes.reserve(128);
+    std::unordered_map<std::string, Model> loaded_models;
+    loaded_models.reserve(128);
 
     for (int i = 1; i < 16; i++) {
         std::string roomname = "room_" + std::to_string(i);
-        loaded_meshes[roomname] = {LoadServerModel((ROOM_DIR + roomname + ".obj").c_str())};
+        loaded_models[roomname] = {LoadServerModel((ROOM_DIR + roomname + ".obj").c_str())};
     }
-    loaded_meshes["cube"] = LoadServerModel((MODEL_DIR "cube.glb"));
-    loaded_meshes["humanoid"] = LoadServerModel((MODEL_DIR "humanoid.glb"));
-    loaded_meshes["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
+    loaded_models["cube"] = LoadServerModel((MODEL_DIR "cube.glb"));
+    loaded_models["humanoid"] = LoadServerModel((MODEL_DIR "humanoid.glb"));
+    loaded_models["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
     /* print_mesh_vertices(*world_model.meshes); */
 
+    Map map(2, 1);
+    map.grid[0] = {CellType::Normal, Direction::Right};
+    map.grid[1] = {CellType::Normal, Direction::Left};
+    for (int row = 0; row < map.rows; row++) {
+        for (int col = 0; col < map.cols; col++) {
+            MapCell cell = map.get({col, row});
+            std::string room_name = "room_" + std::to_string((int) cell.direction);
+            auto room = world.entity();
+            room.set<Color>(GRAY);
+            room.set<ModelPointer>({&loaded_models[room_name]});
+            room.add<Scale>();
+            room.add<SimPosition>();
+            room.add<SimRotation>();
+            room.add<Terrain>();
+            room.set<Scale>({{1, 1, 1}});
+            Vector3 position{static_cast<float>(col * ROOM_SIZE), 0, static_cast<float>(row * ROOM_SIZE)};
+            room.set<SimPosition>({position});
+        }
+    }
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
-    terrain.set<ModelPointer>({&loaded_meshes["room_1"]});
+    terrain.set<ModelPointer>({&loaded_models["room_1"]});
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();
     terrain.add<Scale>();
