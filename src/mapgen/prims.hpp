@@ -1,3 +1,7 @@
+#pragma once
+#include <algorithm>
+#include <vector>
+
 #include "mapgen-util.hpp"
 
 //  PRIM'S ALGORITHM

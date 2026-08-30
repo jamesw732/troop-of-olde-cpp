@@ -41,18 +41,10 @@ inline void create_image(Map map) {
             );
             if (cell.type == CellType::Boss) {
                 int font_size = 48;
-                std::cout << "Found boss\n";
+                /* std::cout << "Found boss\n"; */
                 int text_width = MeasureText("B", 48);
                 float x_offset = (ROOM_SIZE - text_width) / 2.0;
                 float y_offset = (ROOM_SIZE - font_size) / 2.0;
-                /* ImageDrawText( */
-                /*     &map_image, */
-                /*     "B", */
-                /*     5, */
-                /*     5, */
-                /*     48, */
-                /*     RED */
-                /* ); */
                 ImageDrawText(
                     &map_image,
                     "B",

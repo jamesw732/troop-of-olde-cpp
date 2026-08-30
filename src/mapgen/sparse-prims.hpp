@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <vector>
+
 #include "mapgen-util.hpp"
 
 bool has_charted_neighbor(Map map, Coordinate coords, Coordinate exclude);

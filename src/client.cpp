@@ -10,6 +10,7 @@
 #include "client/packet_handler.hpp"
 #include "client/render.hpp"
 #include "client/register.hpp"
+#include "mapgen/mapgen-util.hpp"
 #include "shared/components.hpp"
 #include "shared/register.hpp"
 #include "shared/serialize.hpp"
@@ -58,15 +59,15 @@ int main()
     /* print_mesh_vertices(*loaded_models["sample_world"].meshes); */
 
     auto terrain = world.entity("World");
-    terrain.set<Color>(BLUE);
-    terrain.set<ModelPointer>({&loaded_models["sample_world"].model});
+    terrain.set<Color>(GRAY);
+    terrain.set<ModelPointer>({&loaded_models["room_1"].model});
     terrain.add<Scale>();
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();
     terrain.add<RenderPosition>();
     terrain.add<RenderRotation>();
     terrain.add<Terrain>();
-    terrain.set<Scale>({{10, 10, 10}});
+    terrain.set<Scale>({{1, 1, 1}});
 
     auto ManualPhase = world.entity("ManualPhase");
 

@@ -10,7 +10,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-g1 -O0")
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_DIR ${SRC_DIR}/shared)
 set(CLIENT_DIR ${SRC_DIR}/client)
@@ -28,9 +28,15 @@ add_subdirectory(deps)
 # Copy asset directories to build path
 file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR}/assets)
 file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+file(COPY ${CMAKE_SOURCE_DIR}/assets/rooms DESTINATION ${CMAKE_BINARY_DIR}/assets)
 file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
-add_compile_definitions(FONT_DIR="assets/fonts/" MODEL_DIR="assets/models/" TEXTURE_DIR="assets/textures/")
+add_compile_definitions(
+    FONT_DIR="assets/fonts/"
+    MODEL_DIR="assets/models/"
+    TEXTURE_DIR="assets/textures/"
+    ROOM_DIR="assets/rooms/"
+)
 
 # PCH
 add_library(pch "${SHARED_DIR}/pch.cpp")
@@ -61,7 +67,7 @@ target_precompile_headers(server-network REUSE_FROM pch-networking)
 
 # Server mesh loader
 add_library(server-meshloader STATIC ${CMAKE_SOURCE_DIR}/src/server/mesh_loader.cpp)
-target_link_libraries(server-meshloader PRIVATE raylib)
+target_link_libraries(server-meshloader PUBLIC raylib)
 
 # Executables
 # Create client executable, link with dependencies
@@ -71,22 +77,31 @@ target_link_libraries(client PRIVATE
     bitsery dbg
     client-network
 )
+target_link_options(client PRIVATE -static)
 link_platform_libs(client)
 target_precompile_headers(client REUSE_FROM pch)
 
 # Create server executable, link with dependencies
 add_executable(server src/server.cpp)
 target_link_libraries(server PRIVATE
-    raylib flecs_static
+    server-meshloader
+    flecs_static
     bitsery dbg
-    server-network server-meshloader
+    server-network 
 )
+target_link_options(server PRIVATE -static "-Wl,--undefined=tinyobj_parse_obj")
 link_platform_libs(server)
 target_precompile_headers(server REUSE_FROM pch)
 
 # Create mapgen executable, link with dependencies
 add_executable(mapgen src/mapgen.cpp)
 target_link_libraries(mapgen PRIVATE
+    raylib flecs_static bitsery dbg
+)
+
+# Create roomgen executable, link with dependencies
+add_executable(roomgen src/room-meshgen.cpp)
+target_link_libraries(roomgen PRIVATE
     raylib flecs_static bitsery dbg
 )
 

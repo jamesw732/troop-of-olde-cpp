@@ -4,8 +4,11 @@
 #include "mapgen/sparse-prims.hpp"
 #include "mapgen/visualizer.hpp"
 
-int main() {
-    constexpr int size = 8;
+int main(int argc, char* argv[]) {
+    int size = 8;
+    if (argc > 1) {
+        size = std::stoi(argv[1]);
+    }
     Map map = sparse_prims(size, size);
     /* Map map = prims(size, size); */
     create_image(map);

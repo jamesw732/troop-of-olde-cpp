@@ -62,8 +62,10 @@ inline flecs::system register_render_system(
             )
         {
             BeginMode3D(camera);
+                rlDisableBackfaceCulling();
                 RenderModel(*model.model, pos.val, rot.val, scale.val, color);
-                RenderModelWires(*model.model, pos.val, rot.val, scale.val, color);
+                /* RenderModelWires(*model.model, pos.val, rot.val, scale.val, color); */
+                rlEnableBackfaceCulling();
             EndMode3D();
         }
     );

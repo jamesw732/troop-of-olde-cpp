@@ -31,7 +31,10 @@ int main()
     std::unordered_map<std::string, Model> loaded_meshes;
     loaded_meshes.reserve(128);
 
-    loaded_meshes["sample_world"] = LoadServerModel(MODEL_DIR "sample_world.glb");
+    for (int i = 1; i < 16; i++) {
+        std::string roomname = "room_" + std::to_string(i);
+        loaded_meshes[roomname] = {LoadServerModel((ROOM_DIR + roomname + ".obj").c_str())};
+    }
     loaded_meshes["cube"] = LoadServerModel((MODEL_DIR "cube.glb"));
     loaded_meshes["humanoid"] = LoadServerModel((MODEL_DIR "humanoid.glb"));
     loaded_meshes["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
@@ -39,12 +42,12 @@ int main()
 
     auto terrain = world.entity("World");
     terrain.set<Color>(BLUE);
-    terrain.set<ModelPointer>({&loaded_meshes["sample_world"]});
+    terrain.set<ModelPointer>({&loaded_meshes["room_1"]});
     terrain.add<SimPosition>();
     terrain.add<SimRotation>();
     terrain.add<Scale>();
     terrain.add<Terrain>();
-    terrain.set<Scale>({{10, 10, 10}});
+    terrain.set<Scale>({{1, 1, 1}});
 
     register_components(world);
 

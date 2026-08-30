@@ -34,6 +34,11 @@ You can configure your build scripts to use MinGW by passing in the toolchain:
 cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-toolchain.cmake -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
+Or for MinGW Clang:
+```
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=cmake/mingw-clang-toolchain.cmake -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
 
 I have had some trouble with clangd while using MinGW, it seems to get very confused by the conflicting
 environment. This .clangd works for me:
