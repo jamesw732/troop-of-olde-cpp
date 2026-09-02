@@ -1,6 +1,7 @@
 #include "flecs.h"
 
 #include "components.hpp"
+#include "network-components.hpp"
 #include "packets.hpp"
 
 inline void register_components(flecs::world& world) {
@@ -14,8 +15,8 @@ inline void register_components(flecs::world& world) {
     world.component<MovementUpdate>();
     world.component<Disconnected>();
     // Add packets
-    world.component<ClientLoginPacket>();
-    world.component<SpawnBatchPacket>();
+    world.component<LoginRequestPacket>();
+    world.component<LoginResponsePacket>();
     world.component<PlayerSpawnPacket>();
     world.component<MovementUpdateBatchPacket>();
     world.component<MovementInputPacket>();

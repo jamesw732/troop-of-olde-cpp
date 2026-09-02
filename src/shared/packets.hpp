@@ -5,11 +5,12 @@
 #include "components.hpp"
 #include "const.hpp"
 #include "util.hpp"
+#include "../mapgen/mapgen-util.hpp"
 
 enum class PacketType : uint8_t {
     MovementInputPacket,
-    ClientLoginPacket,
-    SpawnBatchPacket,
+    LoginRequestPacket,
+    LoginResponsePacket,
     PlayerSpawnPacket,
     MovementUpdateBatchPacket,
     DisconnectPacket
@@ -43,14 +44,14 @@ inline std::ostream& operator<<(std::ostream& os, const MovementInputPacket& pkt
     return os;
 }
 
-struct ClientLoginPacket {
-    static constexpr PacketType id = PacketType::ClientLoginPacket;
+struct LoginRequestPacket {
+    static constexpr PacketType id = PacketType::LoginRequestPacket;
     std::string name;
-    Vector3 pos;
+    Vector3 pos; // Should these just be for re-login?
     Vector3 rot;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ClientLoginPacket& pkt) {
+inline std::ostream& operator<<(std::ostream& os, const LoginRequestPacket& pkt) {
     os << "ClientLoginPacket{\n";
     os << indent();
     print_indent(os);
@@ -64,13 +65,15 @@ inline std::ostream& operator<<(std::ostream& os, const ClientLoginPacket& pkt) 
     return os;
 }
 
-struct SpawnBatchPacket {
-    static constexpr PacketType id = PacketType::SpawnBatchPacket;
+struct LoginResponsePacket {
+    static constexpr PacketType id = PacketType::LoginResponsePacket;
     uint32_t local_player_id;
     std::vector<PlayerSpawnState> spawn_states;
+    Map map {0, 0};
+    Coordinate base_loc;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const SpawnBatchPacket& pkt) {
+inline std::ostream& operator<<(std::ostream& os, const LoginResponsePacket& pkt) {
     os << "SpawnBatchPacket{\n";
     os << indent();
     print_indent(os);
@@ -78,6 +81,11 @@ inline std::ostream& operator<<(std::ostream& os, const SpawnBatchPacket& pkt) {
     print_indent(os);
     os << "spawn_states: ";
     print_vector(os, pkt.spawn_states);
+    print_indent(os);
+    os << "map: \n";
+    os << pkt.map;
+    print_indent(os);
+    os << "base_loc: " << pkt.base_loc;
     os << unindent();
     os <<"}\n";
     return os;

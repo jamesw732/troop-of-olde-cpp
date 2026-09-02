@@ -61,7 +61,7 @@ inline std::ostream& operator<<(std::ostream& os, const Direction direction) {
     /* for (int i = 3; i >= 0; --i) { */
     /*     os << (((uint8_t) direction >> i) & 1); */
     /* } */
-    std::cout << std::hex << (int) direction;
+    std::cout << std::hex << (int) direction << std::dec;
     return os;
 }
 
@@ -105,7 +105,11 @@ struct Map {
         return grid[cols * coords.y + coords.x];
     }
 
-    friend std::ostream& operator<<(std::ostream& os, Map& map) {
+    const MapCell& get(Coordinate coords) const {
+        return grid[cols * coords.y + coords.x];
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Map& map) {
          for (int row = 0; row < map.rows; ++row) {
             for (int col = 0; col < map.cols; ++col) {
                 std::cout << map.get({col, row}).type;

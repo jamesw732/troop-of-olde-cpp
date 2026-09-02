@@ -14,6 +14,4 @@ inline void register_client_components(flecs::world world) {
     world.component<LocalPlayer>();
     world.component<AckTick>();
     world.component<Color>();
-
-    world.set<NetworkMap>({});
 }

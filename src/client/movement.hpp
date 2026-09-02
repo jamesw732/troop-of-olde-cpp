@@ -20,7 +20,7 @@
 /* #define DISABLE_SERVER */
 
 // MOVEMENT INPUT SYSTEMS
-inline void register_movement_input_aggregate_system(flecs::world world) {
+inline void register_movement_input_aggregate_system(flecs::world& world) {
     // Build up the active MovementInput per-frame, to be processed per-tick
     world.system<MovementInput>()
         .each([] (MovementInput& input) {
@@ -35,20 +35,27 @@ inline void register_movement_input_aggregate_system(flecs::world world) {
      );
 }
 
-inline void register_movement_input_buffer_system(flecs::world world, InputBuffer& buffer) {
+inline void register_movement_input_buffer_system(
+        flecs::world& world,
+        InputBuffer& buffer,
+        uint16_t& tick,
+        flecs::timer timer)
+{
     // Save the active MovementInput to the input buffer, per-tick
     world.system<MovementInput>()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
+        .kind(flecs::OnLoad)
         .each([&] (MovementInput input) {
-            buffer.push(input);
+            buffer.push(input, tick);
         }
      );
 }
 
-inline void register_movement_input_cleanup_system(flecs::world world) {
+inline void register_movement_input_cleanup_system(flecs::world& world, flecs::timer& timer, flecs::entity& phase) {
     // Clean up the active MovementInput at the end of each tick
     world.system<MovementInput>()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
+        .kind(phase)
         .each([] (MovementInput& input) {
             input = {};
         }
@@ -56,16 +63,16 @@ inline void register_movement_input_cleanup_system(flecs::world world) {
 }
 
 // MOVEMENT PROCESSING SYSTEMS
-
-inline void register_movement_recv_system(flecs::world world) {
+inline void register_movement_recv_system(flecs::world& world, flecs::timer& timer) {
     // Overwrite all simulated state with received state.
     // This keeps responsibilities clear, network layer does not touch simulation directly
     world.system<AckTick, RecvAckTick,
                  SimPosition, SimRotation, SimGravity, SimGrounded,
                  RecvPosition, RecvRotation, RecvGravity, RecvGrounded>()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
+        .kind(flecs::PreUpdate)
         .each([] (
-                AckTick ack_tick,
+                AckTick& ack_tick,
                 RecvAckTick recv_ack_tick,
                 SimPosition& sim_pos,
                 SimRotation& sim_rot,
@@ -77,6 +84,8 @@ inline void register_movement_recv_system(flecs::world world) {
                 RecvGrounded recv_grounded
             )
         {
+            // TODO: Move this to a singleton class that uses a buffer
+            // If we received an old tick, we don't want to go back to it
             if ((int16_t) (recv_ack_tick.val - ack_tick.val) < 0) {
                 return;
             }
@@ -84,17 +93,18 @@ inline void register_movement_recv_system(flecs::world world) {
             sim_rot.val = recv_rot.val;
             sim_grav.val = recv_grav.val;
             sim_grounded.val = recv_grounded.val;
+            ack_tick.val = recv_ack_tick.val;
         }
     );
 }
 
-inline void register_movement_prediction_reset_system(flecs::world world) {
+inline void register_movement_prediction_system(flecs::world& world, InputBuffer& input_buffer, flecs::timer& timer) {
     // Reset all predictions to whatever the simulation state is at the last acknowledged tick
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
                  PredPosition, PredRotation, PredGravity, PredGrounded,
-                 AckTick, RecvAckTick>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&world](
+                 AckTick>()
+        .tick_source(timer)
+        .each([&](
                 SimPosition& pos,
                 SimRotation& rot,
                 SimGravity& gravity,
@@ -103,47 +113,17 @@ inline void register_movement_prediction_reset_system(flecs::world world) {
                 PredRotation& pred_rot,
                 PredGravity& pred_gravity,
                 PredGrounded& pred_grounded,
-                AckTick& old_ack_tick,
-                RecvAckTick& new_ack_tick
+                AckTick& ack_tick
             )
         {
 #ifndef DISABLE_SERVER
-            // If old tick, don't copy
-            if ((int16_t) (new_ack_tick.val - old_ack_tick.val) < 0) {
-                return;
-            }
-            old_ack_tick.val = new_ack_tick.val;
             // Server authoritative state becomes base for new prediction
             pred_pos.val = pos.val;
             pred_rot.val = rot.val;
             pred_gravity.val = gravity.val;
             pred_grounded.val = grounded.val;
-#endif
-        }
-    );
-}
-
-inline void register_movement_reconcile_system(flecs::world& world, InputBuffer& input_buffer) {
-    // Rerun simulation beginning from most recent acknowledged tick
-    world.system<PredPosition, PredRotation, PredGravity, PredGrounded,
-                 AckTick, LocalPlayer>()
-        .interval(MOVE_UPDATE_RATE)
-        .each([&input_buffer, &world](
-                PredPosition& pred_pos,
-                PredRotation& pred_rot,
-                PredGravity& pred_gravity,
-                PredGrounded& pred_grounded,
-                AckTick& new_ack_tick,
-                LocalPlayer)
-        {
-#ifndef DISABLE_SERVER
-            std::cout << input_buffer.size << "\n";
-            // If old tick, skip reconciliation
-            if ((int16_t) (new_ack_tick.val - input_buffer.ack_tick) < 0) {
-                return;
-            }
             // If new tick, perform client-side prediction on un-acked inputs
-            input_buffer.flushUpTo(new_ack_tick.val);
+            input_buffer.flushUpTo(ack_tick.val);
             for (int i = 0; i < input_buffer.size; i++) {
                 MovementInput input = input_buffer.get_at(i);
                 tick_movement(
@@ -164,10 +144,12 @@ inline void register_movement_transmit_system(
     flecs::world& world,
     Network& network,
     InputBuffer& input_buffer,
-    uint16_t& tick)
+    uint16_t& tick,
+    flecs::timer& timer)
 {
     world.system()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
+        .kind(flecs::PostUpdate)
         .each([&network, &input_buffer, &tick]() {
             MovementInputPacket pkt;
             pkt.tick = tick;
@@ -179,9 +161,10 @@ inline void register_movement_transmit_system(
         );
 }
 
-inline void register_movement_tick_system(flecs::world& world, uint16_t& movement_tick) {
+inline void register_movement_tick_system(flecs::world& world, uint16_t& movement_tick, flecs::timer& timer) {
     world.system()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
+        .kind(flecs::OnLoad)
         .each([&movement_tick]() {
                 movement_tick++;
             }
@@ -190,10 +173,10 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
 
 // MOVEMENT LERP SYSTEMS
 
-inline void register_movement_lerp_reset_system(flecs::world& world) {
-    // Update previous predicted positions/rotations to what they are at the start of the tick
+inline void register_movement_lerp_reset_system(flecs::world& world, flecs::timer& timer) {
+    // Slide over prev pointers to entity's current render state.
     world.system<RenderPosition, PrevPredPosition, RenderRotation, PrevPredRotation, LerpTimer>()
-        .interval(MOVE_UPDATE_RATE)
+        .tick_source(timer)
         .each([] (RenderPosition& cur_pos, PrevPredPosition& prev_pos, RenderRotation& cur_rot, PrevPredRotation& prev_rot, LerpTimer& timer) {
             timer.val = 0;
             prev_pos.val = cur_pos.val;

@@ -2,6 +2,7 @@
 #include <csignal>
 
 #include "mapgen/mapgen-util.hpp"
+#include "mapgen/sparse-prims.hpp"
 #include "server/animation.hpp"
 #include "server/disconnect.hpp"
 #include "server/network.hpp"
@@ -41,6 +42,7 @@ int main()
     loaded_models["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
     /* print_mesh_vertices(*world_model.meshes); */
 
+    /* Map map = sparse_prims(8, 8); */
     Map map(2, 1);
     map.grid[0] = {CellType::Normal, Direction::Right};
     map.grid[1] = {CellType::Normal, Direction::Left};
@@ -60,14 +62,6 @@ int main()
             room.set<SimPosition>({position});
         }
     }
-    auto terrain = world.entity("World");
-    terrain.set<Color>(BLUE);
-    terrain.set<ModelPointer>({&loaded_models["room_1"]});
-    terrain.add<SimPosition>();
-    terrain.add<SimRotation>();
-    terrain.add<Scale>();
-    terrain.add<Terrain>();
-    terrain.set<Scale>({{1, 1, 1}});
 
     register_components(world);
 
@@ -75,7 +69,7 @@ int main()
     register_animation_tick_system(world);
     register_movement_networking_system(world, network);
 
-    register_batch_spawn_system(world, network);
+    register_batch_spawn_system(world, network, map);
     register_spawn_broadcast_system(world, network);
     register_disconnect_system(world, network);
 

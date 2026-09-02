@@ -34,6 +34,7 @@ function! Rebuild()
   finally
     execute 'lcd ' . fnameescape(l:cwd)
   endtry
+  redraw!
   return l:success
 endfunction
 

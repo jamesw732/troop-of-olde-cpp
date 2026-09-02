@@ -1,3 +1,4 @@
+#pragma once
 #include "flecs.h"
 
 #include "components.hpp"

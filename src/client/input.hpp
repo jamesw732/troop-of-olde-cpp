@@ -61,8 +61,7 @@ inline CameraInput read_camera_input() {
 }
 
 struct InputBuffer {
-    // Start with rollover to be consistent with server acking tick 0 to start
-    uint16_t ack_tick = -1;
+    uint16_t start_tick = 0;
     uint16_t start_idx = 0;
     uint16_t size = 0;
     bool full = false;
@@ -82,7 +81,7 @@ struct InputBuffer {
         buffer[(start_idx + i) % MAX_INPUT_BUFFER] = input;
     }
 
-    void push(const MovementInput input) {
+    void push(const MovementInput input, uint16_t tick) {
         set_at(input, size);
         if (size >= MAX_INPUT_BUFFER) {
             start_idx += size - MAX_INPUT_BUFFER + 1;
@@ -90,6 +89,7 @@ struct InputBuffer {
             return;
         }
         size++;
+        start_tick = tick - size;
     }
 
     MovementInput pop() {
@@ -112,14 +112,14 @@ struct InputBuffer {
      * new_ack_tick is the most recently acknowledged tick number by the server
      */
     void flushUpTo(uint16_t new_ack_tick) {
-        int16_t num_to_flush = (int16_t) (new_ack_tick - ack_tick);
+        int16_t num_to_flush = (int16_t) (new_ack_tick - start_tick);
         if (num_to_flush <= 0 || num_to_flush > size) {
             return;
         }
         for (int i = 0; i < num_to_flush; i++) {
             pop();
         }
-        ack_tick = new_ack_tick;
+        start_tick = new_ack_tick;
     }
 
     void copy_to_vector(std::vector<MovementInput>& vec) {
@@ -135,13 +135,14 @@ struct InputBuffer {
 };
 
 inline std::ostream& operator<<(std::ostream& os, const InputBuffer& buf) {
-    os << "Ack tick: " << buf.ack_tick << ",\n" << "Contents: {";
-    for (auto it = buf.buffer.begin(); it != buf.buffer.end(); it++) {
-        std::cout << *it;
-        if (std::next(it) != buf.buffer.end()) {
-            std::cout << ", ";
+    os << "Ack tick: " << buf.start_tick << ",\n" << "Contents: {";
+    for (int i = 0; i < buf.size; i++) {
+        int idx = buf.start_idx + i;
+        os << buf.buffer[idx];
+        if (i < buf.size - 1) {
+            os << ", ";
         }
     }
-    std::cout << "}\n";
+    os << "}\n";
     return os;
 }

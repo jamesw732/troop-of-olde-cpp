@@ -43,16 +43,18 @@ T deserialize(const uint8_t* buffer, size_t size) {
 
 // Packets
 template<typename S>
-void serialize(S& s, ClientLoginPacket& login) {
-    s.text1b(login.name, 32);
-    s.object(login.pos);
-    s.object(login.rot);
+void serialize(S& s, LoginRequestPacket& login_request) {
+    s.text1b(login_request.name, 32);
+    s.object(login_request.pos);
+    s.object(login_request.rot);
 }
 
 template<typename S>
-void serialize(S& s, SpawnBatchPacket& spawns) {
-    s.value4b(spawns.local_player_id);
-    s.container(spawns.spawn_states, MAX_CLIENTS);
+void serialize(S& s, LoginResponsePacket& login_response) {
+    s.value4b(login_response.local_player_id);
+    s.container(login_response.spawn_states, MAX_CLIENTS);
+    s.object(login_response.map);
+    s.object(login_response.base_loc);
 }
 
 template<typename S>
@@ -132,4 +134,24 @@ void serialize(S& s, LocomotionBlendSpace& blend_space) {
     s.value4b(blend_space.wB);
     s.value4b(blend_space.wL);
     s.value4b(blend_space.wR);
+}
+
+// Auxiliary Types
+template<typename S>
+void serialize(S& s, Map& map) {
+    s.value4b(map.rows);
+    s.value4b(map.cols);
+    s.container(map.grid, map.rows * map.cols);
+}
+
+template<typename S>
+void serialize(S& s, MapCell& cell) {
+    s.value1b(cell.type);
+    s.value1b(cell.direction);
+}
+
+template<typename S>
+void serialize(S& s, Coordinate& coords) {
+    s.value4b(coords.x);
+    s.value4b(coords.y);
 }

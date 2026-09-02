@@ -29,11 +29,11 @@ struct LerpTimer {
 };
 
 struct AckTick {
-    uint16_t val{static_cast<uint16_t>(-1)};
+    uint16_t val{static_cast<uint16_t>(0)};
 };
 
 struct RecvAckTick {
-    uint16_t val{static_cast<uint16_t>(-1)};
+    uint16_t val{static_cast<uint16_t>(0)};
 };
 
 struct RecvPosition {

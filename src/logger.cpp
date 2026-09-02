@@ -62,14 +62,14 @@ void deserialize_log(const Buffer& file_buffer) {
                 std::cout << pkt << "\n";
                 break;
             }
-            case PacketType::ClientLoginPacket: {
-                ClientLoginPacket pkt;
+            case PacketType::LoginRequestPacket: {
+                LoginRequestPacket pkt;
                 des.object(pkt);
                 std::cout << pkt << "\n";
                 break;
             }
-            case PacketType::SpawnBatchPacket: {
-                SpawnBatchPacket pkt;
+            case PacketType::LoginResponsePacket: {
+                LoginResponsePacket pkt;
                 des.object(pkt);
                 std::cout << pkt << "\n";
                 break;

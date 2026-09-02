@@ -6,22 +6,25 @@
 #include "../shared/serialize.hpp"
 
 
-inline void register_batch_spawn_system(flecs::world& world, Network& network) {
+inline void register_batch_spawn_system(flecs::world& world, Network& network, const Map& map) {
     /*
      * Batches world state and sends to new client
      */
     world.system<NetworkId>()
         .with<NeedsSpawnBatch>()
         .with<Connected>()
-        .each([&world, &network] (flecs::entity e, NetworkId& local_player_id) {
+        .each([&] (flecs::entity e, NetworkId& local_player_id) {
             std::vector<PlayerSpawnState> spawn_states;
-            auto q = world.query<NetworkId, DisplayName, SimPosition>();
-            q.each([&spawn_states] (NetworkId& id, DisplayName& name, SimPosition& pos) {
+            // TODO: set these along with base location in a separate system
+            e.set<SimPosition>({0, 1, 0});
+            e.set<SimRotation>({0, 180, 0});
+            auto q = world.query<NetworkId, DisplayName, SimPosition, SimRotation>();
+            q.each([&spawn_states] (NetworkId id, DisplayName name, SimPosition pos, SimRotation rot) {
                     // std::cout << "Adding player to spawn_states" << std::endl;
-                    spawn_states.push_back(PlayerSpawnState{id.id, name.name, pos.val});
+                    spawn_states.push_back(PlayerSpawnState{id.id, name.name, pos.val, rot.val});
                     }
                 );
-            SpawnBatchPacket spawns{local_player_id.id, spawn_states};
+            LoginResponsePacket spawns{local_player_id.id, spawn_states, map, {0, 0}};
             // for (PlayerSpawnState spawn_state: spawns.spawn_states) {
             //     std::cout << spawn_state.name.name << std::endl;
             //     std::cout << spawn_state.network_id.id << std::endl;

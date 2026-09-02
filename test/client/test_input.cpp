@@ -14,36 +14,36 @@ void test_input_buffer() {
     MovementInput inp4{0, -1};
 
     buffer.flushUpTo(0);
-    assertEquals(buffer.ack_tick, (uint16_t) -1);
+    assertEquals(buffer.start_tick, (uint16_t) -1);
 
-    buffer.push(inp1);
-    buffer.push(inp2);
-    buffer.push(inp3);
-    buffer.push(inp4);
-
-    buffer.flushUpTo(0);
-    front = buffer.buffer.front();
-    assertEquals(front.x, 1);
-    assertEquals(front.z, 0);
-    assertEquals(buffer.ack_tick, 0);
+    buffer.push(inp1, 0);
+    buffer.push(inp2, 1);
+    buffer.push(inp3, 2);
+    buffer.push(inp4, 3);
 
     buffer.flushUpTo(0);
     front = buffer.buffer.front();
     assertEquals(front.x, 1);
     assertEquals(front.z, 0);
-    assertEquals(buffer.ack_tick, 0);
+    assertEquals(buffer.start_tick, 0);
+
+    buffer.flushUpTo(0);
+    front = buffer.buffer.front();
+    assertEquals(front.x, 1);
+    assertEquals(front.z, 0);
+    assertEquals(buffer.start_tick, 0);
 
     buffer.flushUpTo(2);
     front = buffer.buffer.front();
     assertEquals(front.x, 0);
     assertEquals(front.z, -1);
-    assertEquals(buffer.ack_tick, 2);
+    assertEquals(buffer.start_tick, 2);
 
     buffer.flushUpTo(3);
     assert(buffer.buffer.empty());
-    assertEquals(buffer.ack_tick, 3);
+    assertEquals(buffer.start_tick, 3);
 
-    assertEquals(buffer.ack_tick, 3);
+    assertEquals(buffer.start_tick, 3);
     buffer.flushUpTo(100); // Just make sure this doesn't crash the program
     std::cout << "Executed test_input_buffer without errors" << std::endl;
 }

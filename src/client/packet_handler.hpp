@@ -1,4 +1,6 @@
+#pragma once
 #include "entities.hpp"
+#include "login.hpp"
 #include "network.hpp"
 #include "../shared/packets.hpp"
 #include "../shared/serialize.hpp"
@@ -10,12 +12,10 @@
  * to be processed later in a system like any other component would.
  */
 struct PacketHandler {
-    flecs::world world;
+    flecs::world& world;
+    LoginHandler& login_handler;
     std::unordered_map<std::string, ModelAsset>& loaded_models;
-    std::unordered_map<NetworkId, flecs::entity> netid_to_entity;
-
-    PacketHandler(flecs::world& w, std::unordered_map<std::string, ModelAsset>& m)
-        : world(w), loaded_models(m) {};
+    std::unordered_map<uint32_t, flecs::entity>& netid_to_entity;
 
     void handle_packets(std::deque<std::vector<uint8_t>>& packets) {
         while (true) {
@@ -32,39 +32,12 @@ struct PacketHandler {
         bitsery::Deserializer<InputAdapter> des{InputAdapter{packet_data.data(), packet_data.size()}};
         PacketType pkt_type;
         des.value1b(pkt_type);
-        auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
         switch (pkt_type) {
-            case PacketType::SpawnBatchPacket: {
+            case PacketType::LoginResponsePacket: {
                 // We just entered world and need world's whole state
-                SpawnBatchPacket spawn_batch;
-                des.object(spawn_batch);
-                for (PlayerSpawnState spawn_state: spawn_batch.spawn_states) {
-                    flecs::entity entity;
-                    if (spawn_state.network_id == spawn_batch.local_player_id) {
-                        entity = create_local_player(world);
-                    }
-                    else {
-                        entity = create_remote_player(world);
-                    }
-                    entity.set<PredPosition>({spawn_state.pos});
-                    entity.set<RenderPosition>({spawn_state.pos});
-                    entity.set<PrevPredPosition>({spawn_state.pos});
-                    entity.set<PredRotation>({spawn_state.rot});
-                    entity.set<RenderRotation>({spawn_state.rot});
-                    entity.set<PrevPredRotation>({spawn_state.rot});
-                    entity.set<NetworkId>({spawn_state.network_id});
-                    entity.set<DisplayName>({spawn_state.name});
-                    entity.set<CamRotation>({30.0});
-                    entity.set<Color>(ORANGE);
-                    // Hardcode model
-                    entity.set<ModelPointer>({&loaded_models.at("paladin").model});
-                    entity.set<ModelAnimations>({&loaded_models.at("paladin").animations});
-                    netid_to_entity[spawn_state.network_id] = entity;
-                }
-                // std::cout << "Batch Spawn Packet: " << '\n';
-                // for (auto pair: netid_to_entity) {
-                //     std::cout << (int) pair.first.id << ", " << (int) pair.second << '\n';
-                // }
+                LoginResponsePacket login_response;
+                des.object(login_response);
+                login_handler.logins.push_back(login_response);
                 break;
             }
 
@@ -72,26 +45,7 @@ struct PacketHandler {
                 // Remote player entered world and we need that new player's state
                 PlayerSpawnPacket spawn_packet;
                 des.object(spawn_packet);
-                PlayerSpawnState spawn_state = spawn_packet.spawn_state;
-                flecs::entity entity = create_remote_player(world);
-                entity.set<NetworkId>({spawn_state.network_id});
-                entity.set<PredPosition>({spawn_state.pos});
-                entity.set<PredRotation>({spawn_state.rot});
-                entity.set<PrevPredPosition>({spawn_state.pos});
-                entity.set<PrevPredRotation>({spawn_state.rot});
-                entity.set<RenderPosition>({spawn_state.pos});
-                entity.set<RenderRotation>({spawn_state.rot});
-                entity.set<DisplayName>({spawn_state.name});
-                entity.set<Color>(ORANGE);
-                // Hardcode model
-                entity.set<ModelPointer>({&loaded_models.at("paladin").model});
-                entity.set<ModelAnimations>({&loaded_models.at("paladin").animations});
-                netid_to_entity[spawn_state.network_id] = entity;
-                // std::cout << "Single Spawn Packet: " << '\n';
-                // std::cout << spawn_state.network_id.id << '\n';
-                // for (auto pair: netid_to_entity) {
-                //     std::cout <<  pair.first.id << ", " << pair.second << '\n';
-                // }
+                login_handler.spawns.push_back(spawn_packet);
                 break;
             }
 
@@ -99,7 +53,6 @@ struct PacketHandler {
                 MovementUpdateBatchPacket batch;
                 des.object(batch);
 #ifndef DISABLE_SERVER
-                auto& netid_to_entity = world.get_mut<NetworkMap>().netid_to_entity;
                 for (MovementUpdate move_update: batch.move_updates) {
                     /* if (!netid_to_entity.contains(move_update.network_id)) { */
                     /*     continue; */
