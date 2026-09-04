@@ -36,7 +36,7 @@ inline void register_movement_system(flecs::world& world) {
                 MovementInput input = input_buffer.inputs[i];
                 tick_movement(world, input, pos.val, rot.val.y, gravity.val, grounded.val);
             }
-            // If we didn't get a new tick, predict with an empty input
+            // If we didn't get a new tick, temporarily predict with an empty input
             if (prev_tick.val >= recv_tick.val) {
                 tick_movement(
                     world,
@@ -64,20 +64,20 @@ inline void register_movement_system(flecs::world& world) {
  * remote players have their predicted state.
  */
 inline void register_movement_networking_system(flecs::world& world, Network& network) {
-    world.system<NetworkId, CurMoveTick,
+    world.system<ClientId, CurMoveTick,
         SimPosition, SimRotation, SimGravity, SimGrounded,
         LocomotionBlendSpace>()
         .with<Connected>()
         .interval(MOVE_UPDATE_RATE)
         .each([&]
-             (NetworkId& network_id, CurMoveTick& ack_tick,
+             (ClientId& client_id, CurMoveTick& ack_tick,
               SimPosition& pos, SimRotation& rot, SimGravity& gravity, SimGrounded& grounded,
               LocomotionBlendSpace blend_space)
         {
             MovementUpdateBatchPacket batch;
             batch.move_updates.clear();
             MovementUpdate move_update{
-                network_id.id,
+                client_id.id,
                 ack_tick.val,
                 pos.val,
                 rot.val,
@@ -86,11 +86,11 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 blend_space
            };
             batch.move_updates.push_back(move_update);
-            world.query<NetworkId, CurMoveTick,
+            world.query<ClientId, CurMoveTick,
                 PredPosition, PredRotation, PredGravity, PredGrounded,
                 LocomotionBlendSpace>()
                 .each([&]
-                    (NetworkId remote_network_id,
+                    (ClientId remote_network_id,
                      CurMoveTick remote_ack_tick,
                      PredPosition pred_pos,
                      PredRotation pred_rot,
@@ -98,7 +98,7 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                      PredGrounded pred_grounded,
                      LocomotionBlendSpace remote_blend_space)
                 {
-                    if (remote_network_id.id == network_id.id) {
+                    if (remote_network_id.id == client_id.id) {
                         return;
                     }
                     MovementUpdate remote_move_update{
@@ -114,7 +114,7 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 }
             );
             auto [buffer, size] = serialize(batch);
-            network.queue_data_unreliable(network_id, buffer, size);
+            network.queue_data_unreliable(client_id.id, buffer, size);
         }
     );
 }

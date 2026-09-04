@@ -1,5 +1,4 @@
 #pragma once
-#include <deque>
 #include <memory>
 #include <vector>
 
@@ -14,7 +13,7 @@ class Network {
     std::ofstream out_log_file;
     std::ofstream in_log_file;
   public:
-    std::deque<std::vector<uint8_t>> packets;
+    std::vector<std::vector<uint8_t>> packets;
 
     Network();
     ~Network();

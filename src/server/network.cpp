@@ -3,6 +3,7 @@
 #include "network.hpp"
 #include "../shared/network-components.hpp"
 #include "../shared/const.hpp"
+#include "../shared/packet_types.hpp"
 #include "../shared/util.hpp"
 
 
@@ -10,10 +11,10 @@ struct NetworkImpl {
     ENetHost* server = {0};
     ENetAddress address = {0};
     ENetEvent event;
-    std::unordered_map<NetworkId, ENetPeer*> netid_to_peer;
+    std::unordered_map<uint32_t, ENetPeer*> client_id_to_peer;
 };
 
-Network::Network(flecs::world& w) : world(w), impl(std::make_unique<NetworkImpl>()) {
+Network::Network(): impl(std::make_unique<NetworkImpl>()) {
     open_log_files();
 };
 Network::~Network() = default;
@@ -47,50 +48,30 @@ void Network::process_events() {
                     << ":"
                     << (int) impl->event.peer->address.port
                     << "." << std::endl;
-                auto entity = world.entity();
-                entity.set<NetworkId>({network_id_counter});
-                impl->netid_to_peer[{network_id_counter}] = impl->event.peer;
-                network_id_counter++;
-                impl->event.peer->data = (void*) entity.raw_id();
+                impl->client_id_to_peer[client_id_counter] = impl->event.peer;
+                impl->event.peer->data = (void*) (uintptr_t) client_id_counter;
+                client_id_counter++;
                 break;
             }
 
             case ENET_EVENT_TYPE_RECEIVE: {
-                auto id = cast_raw_id(impl->event.peer->data);
-                flecs::entity entity(world, id);
+                uint32_t client_id = cast_raw_id(impl->event.peer->data);
                 uint8_t* buffer = impl->event.packet->data;
                 size_t size = impl->event.packet->dataLength;
                 Buffer packet_data(buffer, buffer + size);
-                RecvPacket recv_packet{entity, packet_data};
                 // To be handled by PacketHandler
-                packets.push_back(recv_packet);
+                packets.push_back({client_id, packet_data});
                 log(in_log_file, packet_data, size);
                 break;
             }
 
             case ENET_EVENT_TYPE_DISCONNECT: {
-                std::cout << "Client with Entity id "
-                    << cast_raw_id(impl->event.peer->data)
-                    << " disconnected."
-                    << std::endl;
-                auto id = cast_raw_id(impl->event.peer->data);
-                flecs::entity entity(world, id);
-                entity.add<Disconnected>();
-                impl->event.peer->data = NULL;
-                enet_peer_reset(impl->event.peer);
+                handle_disconnect();
                 break;
             }
 
             case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT: {
-                std::cout << "Client with Entity id "
-                    << cast_raw_id(impl->event.peer->data)
-                    << " disconnected due to timeout."
-                    << std::endl;
-                auto id = cast_raw_id(impl->event.peer->data);
-                flecs::entity entity(world, id);
-                entity.add<Disconnected>();
-                impl->event.peer->data = NULL;
-                enet_peer_reset(impl->event.peer);
+                handle_disconnect();
                 break;
             }
 
@@ -100,23 +81,32 @@ void Network::process_events() {
     }
 }
 
-void Network::queue_data_unreliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
-    auto netid_peer = impl->netid_to_peer.find(network_id);
-    if (netid_peer == impl->netid_to_peer.end()) {
-        return;
-    }
-    ENetPeer* peer = netid_peer->second;
+void Network::handle_disconnect() {
+    uint32_t client_id = cast_raw_id(impl->event.peer->data);
+    std::cout << "Client with Entity id "
+        << client_id
+        << " disconnected due to timeout."
+        << std::endl;
+    impl->event.peer->data = NULL;
+    impl->client_id_to_peer.erase(client_id);
+    enet_peer_reset(impl->event.peer);
+    // forward the disconnect to packet_handler as a buffer with just DisconnectPacket enum
+    std::vector<uint8_t> buffer;
+    buffer.push_back(static_cast<uint8_t>(PacketType::DisconnectPacket));
+    packets.push_back({client_id, buffer});
+}
+
+void Network::queue_data_unreliable(const uint32_t& client_id, const Buffer& buffer, const size_t size){
+    if (!impl->client_id_to_peer.contains(client_id)) return;
+    ENetPeer* peer = impl->client_id_to_peer[client_id];
     ENetPacket* packet = enet_packet_create(buffer.data(), size, 0);
     enet_peer_send(peer, 0, packet);
     log(out_log_file, buffer, size);
 }
 
-void Network::queue_data_reliable(const NetworkId& network_id, const Buffer& buffer, const size_t size){
-    auto netid_peer = impl->netid_to_peer.find(network_id);
-    if (netid_peer == impl->netid_to_peer.end()) {
-        return;
-    }
-    ENetPeer* peer = netid_peer->second;
+void Network::queue_data_reliable(const uint32_t& client_id, const Buffer& buffer, const size_t size){
+    if (!impl->client_id_to_peer.contains(client_id)) return;
+    ENetPeer* peer = impl->client_id_to_peer[client_id];
     ENetPacket* packet = enet_packet_create(buffer.data(), size, ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(peer, 1, packet);
     log(out_log_file, buffer, size);
@@ -139,6 +129,6 @@ void Network::close_log_files() {
     in_log_file.close();
 }
 
-ecs_entity_t Network::cast_raw_id(void* raw_id) {
-    return (ecs_entity_t)(uintptr_t) raw_id;
+uint32_t Network::cast_raw_id(void* raw_id) {
+    return (uint32_t)(uintptr_t) raw_id;
 }

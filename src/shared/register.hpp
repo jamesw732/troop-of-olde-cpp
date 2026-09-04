@@ -7,7 +7,7 @@
 inline void register_components(flecs::world& world) {
     // Add normal components
     world.component<DisplayName>();
-    world.component<NetworkId>();
+    world.component<ClientId>();
     world.component<MovementInput>();
     world.component<SimPosition>();
     world.component<SimRotation>();

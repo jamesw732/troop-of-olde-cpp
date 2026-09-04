@@ -4,17 +4,9 @@
 
 #include "components.hpp"
 #include "const.hpp"
+#include "packet_types.hpp"
 #include "util.hpp"
 #include "../mapgen/mapgen-util.hpp"
-
-enum class PacketType : uint8_t {
-    MovementInputPacket,
-    LoginRequestPacket,
-    LoginResponsePacket,
-    PlayerSpawnPacket,
-    MovementUpdateBatchPacket,
-    DisconnectPacket
-};
 
 /*
  * Contains client's  movement tick and all unacknowledged MovementInputs
@@ -124,14 +116,14 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdateBatchPacke
 
 struct DisconnectPacket {
     static constexpr PacketType id = PacketType::DisconnectPacket;
-    uint32_t network_id;
+    uint32_t client_id;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DisconnectPacket& pkt) {
     os << "DisconnectPacket{\n";
     os << indent();
     print_indent(os);
-    os << "network_id: " << pkt.network_id << "\n";
+    os << "client_id: " << pkt.client_id << "\n";
     os << unindent();
     os << "}\n";
     return os;

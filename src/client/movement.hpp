@@ -84,7 +84,6 @@ inline void register_movement_recv_system(flecs::world& world, flecs::timer& tim
                 RecvGrounded recv_grounded
             )
         {
-            // TODO: Move this to a singleton class that uses a buffer
             // If we received an old tick, we don't want to go back to it
             if ((int16_t) (recv_ack_tick.val - ack_tick.val) < 0) {
                 return;
@@ -99,10 +98,25 @@ inline void register_movement_recv_system(flecs::world& world, flecs::timer& tim
 }
 
 inline void register_movement_prediction_system(flecs::world& world, InputBuffer& input_buffer, flecs::timer& timer) {
-    // Reset all predictions to whatever the simulation state is at the last acknowledged tick
+    world.system<SimPosition, SimRotation, PredPosition, PredRotation>()
+        .without<LocalPlayer>()
+        .tick_source(timer)
+        .each([&](
+                SimPosition& pos,
+                SimRotation& rot,
+                PredPosition& pred_pos,
+                PredRotation& pred_rot
+            )
+        {
+            // Server authoritative state becomes base for new prediction
+            pred_pos.val = pos.val;
+            pred_rot.val = rot.val;
+        }
+    );
     world.system<SimPosition, SimRotation, SimGravity, SimGrounded,
                  PredPosition, PredRotation, PredGravity, PredGrounded,
                  AckTick>()
+        .with<LocalPlayer>()
         .tick_source(timer)
         .each([&](
                 SimPosition& pos,
@@ -148,6 +162,7 @@ inline void register_movement_transmit_system(
     flecs::timer& timer)
 {
     world.system()
+        .with<LocalPlayer>()
         .tick_source(timer)
         .kind(flecs::PostUpdate)
         .each([&network, &input_buffer, &tick]() {
@@ -157,8 +172,8 @@ inline void register_movement_transmit_system(
             input_buffer.copy_to_array(pkt.inputs);
             auto [buffer, size] = serialize(pkt);
             network.queue_data_unreliable(buffer, size);
-            }
-        );
+        }
+    );
 }
 
 inline void register_movement_tick_system(flecs::world& world, uint16_t& movement_tick, flecs::timer& timer) {
@@ -166,9 +181,9 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .tick_source(timer)
         .kind(flecs::OnLoad)
         .each([&movement_tick]() {
-                movement_tick++;
-            }
-        );
+            movement_tick++;
+        }
+    );
 }
 
 // MOVEMENT LERP SYSTEMS

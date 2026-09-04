@@ -24,11 +24,10 @@ void handle_signal(int signal) {
 int main()
 {
     flecs::world world;
-    Network network(world);
+    Network network;
     if (network.create() > 0) {
         return 1;
     }
-    PacketHandler packet_handler{world};
 
     std::unordered_map<std::string, Model> loaded_models;
     loaded_models.reserve(128);
@@ -63,17 +62,20 @@ int main()
         }
     }
 
+    std::unordered_map<uint32_t, flecs::entity> client_id_to_entity;
+    LoginHandler login_handler{world, map, network, client_id_to_entity};
+    PacketHandler packet_handler{world, login_handler, client_id_to_entity};
+
     register_components(world);
 
     register_movement_system(world);
     register_animation_tick_system(world);
     register_movement_networking_system(world, network);
 
-    register_batch_spawn_system(world, network, map);
-    register_spawn_broadcast_system(world, network);
-    register_disconnect_system(world, network);
+    register_disconnect_system(world, network, client_id_to_entity);
 
     std::signal(SIGINT, handle_signal);
+
 
     // Main game loop
     while (running.load())
@@ -81,6 +83,7 @@ int main()
         float dt = GetFrameTime();
         network.process_events();
         packet_handler.handle_packets(network.packets);
+        login_handler.handle_logins();
         world.progress(dt);
         network.send_network_buffer();
     }

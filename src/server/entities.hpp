@@ -11,7 +11,7 @@ inline flecs::entity add_character_components(flecs::entity entity) {
     entity.add<Character>();
     entity.add<DisplayName>();
 
-    entity.add<NetworkId>();
+    entity.add<ClientId>();
     entity.add<Connected>();
     entity.add<NeedsSpawnBroadcast>();
 

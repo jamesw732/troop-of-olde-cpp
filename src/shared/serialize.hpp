@@ -86,7 +86,7 @@ void serialize(S& s, MovementUpdateBatchPacket& batch) {
 
 template<typename S>
 void serialize(S& s, DisconnectPacket& dc_packet) {
-    s.value4b(dc_packet.network_id);
+    s.value4b(dc_packet.client_id);
 }
 
 // Primitives

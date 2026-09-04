@@ -1,3 +1,5 @@
+#pragma once
+#include "entities.hpp"
 #include "flecs.h"
 
 #include "components.hpp"
@@ -5,55 +7,45 @@
 #include "../shared/packets.hpp"
 #include "../shared/serialize.hpp"
 
+struct LoginRequest{
+    uint32_t client_id;
+    LoginRequestPacket packet;
+};
 
-inline void register_batch_spawn_system(flecs::world& world, Network& network, const Map& map) {
-    /*
-     * Batches world state and sends to new client
-     */
-    world.system<NetworkId>()
-        .with<NeedsSpawnBatch>()
-        .with<Connected>()
-        .each([&] (flecs::entity e, NetworkId& local_player_id) {
+struct LoginHandler {
+    flecs::world& world;
+    Map& map;
+    Network& network;
+    std::unordered_map<uint32_t, flecs::entity>& client_id_to_entity;
+    std::vector<LoginRequest> logins {};
+
+    void handle_logins() {
+        for (LoginRequest login: logins) {
+            // Create entity
+            auto e = world.entity();
+            client_id_to_entity[login.client_id] = e;
+            e.set<ClientId>({login.client_id});
+            add_character_components(e);
+            // TODO: Generate base location
+            Vector3 pos {0, 1, 0};
+            Vector3 rot {0, 180, 0};
+            e.set<SimPosition>({pos});
+            e.set<SimRotation>({rot});
+            // Send batched spawn state to local client
             std::vector<PlayerSpawnState> spawn_states;
-            // TODO: set these along with base location in a separate system
-            e.set<SimPosition>({0, 1, 0});
-            e.set<SimRotation>({0, 180, 0});
-            auto q = world.query<NetworkId, DisplayName, SimPosition, SimRotation>();
-            q.each([&spawn_states] (NetworkId id, DisplayName name, SimPosition pos, SimRotation rot) {
-                    // std::cout << "Adding player to spawn_states" << std::endl;
+            auto q = world.query<ClientId, DisplayName, SimPosition, SimRotation>();
+            q.each([&spawn_states] (ClientId id, DisplayName name, SimPosition pos, SimRotation rot) {
                     spawn_states.push_back(PlayerSpawnState{id.id, name.name, pos.val, rot.val});
-                    }
-                );
-            LoginResponsePacket spawns{local_player_id.id, spawn_states, map, {0, 0}};
-            // for (PlayerSpawnState spawn_state: spawns.spawn_states) {
-            //     std::cout << spawn_state.name.name << std::endl;
-            //     std::cout << spawn_state.network_id.id << std::endl;
-            //     std::cout << vector3_to_string(spawn_state.pos.val) << std::endl;
-            // }
+                }
+            );
+            LoginResponsePacket spawns{login.client_id, spawn_states, map, {0, 0}};
             auto [buffer, size] = serialize(spawns);
-            network.queue_data_reliable(local_player_id, buffer, size);
-            // Remove login packet from entity
-            e.remove<NeedsSpawnBatch>();
-        }
-    );
-}
-
-inline void register_spawn_broadcast_system(flecs::world& world, Network& network) {
-    /*
-     * Sends new character information to all existing clients
-     */
-    world.system<NetworkId, DisplayName, SimPosition>()
-        .with<NeedsSpawnBroadcast>()
-        .each([&world, &network] (flecs::entity e,
-                        const NetworkId& network_id,
-                        const DisplayName& name,
-                        const SimPosition& pos
-            ) {
-            // std::cout << "Broadcasting spawn" << '\n';
-            PlayerSpawnPacket spawn_packet{{network_id.id, name.name, pos.val}};
-            world.query<NetworkId, Connected>()
-                .each([&] (const NetworkId& tgt_network_id, Connected) {
-                    if (network_id.id == tgt_network_id.id) {
+            network.queue_data_reliable(login.client_id, buffer, size);
+            // Update remote clients with new player
+            PlayerSpawnPacket spawn_packet{{login.client_id, login.packet.name, pos, rot}};
+            world.query<ClientId>()
+                .each([&] (const ClientId& tgt_client_id) {
+                    if (login.client_id == tgt_client_id.id) {
                         // std::cout << "Skipping client with network id " << tgt_network_id.id << '\n';
                         return;
                     }
@@ -61,10 +53,10 @@ inline void register_spawn_broadcast_system(flecs::world& world, Network& networ
                     // << " to client with network id " << tgt_network_id.id
                     // << '\n';
                     auto [buffer, size] = serialize(spawn_packet);
-                    network.queue_data_reliable(tgt_network_id, buffer, size);
+                    network.queue_data_reliable(tgt_client_id.id, buffer, size);
                 }
             );
-            e.remove<NeedsSpawnBroadcast>();
         }
-    );
-}
+        logins.clear();
+    }
+};

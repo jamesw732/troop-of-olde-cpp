@@ -59,7 +59,7 @@ struct LoginHandler {
     }
 
     void apply_spawn_state(flecs::entity entity, PlayerSpawnState spawn_state) {
-        entity.set<NetworkId>({spawn_state.network_id});
+        entity.set<ClientId>({spawn_state.network_id});
         entity.set<PredPosition>({spawn_state.pos});
         entity.set<PredRotation>({spawn_state.rot});
         entity.set<PrevPredPosition>({spawn_state.pos});

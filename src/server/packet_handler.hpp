@@ -1,7 +1,6 @@
-#include "flecs.h"
-
 #include "network.hpp"
 #include "entities.hpp"
+#include "login.hpp"
 #include "../shared/packets.hpp"
 
 
@@ -12,29 +11,29 @@
  * to be processed later in a system like any other component would.
  */
 struct PacketHandler {
-    flecs::world world;
-    PacketHandler(flecs::world& w) : world(w) {};
+    flecs::world& world;
+    LoginHandler& login_handler;
+    std::unordered_map<uint32_t, flecs::entity>& client_id_to_entity;
 
-    void handle_packets(std::deque<RecvPacket>& packets) {
-        while (true) {
-            if (packets.empty()) {
-                return;
-            }
-            auto packet_data = packets.front();
-            handle_packet(packet_data);
-            packets.pop_front();
+    void handle_packets(std::vector<RecvPacket>& packets) {
+        for (RecvPacket packet: packets) {
+            handle_packet(packet);
         }
+        packets.clear();
     }
 
     void handle_packet(RecvPacket packet) {
-        flecs::entity player = packet.e;
-        uint8_t* buffer = packet.packet_data.data();
-        size_t size = packet.packet_data.size();
+        // This function should not do any complicated operations, those should be done by systems
+        // Tentative heuristic is that if we need to query for a component, it's too complicated
+        uint8_t* buffer = packet.data.data();
+        size_t size = packet.data.size();
         bitsery::Deserializer<InputAdapter> des{InputAdapter{buffer, size}};
         PacketType pkt_type;
         des.value1b(pkt_type);
         switch (pkt_type) {
             case PacketType::MovementInputPacket: {
+                if (!client_id_to_entity.contains(packet.client_id)) return;
+                flecs::entity player = client_id_to_entity[packet.client_id];
                 MovementInputPacket input_packet;
                 des.object(input_packet);
                 player.set<RecvMoveTick>({input_packet.tick});
@@ -45,12 +44,13 @@ struct PacketHandler {
             case PacketType::LoginRequestPacket: {
                 LoginRequestPacket login;
                 des.object(login);
-                add_character_components(player);
-                player.set<DisplayName>({login.name});
-                /* player.set<SimPosition>({login.pos}); */
-                /* player.set<SimRotation>({login.rot}); */
-                player.add<NeedsSpawnBatch>();
+                login_handler.logins.push_back({packet.client_id, login});
                 break;
+            }
+
+            case PacketType::DisconnectPacket: {
+                flecs::entity player = client_id_to_entity[packet.client_id];
+                player.add<Disconnected>();
             }
 
             default: {

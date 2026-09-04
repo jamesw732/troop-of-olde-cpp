@@ -17,18 +17,16 @@ struct PacketHandler {
     std::unordered_map<std::string, ModelAsset>& loaded_models;
     std::unordered_map<uint32_t, flecs::entity>& netid_to_entity;
 
-    void handle_packets(std::deque<std::vector<uint8_t>>& packets) {
-        while (true) {
-            if (packets.empty()) {
-                return;
-            }
-            auto packet_data = packets.front();
-            handle_packet(packet_data);
-            packets.pop_front();
+    void handle_packets(std::vector<std::vector<uint8_t>>& packets) {
+        for (std::vector<uint8_t> packet: packets) {
+            handle_packet(packet);
         }
+        packets.clear();
     }
 
     void handle_packet(std::vector<uint8_t>& packet_data) {
+        // This function should not do any complicated operations, those should be done by systems
+        // Tentative heuristic is that if we need to query for a component, it's too complicated
         bitsery::Deserializer<InputAdapter> des{InputAdapter{packet_data.data(), packet_data.size()}};
         PacketType pkt_type;
         des.value1b(pkt_type);
@@ -64,7 +62,7 @@ struct PacketHandler {
                     flecs::entity e = netid_entity->second;
                     /* if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) { */
                     /*     continue; */
-                    /* } */
+                   /* } */
                     e.set<RecvAckTick>({move_update.ack_tick});
                     e.set<RecvPosition>({move_update.pos});
                     e.set<RecvRotation>({move_update.rot});
@@ -79,8 +77,8 @@ struct PacketHandler {
             case PacketType::DisconnectPacket: {
                 DisconnectPacket dc_packet;
                 des.object(dc_packet);
-                std::cout << dc_packet.network_id << '\n';
-                auto netid_entity = netid_to_entity.find(dc_packet.network_id);
+                std::cout << dc_packet.client_id << '\n';
+                auto netid_entity = netid_to_entity.find(dc_packet.client_id);
                 if (netid_entity == netid_to_entity.end()) {
                     break;
                 }

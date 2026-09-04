@@ -3,18 +3,18 @@
 #include <functional>
 
 
-struct NetworkId {
+struct ClientId {
     uint32_t id;
 
-    bool operator==(const NetworkId& other) const noexcept {
+    bool operator==(const ClientId& other) const noexcept {
         return id == other.id;
     }
 };
 
 namespace std {
     template<>
-    struct hash<NetworkId> {
-        std::size_t operator()(const NetworkId& nid) const noexcept {
+    struct hash<ClientId> {
+        std::size_t operator()(const ClientId& nid) const noexcept {
             return std::hash<uint32_t>{}(nid.id);
         }
     };
