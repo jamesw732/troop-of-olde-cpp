@@ -11,9 +11,7 @@ struct NetworkImpl {
 };
 
 
-Network::Network() : impl(std::make_unique<NetworkImpl>()) {
-    open_log_files();
-};
+Network::Network() : impl(std::make_unique<NetworkImpl>()) {};
 Network::~Network() = default;
 
 void Network::connect() {
@@ -118,8 +116,8 @@ void Network::disconnect() {
 
 // TODO: Fix logging with multiple clients
 void Network::open_log_files() {
-    out_log_file.open("client-out.bin", std::ios_base::binary);
-    in_log_file.open("client-in.bin", std::ios_base::binary);
+    out_log_file.open("client-out-" + std::to_string(client_id) + ".bin", std::ios_base::binary);
+    in_log_file.open("client-in-" + std::to_string(client_id) + ".bin", std::ios_base::binary);
     // Replace above with these if you want to append rather than replace
     /* out_log_file.open("client-out.bin", std::ios_base::binary | std::ios_base::app); */
     /* in_log_file.open("client-in.bin", std::ios_base::binary | std::ios_base::app); */

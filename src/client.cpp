@@ -105,7 +105,7 @@ int main()
     register_disconnect_system(world, netid_to_entity);
 
     // ECS-adjacent handlers
-    LoginHandler login_handler{world, loaded_models, netid_to_entity, map, {}, {}};
+    LoginHandler login_handler{world, loaded_models, netid_to_entity, map, network, {}, {}};
     PacketHandler packet_handler(world, login_handler, loaded_models, netid_to_entity);
 
     // Send Login request

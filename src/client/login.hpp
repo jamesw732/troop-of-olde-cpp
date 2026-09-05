@@ -17,6 +17,7 @@ struct LoginHandler {
     std::unordered_map<std::string, ModelAsset>& loaded_models;
     std::unordered_map<uint32_t, flecs::entity>& netid_to_entity;
     Map& map;
+    Network& network;
     std::vector<LoginResponsePacket> logins;
     std::vector<PlayerSpawnPacket> spawns;
 
@@ -34,10 +35,12 @@ struct LoginHandler {
                     entity = create_remote_player(world);
                 }
                 apply_spawn_state(entity, spawn_state);
-                map = pkt.map;
-                create_dungeon();
-                // TODO: Use base location somehow
             }
+            map = pkt.map;
+            create_dungeon();
+            network.client_id = pkt.local_player_id;
+            network.open_log_files();
+            // TODO: Use base location somehow
             // std::cout << "Batch Spawn Packet: " << '\n';
             // for (auto pair: netid_to_entity) {
             //     std::cout << (int) pair.first.id << ", " << (int) pair.second << '\n';

@@ -14,6 +14,7 @@ class Network {
     std::ofstream in_log_file;
   public:
     std::vector<std::vector<uint8_t>> packets;
+    uint32_t client_id;
 
     Network();
     ~Network();
