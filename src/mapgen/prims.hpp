@@ -102,6 +102,8 @@ inline Map prims(int x, int y) {
         first_cell = false;
     }
 
+    map.add_base_locs(gen);
+
     return map;
 }
 

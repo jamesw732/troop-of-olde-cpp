@@ -83,6 +83,9 @@ struct LoginHandler {
         for (int row = 0; row < map.rows; row++) {
             for (int col = 0; col < map.cols; col++) {
                 MapCell cell = map.get({col, row});
+                if (cell.type == CellType::Vacant) {
+                    continue;
+                }
                 std::string room_name = "room_" + std::to_string((int) cell.direction);
                 auto room = world.entity();
                 room.set<Color>(GRAY);
@@ -94,6 +97,7 @@ struct LoginHandler {
                 room.add<RenderRotation>();
                 room.add<Terrain>();
                 room.set<Scale>({{1, 1, 1}});
+                /* room.set<Scale>({Vector3Scale({1, 1, 1}, ROOM_SIZE / 10.0)}); */
                 Vector3 position{static_cast<float>(col * ROOM_SIZE), 0, static_cast<float>(row * ROOM_SIZE)};
                 room.set<SimPosition>({position});
                 room.set<RenderPosition>({position});

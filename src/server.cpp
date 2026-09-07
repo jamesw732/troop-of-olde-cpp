@@ -41,13 +41,16 @@ int main()
     loaded_models["paladin"] = LoadServerModel((MODEL_DIR "paladin.glb"));
     /* print_mesh_vertices(*world_model.meshes); */
 
-    /* Map map = sparse_prims(8, 8); */
-    Map map(2, 1);
-    map.grid[0] = {CellType::Normal, Direction::Right};
-    map.grid[1] = {CellType::Normal, Direction::Left};
+    Map map = sparse_prims(8, 8);
+    /* Map map(2, 1); */
+    /* map.grid[0] = {CellType::Normal, Direction::Right}; */
+    /* map.grid[1] = {CellType::Normal, Direction::Left}; */
     for (int row = 0; row < map.rows; row++) {
         for (int col = 0; col < map.cols; col++) {
             MapCell cell = map.get({col, row});
+            if (cell.type == CellType::Vacant) {
+                continue;
+            }
             std::string room_name = "room_" + std::to_string((int) cell.direction);
             auto room = world.entity();
             room.set<Color>(GRAY);
@@ -57,6 +60,7 @@ int main()
             room.add<SimRotation>();
             room.add<Terrain>();
             room.set<Scale>({{1, 1, 1}});
+            /* room.set<Scale>({Vector3Scale({1, 1, 1}, ROOM_SIZE / 10.0)}); */
             Vector3 position{static_cast<float>(col * ROOM_SIZE), 0, static_cast<float>(row * ROOM_SIZE)};
             room.set<SimPosition>({position});
         }

@@ -93,10 +93,19 @@ inline std::ostream& operator<<(std::ostream& os, const Coordinate coords) {
 }
 
 
+template<typename T>
+T random_choice(const std::vector<T>& choices, std::mt19937& gen);
+
+Direction get_direction_from_diff(Coordinate diff);
+std::array<Coordinate, 4> get_neighbors(Coordinate coords);
+bool is_valid_coord(Coordinate coord, int rows, int cols);
+
+
 struct Map {
     int rows;
     int cols;
     std::vector<MapCell> grid;
+    std::vector<Coordinate> base_locs;
 
     Map(int x, int y) : cols(x), rows(y), grid(rows * cols) {
     }
@@ -126,17 +135,23 @@ struct Map {
         return os;
     }
 
+    inline void add_base_locs(std::mt19937& gen) {
+        std::vector<Coordinate> possible_base_locs;
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                MapCell cell = get({col, row});
+                if (cell.type == CellType::Normal) {
+                    possible_base_locs.push_back({col, row});
+                }
+            }
+        }
+        Coordinate base_coords = random_choice(possible_base_locs, gen);
+        base_locs.push_back(base_coords);
+        get(base_coords).type = CellType::Base;
+    }
 };
 
 using CoordsList = std::vector<Coordinate>;
-
-
-template<typename T>
-T random_choice(const std::vector<T>& choices, std::mt19937& gen);
-
-Direction get_direction_from_diff(Coordinate diff);
-std::array<Coordinate, 4> get_neighbors(Coordinate coords);
-bool is_valid_coord(Coordinate coord, int rows, int cols);
 
 inline std::array<Coordinate, 4> get_neighbors(Coordinate coords) {
     return {{

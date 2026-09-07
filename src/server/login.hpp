@@ -6,6 +6,7 @@
 #include "network.hpp"
 #include "../shared/packets.hpp"
 #include "../shared/serialize.hpp"
+#include "../mapgen/mapgen-util.hpp"
 
 struct LoginRequest{
     uint32_t client_id;
@@ -26,8 +27,9 @@ struct LoginHandler {
             client_id_to_entity[login.client_id] = e;
             e.set<ClientId>({login.client_id});
             add_character_components(e);
-            // TODO: Generate base location
-            Vector3 pos {0, 1, 0};
+            Coordinate base_loc = map.base_locs[0];
+            Vector3 pos {static_cast<float>(base_loc.x * ROOM_SIZE), 1, static_cast<float>(base_loc.y * ROOM_SIZE)};
+            /* Vector3 pos {0, 1, 0}; */
             Vector3 rot {0, 180, 0};
             e.set<SimPosition>({pos});
             e.set<SimRotation>({rot});

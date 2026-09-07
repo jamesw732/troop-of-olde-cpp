@@ -86,6 +86,8 @@ inline Map sparse_prims(int x, int y) {
         }
     }
 
+    map.add_base_locs(gen);
+
     return map;
 }
 
