@@ -1,6 +1,5 @@
 # Right now:
 Todo:
-- Generate map at runtime on server, along with single base location
 - Swap out client_id for network_id
 
 
@@ -17,3 +16,4 @@ Todo:
     - Add jumping into movement input bit mask?
     - Jumping animations?
 - Combat???
+- Progression???

@@ -96,8 +96,8 @@ struct LoginHandler {
                 room.add<RenderPosition>();
                 room.add<RenderRotation>();
                 room.add<Terrain>();
-                room.set<Scale>({{1, 1, 1}});
-                /* room.set<Scale>({Vector3Scale({1, 1, 1}, ROOM_SIZE / 10.0)}); */
+                /* room.set<Scale>({{1, 1, 1}}); */
+                room.set<Scale>({Vector3Scale({1, 1, 1}, ROOM_SIZE)});
                 Vector3 position{static_cast<float>(col * ROOM_SIZE), 0, static_cast<float>(row * ROOM_SIZE)};
                 room.set<SimPosition>({position});
                 room.set<RenderPosition>({position});

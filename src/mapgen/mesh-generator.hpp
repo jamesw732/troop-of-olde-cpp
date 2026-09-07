@@ -7,6 +7,8 @@
 
 #include "mapgen-util.hpp"
 
+const int GEN_ROOM_SIZE = 1;
+
 inline bool has_direction(Direction directions, Direction direction)
 {
     return (static_cast<uint8_t>(directions) &
@@ -206,9 +208,9 @@ namespace
 
 inline Mesh generate_room_mesh(
     Direction exits,
-    float room_size = ROOM_SIZE,
-    float wall_height = 2.0f,
-    float door_width = 1.5f
+    float room_size = GEN_ROOM_SIZE,
+    float wall_height = 0.2f * GEN_ROOM_SIZE,
+    float door_width = 0.15f * GEN_ROOM_SIZE
 ) {
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
