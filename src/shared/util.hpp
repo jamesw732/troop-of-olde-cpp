@@ -20,6 +20,10 @@ using Buffer = std::vector<uint8_t>;
 using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
 using InputAdapter = bitsery::InputBufferAdapter<uint8_t*>;
 
+inline float round(float a, int places) {
+    return std::round(a * pow(10, places)) / pow(10, places);
+}
+
 inline bool is_close(float a, float b, float tol=1e-5f) {
     return std::abs(a - b) < tol;
 }
@@ -45,14 +49,34 @@ inline float angle_slerp(float a0, float a1, float t) {
     return fmodf(a0 + diff * t, 360);
 }
 
+// Logging util
+#define LOG_ERROR   0
+#define LOG_WARNING 1
+#define LOG_INFO    2
+#define LOG_DEBUG   3
+#define LOG_TRACE   4
+
+enum class LogLevel: uint8_t {
+    Error = LOG_ERROR,
+    Warning = LOG_WARNING,
+    Info = LOG_INFO,
+    Debug = LOG_DEBUG,
+    Trace = LOG_TRACE
+};
+
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 3
+#endif
+
+inline float get_duration_ms(auto duration) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+}
+
 inline uint64_t get_timestamp_us() {
     using namespace std::chrono;
     return duration_cast<microseconds>(
         system_clock::now().time_since_epoch()
     ).count();
-    /* return duration_cast<microseconds>( */
-    /*     steady_clock::now().time_since_epoch() */
-    /* ).count(); */
 }
 
 inline void log(std::ofstream& log_file, const Buffer& buffer, const size_t& size) {
@@ -62,6 +86,29 @@ inline void log(std::ofstream& log_file, const Buffer& buffer, const size_t& siz
     log_file.write(reinterpret_cast<char*>(&short_size), sizeof(uint16_t));
     log_file.write(reinterpret_cast<const char*>(buffer.data()), size);
 }
+
+template <typename... Args>
+inline void log(LogLevel level, Args&&... args) {
+    auto timestamp = get_timestamp_us();
+    std::chrono::microseconds us(timestamp);
+    std::chrono::system_clock::time_point tp(us);
+    std::time_t time = std::chrono::system_clock::to_time_t(tp);
+    std::tm* tm = std::localtime(&time);
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+            tp.time_since_epoch()
+            ).count() % 1000;
+
+    std::cout << std::put_time(tm, "%Y-%m-%d %H:%M:%S")
+        << '.' << std::setfill('0') << std::setw(3) << millis
+        << ": "; 
+    (std::cout << ... << args) << "\n";
+}
+
+#define LOG(level, ...) \
+    do { \
+        if constexpr (static_cast<uint8_t>(level) <= LOG_LEVEL) \
+            log(level, __VA_ARGS__); \
+    } while (0)
 
 
 inline int indent_index() {

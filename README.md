@@ -7,12 +7,11 @@ submodules, run `git submodule update --init --recursive` from `deps`.
 
 
 # Compiling
-This project uses CMake for compilation. Typical usage should follow standard CMake patterns, but
-potential deviations are covered here.
+This project uses CMake for compilation.
 
 See [WSL instructions](#wsl) for compiling on WSL.
 ```
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-DLOG_LEVEL=LOG_TRACE"
 cmake --build build
 ```
 

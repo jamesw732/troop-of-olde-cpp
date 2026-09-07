@@ -1,8 +1,7 @@
 # Right now:
 Todo:
-- Figure out stuttering bug with multiple clients
-    - Allow network logging with multiple clients
 - Generate map at runtime on server, along with single base location
+- Swap out client_id for network_id
 
 
 # Considering:

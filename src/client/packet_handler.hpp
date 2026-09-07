@@ -55,14 +55,14 @@ struct PacketHandler {
                     /* if (!netid_to_entity.contains(move_update.network_id)) { */
                     /*     continue; */
                     /* } */
-                    auto netid_entity = netid_to_entity.find(move_update.network_id);
+                    auto netid_entity = netid_to_entity.find(move_update.client_id);
                     if (netid_entity == netid_to_entity.end()) {
                         continue;
                     }
                     flecs::entity e = netid_entity->second;
-                    /* if ((int16_t) (move_update.ack_tick - e.get<AckTick>().val) <= 0) { */
-                    /*     continue; */
-                   /* } */
+                    if ((int16_t) (move_update.ack_tick - e.get<RecvAckTick>().val) <= 0) {
+                        continue;
+                   }
                     e.set<RecvAckTick>({move_update.ack_tick});
                     e.set<RecvPosition>({move_update.pos});
                     e.set<RecvRotation>({move_update.rot});

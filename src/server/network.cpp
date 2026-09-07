@@ -34,6 +34,11 @@ bool Network::create() {
         return 1;
     }
     std::cout << "Started a server..." << std::endl;
+    char host[64];
+    enet_address_get_host_ip(&impl->address, host, sizeof(host));
+    std::cout << "Server address: "
+              << host << ":" << impl->address.port << "\n";
+
     ENetEvent event;
     return 0;
 }

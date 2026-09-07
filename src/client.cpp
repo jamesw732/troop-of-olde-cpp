@@ -118,11 +118,16 @@ int main()
     while (!WindowShouldClose())
     {
         dt = GetFrameTime();
+        auto start = std::chrono::steady_clock::now();
         network.process_events();
+        auto t1 = std::chrono::steady_clock::now();
         packet_handler.handle_packets(network.packets);
+        auto t2 = std::chrono::steady_clock::now();
         login_handler.handle_logins();
+        auto t3 = std::chrono::steady_clock::now();
         // Progress all fixed-timestep ECS timers
         world.progress(dt);
+        auto t4 = std::chrono::steady_clock::now();
         // Do rendering
         BeginDrawing();
             // Draw the UI
@@ -138,8 +143,20 @@ int main()
             render_sys.run();
             anim_render_sys.run();
         EndDrawing();
+        auto t5 = std::chrono::steady_clock::now();
         // Send all messages to server
         network.send_network_buffer();
+        auto end = std::chrono::steady_clock::now();
+        auto duration = end - start;
+        auto duration_ms = get_duration_ms(end - start);
+        if (duration_ms > 50) {
+            std::cout << "SLOW TICK: recv=" << get_duration_ms(t1 - start)
+               << ", handle packets=" << get_duration_ms(t2 - t1)
+               << ", handle logins=" << get_duration_ms(t3 - t2) 
+               << ", flecs=" << get_duration_ms(t4 - t3)
+               << ", render=" << get_duration_ms(t5 - t4)
+               << ", transmit=" << get_duration_ms(end - t5) << "\n";
+        }
     }
     CloseWindow();
     network.disconnect();

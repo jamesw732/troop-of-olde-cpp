@@ -169,7 +169,7 @@ inline std::ostream& operator<<(std::ostream& os, const PlayerSpawnState& state)
 }
 
 struct MovementUpdate {
-    uint32_t network_id;
+    uint32_t client_id;
     uint16_t ack_tick;
     Vector3 pos;
     Vector3 rot;
@@ -182,7 +182,7 @@ inline std::ostream& operator<<(std::ostream& os, const MovementUpdate& update) 
     os << "MovementUpdate{\n";
     os << indent();
     print_indent(os);
-    os << "network_id: " << update.network_id << "\n";
+    os << "client_id: " << update.client_id << "\n";
     print_indent(os);
     os << "ack_tick: " << update.ack_tick << "\n";
     print_indent(os);

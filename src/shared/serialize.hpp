@@ -119,7 +119,7 @@ void serialize(S& s, PlayerSpawnState& spawn_state) {
 
 template<typename S>
 void serialize(S& s, MovementUpdate& move_update) {
-    s.value4b(move_update.network_id);
+    s.value4b(move_update.client_id);
     s.value2b(move_update.ack_tick);
     s.object(move_update.pos);
     s.object(move_update.rot);

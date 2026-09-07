@@ -88,6 +88,7 @@ inline void register_movement_recv_system(flecs::world& world, flecs::timer& tim
             if ((int16_t) (recv_ack_tick.val - ack_tick.val) < 0) {
                 return;
             }
+            LOG(LogLevel::Debug, "Received position ", recv_pos.val, " for tick ", recv_ack_tick.val);
             sim_pos.val = recv_pos.val;
             sim_rot.val = recv_rot.val;
             sim_grav.val = recv_grav.val;
@@ -132,14 +133,17 @@ inline void register_movement_prediction_system(flecs::world& world, InputBuffer
         {
 #ifndef DISABLE_SERVER
             // Server authoritative state becomes base for new prediction
+            LOG(LogLevel::Debug, "Using simulated position ", pos.val);
             pred_pos.val = pos.val;
             pred_rot.val = rot.val;
             pred_gravity.val = gravity.val;
             pred_grounded.val = grounded.val;
             // If new tick, perform client-side prediction on un-acked inputs
             input_buffer.flushUpTo(ack_tick.val);
+            LOG(LogLevel::Debug, "Input buffer size ", input_buffer.size);
             for (int i = 0; i < input_buffer.size; i++) {
                 MovementInput input = input_buffer.get_at(i);
+                LOG(LogLevel::Debug, input);
                 tick_movement(
                     world,
                     input,
@@ -149,6 +153,7 @@ inline void register_movement_prediction_system(flecs::world& world, InputBuffer
                     pred_grounded.val
                 );
             }
+            LOG(LogLevel::Debug, "Predicted position ", pred_pos.val);
 #endif
         }
     );
@@ -182,6 +187,7 @@ inline void register_movement_tick_system(flecs::world& world, uint16_t& movemen
         .kind(flecs::OnLoad)
         .each([&movement_tick]() {
             movement_tick++;
+            LOG(LogLevel::Debug, "Begin tick ", movement_tick);
         }
     );
 }
