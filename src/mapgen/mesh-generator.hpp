@@ -8,6 +8,7 @@
 #include "mapgen-util.hpp"
 
 const int GEN_ROOM_SIZE = 1;
+const float WALL_THICKNESS = 0.05;
 
 inline bool has_direction(Direction directions, Direction direction)
 {
@@ -49,6 +50,64 @@ namespace
         indices.push_back(base + 3);
     }
 
+    void AddBox(
+        std::vector<Vertex>& vertices,
+        std::vector<uint16_t>& indices,
+        Vector3 min,
+        Vector3 max)
+    {
+        Vector3 p000{min.x, min.y, min.z};
+        Vector3 p100{max.x, min.y, min.z};
+        Vector3 p110{max.x, min.y, max.z};
+        Vector3 p010{min.x, min.y, max.z};
+        Vector3 p001{min.x, max.y, min.z};
+        Vector3 p101{max.x, max.y, min.z};
+        Vector3 p111{max.x, max.y, max.z};
+        Vector3 p011{min.x, max.y, max.z};
+
+        // Bottom (-Y)
+        AddQuad(
+            vertices, indices,
+            p000, p010, p110, p100,
+            {0.0f, -1.0f, 0.0f}
+        );
+
+        // Top (+Y)
+        AddQuad(
+            vertices, indices,
+            p001, p101, p111, p011,
+            {0.0f, 1.0f, 0.0f}
+        );
+
+        // North / back (-Z)
+        AddQuad(
+            vertices, indices,
+            p000, p100, p101, p001,
+            {0.0f, 0.0f, -1.0f}
+        );
+
+        // South / front (+Z)
+        AddQuad(
+            vertices, indices,
+            p010, p011, p111, p110,
+            {0.0f, 0.0f, 1.0f}
+        );
+
+        // West / left (-X)
+        AddQuad(
+            vertices, indices,
+            p000, p001, p011, p010,
+            {-1.0f, 0.0f, 0.0f}
+        );
+
+        // East / right (+X)
+        AddQuad(
+            vertices, indices,
+            p100, p110, p111, p101,
+            {1.0f, 0.0f, 0.0f}
+        );
+    }
+
     /*
         Adds a wall along one axis with a centered doorway.
 
@@ -69,7 +128,7 @@ namespace
             right wall segment
             wall above the doorway
     */
-    void AddWallWithDoor(
+    void AddWall(
         std::vector<Vertex>& vertices,
         std::vector<uint16_t>& indices,
         float half_size,
@@ -86,48 +145,22 @@ namespace
         float left = -half_size;
         float right = half_size;
 
-        /*
-            Horizontal walls run along X.
+        int protrude_direction = positive_side ? -1 : 1;
 
-            Vertical walls run along Z.
-
-            `positive_side` determines which side of the room
-            the wall is on, which determines the normal.
-        */
-
-        Vector3 normal{0};
-
-        if (horizontal)
-        {
-            normal = {
-                0.0f,
-                0.0f,
-                positive_side ? 1.0f : -1.0f
-            };
-        }
-        else
-        {
-            normal = {
-                positive_side ? 1.0f : -1.0f,
-                0.0f,
-                0.0f
-            };
-        }
-
-        auto make_point = [&](float along, float height)
+        auto make_point = [&](float along, float height, float protrude)
         {
             if (horizontal)
             {
                 return Vector3{
                     along,
                     height,
-                    fixed_position
+                    fixed_position + protrude_direction * protrude
                 };
             }
             else
             {
                 return Vector3{
-                    fixed_position,
+                    fixed_position + protrude_direction * protrude,
                     height,
                     along
                 };
@@ -136,14 +169,11 @@ namespace
 
         if (!has_door)
         {
-            AddQuad(
+            AddBox(
                 vertices,
                 indices,
-                make_point(left, 0.0f),
-                make_point(right, 0.0f),
-                make_point(right, wall_height),
-                make_point(left, wall_height),
-                normal
+                make_point(left, 0.0f, 0),
+                make_point(right, wall_height, WALL_THICKNESS)
             );
 
             return;
@@ -156,14 +186,11 @@ namespace
         */
         if (left < -door_half)
         {
-            AddQuad(
+            AddBox(
                 vertices,
                 indices,
-                make_point(left, 0.0f),
-                make_point(-door_half, 0.0f),
-                make_point(-door_half, wall_height),
-                make_point(left, wall_height),
-                normal
+                make_point(left, 0.0f, 0),
+                make_point(-door_half, wall_height, WALL_THICKNESS)
             );
         }
 
@@ -172,32 +199,24 @@ namespace
         */
         if (door_half < right)
         {
-            AddQuad(
+            AddBox(
                 vertices,
                 indices,
-                make_point(door_half, 0.0f),
-                make_point(right, 0.0f),
-                make_point(right, wall_height),
-                make_point(door_half, wall_height),
-                normal
+                make_point(door_half, 0.0f, 0),
+                make_point(right, wall_height, WALL_THICKNESS)
             );
         }
 
         /*
             Wall above the doorway.
-
             This is the lintel/header above the opening.
         */
-        AddQuad(
+        AddBox(
             vertices,
             indices,
-            make_point(-door_half, wall_height * 0.8f),
-            make_point(door_half, wall_height * 0.8f),
-            make_point(door_half, wall_height),
-            make_point(-door_half, wall_height),
-            normal
+            make_point(-door_half, wall_height * 0.8f, 0),
+            make_point(door_half, wall_height, WALL_THICKNESS)
         );
-
         /*
             The portion below the doorway is intentionally absent.
             The doorway extends all the way down to the floor.
@@ -217,12 +236,7 @@ inline Mesh generate_room_mesh(
 
     const float half = room_size * 0.5f;
 
-    /*
-        --------------------------------------------------
-        FLOOR
-        --------------------------------------------------
-    */
-
+    // floor
     AddQuad(
         vertices,
         indices,
@@ -236,13 +250,8 @@ inline Mesh generate_room_mesh(
         {0.0f, 1.0f, 0.0f}
     );
 
-    /*
-        --------------------------------------------------
-        NORTH WALL (-Z)
-        --------------------------------------------------
-    */
-
-    AddWallWithDoor(
+    // north
+    AddWall(
         vertices,
         indices,
         half,
@@ -254,13 +263,8 @@ inline Mesh generate_room_mesh(
         false       // outward normal = -Z
     );
 
-    /*
-        --------------------------------------------------
-        SOUTH WALL (+Z)
-        --------------------------------------------------
-    */
-
-    AddWallWithDoor(
+    // south
+    AddWall(
         vertices,
         indices,
         half,
@@ -272,13 +276,8 @@ inline Mesh generate_room_mesh(
         true        // outward normal = +Z
     );
 
-    /*
-        --------------------------------------------------
-        WEST WALL (-X)
-        --------------------------------------------------
-    */
-
-    AddWallWithDoor(
+    // west
+    AddWall(
         vertices,
         indices,
         half,
@@ -290,13 +289,8 @@ inline Mesh generate_room_mesh(
         false       // outward normal = -X
     );
 
-    /*
-        --------------------------------------------------
-        EAST WALL (+X)
-        --------------------------------------------------
-    */
-
-    AddWallWithDoor(
+    // east
+    AddWall(
         vertices,
         indices,
         half,
@@ -308,12 +302,8 @@ inline Mesh generate_room_mesh(
         true        // outward normal = +X
     );
 
-    /*
-        --------------------------------------------------
-        CONVERT TO RAYLIB MESH
-        --------------------------------------------------
-    */
 
+    // Convert to raylib mesh
     Mesh mesh = {0};
 
     mesh.vertexCount = static_cast<int>(vertices.size());
