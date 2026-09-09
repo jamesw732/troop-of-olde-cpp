@@ -9,9 +9,9 @@
 
 inline void register_disconnect_system(flecs::world& world, auto& netid_to_entity) {
     world.system<ClientId, const Disconnected>()
-        .each([&] (flecs::entity entity, ClientId& network_id, const Disconnected&) {
+        .each([&] (flecs::entity entity, ClientId& client_id, const Disconnected&) {
             std::cout << "Removing disconnected player" << '\n';
-            netid_to_entity.erase(network_id.id);
+            netid_to_entity.erase(client_id.id);
             entity.destruct();
         }
     );

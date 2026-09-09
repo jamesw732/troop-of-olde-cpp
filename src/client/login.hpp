@@ -27,7 +27,7 @@ struct LoginHandler {
             std::cout << "Received login packet\n";
             for (PlayerSpawnState spawn_state: pkt.spawn_states) {
                 flecs::entity entity;
-                if (spawn_state.network_id == pkt.local_player_id) {
+                if (spawn_state.client_id == pkt.local_player_id) {
                     entity = create_local_player(world);
                     entity.set<CamRotation>({30});
                 }
@@ -53,7 +53,7 @@ struct LoginHandler {
             flecs::entity entity = create_remote_player(world);
             apply_spawn_state(entity, spawn_state);
             // std::cout << "Single Spawn Packet: " << '\n';
-            // std::cout << spawn_state.network_id.id << '\n';
+            // std::cout << spawn_state.client_id.id << '\n';
             // for (auto pair: netid_to_entity) {
             //     std::cout <<  pair.first.id << ", " << pair.second << '\n';
             // }
@@ -62,7 +62,7 @@ struct LoginHandler {
     }
 
     void apply_spawn_state(flecs::entity entity, PlayerSpawnState spawn_state) {
-        entity.set<ClientId>({spawn_state.network_id});
+        entity.set<ClientId>({spawn_state.client_id});
         entity.set<PredPosition>({spawn_state.pos});
         entity.set<PredRotation>({spawn_state.rot});
         entity.set<PrevPredPosition>({spawn_state.pos});
@@ -76,7 +76,7 @@ struct LoginHandler {
         // Hardcode model
         entity.set<ModelPointer>({&loaded_models.at("paladin").model});
         entity.set<ModelAnimations>({&loaded_models.at("paladin").animations});
-        netid_to_entity[spawn_state.network_id] = entity;
+        netid_to_entity[spawn_state.client_id] = entity;
     }
 
     void create_dungeon() {

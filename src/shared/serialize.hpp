@@ -111,7 +111,7 @@ void serialize (S& s, Vector3& v) {
 
 template<typename S>
 void serialize(S& s, PlayerSpawnState& spawn_state) {
-    s.value4b(spawn_state.network_id);
+    s.value4b(spawn_state.client_id);
     s.text1b(spawn_state.name, 32);
     s.object(spawn_state.pos);
     s.object(spawn_state.rot);

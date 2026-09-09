@@ -144,7 +144,7 @@ struct ModelAnimations {
 };
 
 struct PlayerSpawnState {
-    uint32_t network_id;
+    uint32_t client_id;
     std::string name;
     Vector3 pos;
     Vector3 rot;
@@ -154,7 +154,7 @@ inline std::ostream& operator<<(std::ostream& os, const PlayerSpawnState& state)
     os << "PlayerSpawnState{\n";
     os << indent();
     print_indent(os);
-    os << "network_id: " << state.network_id << "\n";
+    os << "client_id: " << state.client_id << "\n";
     print_indent(os);
     os << "name: " << state.name << "\n";
     print_indent(os);

@@ -90,7 +90,7 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                 PredPosition, PredRotation, PredGravity, PredGrounded,
                 LocomotionBlendSpace>()
                 .each([&]
-                    (ClientId remote_network_id,
+                    (ClientId remote_client_id,
                      CurMoveTick remote_ack_tick,
                      PredPosition pred_pos,
                      PredRotation pred_rot,
@@ -98,11 +98,11 @@ inline void register_movement_networking_system(flecs::world& world, Network& ne
                      PredGrounded pred_grounded,
                      LocomotionBlendSpace remote_blend_space)
                 {
-                    if (remote_network_id.id == client_id.id) {
+                    if (remote_client_id.id == client_id.id) {
                         return;
                     }
                     MovementUpdate remote_move_update{
-                        remote_network_id.id,
+                        remote_client_id.id,
                         remote_ack_tick.val,
                         pred_pos.val,
                         pred_rot.val,

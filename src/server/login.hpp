@@ -48,11 +48,11 @@ struct LoginHandler {
             world.query<ClientId>()
                 .each([&] (const ClientId& tgt_client_id) {
                     if (login.client_id == tgt_client_id.id) {
-                        // std::cout << "Skipping client with network id " << tgt_network_id.id << '\n';
+                        // std::cout << "Skipping client with network id " << tgt_client_id.id << '\n';
                         return;
                     }
-                    // std::cout << "Sending character with network id " << network_id.id
-                    // << " to client with network id " << tgt_network_id.id
+                    // std::cout << "Sending character with network id " << client_id.id
+                    // << " to client with network id " << tgt_client_id.id
                     // << '\n';
                     auto [buffer, size] = serialize(spawn_packet);
                     network.queue_data_reliable(tgt_client_id.id, buffer, size);

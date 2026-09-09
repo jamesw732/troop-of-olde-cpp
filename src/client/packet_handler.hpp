@@ -52,7 +52,7 @@ struct PacketHandler {
                 des.object(batch);
 #ifndef DISABLE_SERVER
                 for (MovementUpdate move_update: batch.move_updates) {
-                    /* if (!netid_to_entity.contains(move_update.network_id)) { */
+                    /* if (!netid_to_entity.contains(move_update.client_id)) { */
                     /*     continue; */
                     /* } */
                     auto netid_entity = netid_to_entity.find(move_update.client_id);
