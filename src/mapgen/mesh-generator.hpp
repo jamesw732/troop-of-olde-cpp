@@ -15,12 +15,14 @@ const float WALL_REL_THICKNESS = 0.05;
 const float WALL_THICKNESS = WALL_REL_THICKNESS * GEN_ROOM_SIZE;
 const float WALL_REL_HEIGHT = 0.2f;
 const float WALL_HEIGHT = WALL_REL_HEIGHT * GEN_ROOM_SIZE;
-const float DOOR_REL_WIDTH = 0.3f;
+const float DOOR_REL_WIDTH = 0.15f;
 const float DOOR_WIDTH = DOOR_REL_WIDTH * GEN_ROOM_SIZE;
 const float DOOR_REL_HEIGHT = 0.8f;
 const float DOOR_HEIGHT = DOOR_REL_HEIGHT * GEN_ROOM_SIZE;
+
 const float HALF = 0.5f * GEN_ROOM_SIZE;
 const float DOOR_HALF = 0.5f * DOOR_WIDTH;
+const float FLOOR_HALF = HALF - WALL_THICKNESS;
 
 inline bool has_direction(Direction directions, Direction direction)
 {
@@ -34,6 +36,26 @@ struct Vertex
     Vector3 normal;
     Vector2 texcoord;
 };
+
+/*
+ * Make a point in world space from 
+ * floor_offset: the choice of wall to use. Coordinates are relative to the room, {1, 0} means the east wall
+ * wall_offset: where, relative to the bottom middle of the wall, the point should be placed
+ */
+inline Vector3 make_point(Vector2 floor_offset, Vector3 wall_offset) {
+    if (floor_offset.x) {
+        // make face along y, z in world axes
+        return Vector3{
+            (HALF - GEN_ROOM_SIZE * wall_offset.z) * floor_offset.x,
+            WALL_HEIGHT * wall_offset.y,
+            wall_offset.x
+        };
+    }
+    return Vector3{
+        wall_offset.x,
+        WALL_HEIGHT * wall_offset.y,
+        (HALF - GEN_ROOM_SIZE * wall_offset.z) * floor_offset.y};
+}
 
 inline void AddQuad(
         std::vector<Vertex>& vertices,
@@ -60,27 +82,20 @@ inline void AddQuad(
     indices.push_back(base + 3);
 }
 
-inline void AddWall(
+inline void AddInteriorWall(
     std::vector<Vertex>& vertices,
     std::vector<uint16_t>& indices,
     bool has_door,
     Vector2 floor_offset
 ){
-    auto make_point = [&] (Vector2 wall_offset) {
-        if (floor_offset.x) {
-            // make face along y, z in world axes
-            return Vector3{HALF * floor_offset.x, WALL_HEIGHT * wall_offset.y, HALF * wall_offset.x};
-        }
-        return Vector3{HALF * wall_offset.x, WALL_HEIGHT * wall_offset.y, HALF * floor_offset.y};
-    };
     Vector3 normal = {-floor_offset.x, 0, -floor_offset.y};
     if (!has_door) {
         AddQuad(
             vertices, indices,
-            make_point({-1, 0}),
-            make_point({-1, 1}),
-            make_point({1, 1}),
-            make_point({1, 0}),
+            make_point(floor_offset, {-0.5f + WALL_REL_THICKNESS, 0, WALL_REL_THICKNESS}),
+            make_point(floor_offset, {-0.5f + WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+            make_point(floor_offset, {0.5f - WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+            make_point(floor_offset, {0.5f - WALL_REL_THICKNESS, 0, WALL_REL_THICKNESS}),
             normal
         );
         return;
@@ -88,33 +103,117 @@ inline void AddWall(
     // Left side of door wall
     AddQuad(
         vertices, indices,
-        make_point({-1, 0}),
-        make_point({-1, 1}),
-        make_point({-DOOR_HALF, 1}),
-        make_point({-DOOR_HALF, 0}),
+        make_point(floor_offset, {-0.5f + WALL_REL_THICKNESS, 0, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-0.5f + WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-DOOR_HALF, 1, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-DOOR_HALF, 0, WALL_REL_THICKNESS}),
         normal
     );
     // Right side of door wall
     AddQuad(
         vertices, indices,
-        make_point({DOOR_HALF, 0}),
-        make_point({DOOR_HALF, 1}),
-        make_point({1, 1}),
-        make_point({1, 0}),
+        make_point(floor_offset, {DOOR_HALF, 0, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, 1, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {0.5f - WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {0.5f - WALL_REL_THICKNESS, 0, WALL_REL_THICKNESS}),
         normal
     );
     // The overhang above the door
     AddQuad(
         vertices, indices,
-        make_point({-DOOR_HALF, DOOR_HEIGHT}),
-        make_point({-DOOR_HALF, 1}),
-        make_point({DOOR_HALF, 1}),
-        make_point({DOOR_HALF, DOOR_HEIGHT}),
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT, WALL_THICKNESS}),
+        make_point(floor_offset, {-DOOR_HALF, 1, WALL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, 1, WALL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT, WALL_THICKNESS}),
+        normal
+    );
+    // The wall on the left side of the door connecting the interior to the exterior
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {-DOOR_HALF, 0, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT}),
+        make_point(floor_offset, {-DOOR_HALF, 0}),
+        normal
+    );
+    // The wall on the right side of the door connecting the interior to the exterior
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {DOOR_HALF, 0}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, 0, WALL_REL_THICKNESS}),
+        normal
+    );
+    // The little ceiling above the door
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT}),
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT}),
         normal
     );
 }
 
-inline Mesh make_mesh(std::vector<Vertex> vertices, std::vector<uint16_t> indices) {
+inline void AddExteriorWall(
+    std::vector<Vertex>& vertices,
+    std::vector<uint16_t>& indices,
+    bool has_door,
+    Vector2 floor_offset
+){
+    Vector3 normal = {-floor_offset.x, 0, -floor_offset.y};
+    // The trapezoid ceiling joining the interior and exterior walls
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {-0.5f, 1}),
+        make_point(floor_offset, {0.5f, 1}),
+        make_point(floor_offset, {0.5f - WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+        make_point(floor_offset, {-0.5f + WALL_REL_THICKNESS, 1, WALL_REL_THICKNESS}),
+        normal
+    );
+    if (!has_door) {
+        AddQuad(
+            vertices, indices,
+            make_point(floor_offset, {-0.5f, 0}),
+            make_point(floor_offset, {-0.5f, 1}),
+            make_point(floor_offset, {0.5f, 1}),
+            make_point(floor_offset, {0.5f, 0}),
+            normal
+        );
+        return;
+    } 
+    // Left side of door wall
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {-0.5f, 0}),
+        make_point(floor_offset, {-0.5f, 1}),
+        make_point(floor_offset, {-DOOR_HALF, 1}),
+        make_point(floor_offset, {-DOOR_HALF, 0}),
+        normal
+    );
+    // Right side of door wall
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {DOOR_HALF, 0}),
+        make_point(floor_offset, {DOOR_HALF, 1}),
+        make_point(floor_offset, {0.5f, 1}),
+        make_point(floor_offset, {0.5f, 0}),
+        normal
+    );
+    // The overhang above the door
+    AddQuad(
+        vertices, indices,
+        make_point(floor_offset, {-DOOR_HALF, DOOR_HEIGHT}),
+        make_point(floor_offset, {-DOOR_HALF, 1}),
+        make_point(floor_offset, {DOOR_HALF, 1}),
+        make_point(floor_offset, {DOOR_HALF, DOOR_HEIGHT}),
+        normal
+    );
+}
+
+
+inline Mesh vertices_to_mesh(std::vector<Vertex> vertices, std::vector<uint16_t> indices) {
     Mesh mesh = {0};
 
     mesh.vertexCount = static_cast<int>(vertices.size());
@@ -173,17 +272,24 @@ inline std::vector<Mesh> generate_room_meshes(Direction exits){
         {-HALF, 0.0f,  HALF},
         {0.0f, 1.0f, 0.0f}
     );
-    ret.push_back(make_mesh(floor_vertices, floor_indices));
+    ret.push_back(vertices_to_mesh(floor_vertices, floor_indices));
 
     // walls
     std::vector<Vertex> interior_vertices;
     std::vector<uint16_t> interior_indices;
-    AddWall(interior_vertices, interior_indices, has_direction(exits, Direction::Up), {0, -1});
-    AddWall(interior_vertices, interior_indices, has_direction(exits, Direction::Down), {0, 1});
-    AddWall(interior_vertices, interior_indices, has_direction(exits, Direction::Left), {-1, 0});
-    AddWall(interior_vertices, interior_indices, has_direction(exits, Direction::Right), {1, 0});
-    ret.push_back(make_mesh(interior_vertices, interior_indices));
-    ret.push_back({});
+    AddInteriorWall(interior_vertices, interior_indices, has_direction(exits, Direction::Up), {0, -1});
+    AddInteriorWall(interior_vertices, interior_indices, has_direction(exits, Direction::Down), {0, 1});
+    AddInteriorWall(interior_vertices, interior_indices, has_direction(exits, Direction::Left), {-1, 0});
+    AddInteriorWall(interior_vertices, interior_indices, has_direction(exits, Direction::Right), {1, 0});
+    ret.push_back(vertices_to_mesh(interior_vertices, interior_indices));
+
+    std::vector<Vertex> exterior_vertices;
+    std::vector<uint16_t> exterior_indices;
+    AddExteriorWall(exterior_vertices, exterior_indices, has_direction(exits, Direction::Up), {0, -1});
+    AddExteriorWall(exterior_vertices, exterior_indices, has_direction(exits, Direction::Down), {0, 1});
+    AddExteriorWall(exterior_vertices, exterior_indices, has_direction(exits, Direction::Left), {-1, 0});
+    AddExteriorWall(exterior_vertices, exterior_indices, has_direction(exits, Direction::Right), {1, 0});
+    ret.push_back(vertices_to_mesh(exterior_vertices, exterior_indices));
     return ret;
 }
 
