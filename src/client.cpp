@@ -68,22 +68,12 @@ int main()
     loaded_models.reserve(128);
     load_all_models(loaded_models);
 
-    auto test_triangles = world.entity();
-    Model test_triangle_model = loaded_models["test-triangles"].model;
-    test_triangle_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = RED;
-    test_triangle_model.materials[1].maps[MATERIAL_MAP_DIFFUSE].color = GREEN;
-    test_triangle_model.materials[2].maps[MATERIAL_MAP_DIFFUSE].color = BLUE;
-    test_triangles.set<Color>(WHITE);
-    test_triangles.set<ModelPointer>({&test_triangle_model});
-    test_triangles.add<Scale>();
-    test_triangles.add<SimPosition>();
-    test_triangles.add<SimRotation>();
-    test_triangles.add<RenderPosition>();
-    test_triangles.add<RenderRotation>();
-    test_triangles.set<Scale>({{50, 50, 50}});
-    Vector3 position{static_cast<float>(4 * ROOM_SIZE), 5, static_cast<float>(4 * ROOM_SIZE)};
-    test_triangles.set<SimPosition>({position});
-    test_triangles.set<RenderPosition>({position});
+    auto skybox = world.entity();
+    skybox.set<Color>(BLACK);
+    skybox.set<ModelPointer>({&loaded_models["cube"].model});
+    skybox.add<RenderPosition>();
+    skybox.add<RenderRotation>();
+    skybox.set<Scale>({{500, 500, 500}});
 
 
     // Register ECS systems
