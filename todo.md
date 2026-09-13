@@ -1,7 +1,6 @@
 # Right now:
 Todo:
 - Beef up dungeon meshes
-    - Walls with thickness
     - Textures
 
 

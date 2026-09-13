@@ -35,9 +35,11 @@ inline RayCollision find_closest_collision(
         {
             Ray ray{pos, Vector3Normalize(dir)};
             Matrix transform = get_transformation_matrix(mesh_pos.val, mesh_rot.val, mesh_scale.val);
-            const RayCollision collision = GetRayCollisionMesh(ray, *model.model->meshes, transform);
-            if(!collision.hit || closest_collision.distance <= collision.distance) return;
-            closest_collision = collision;
+            for (int mesh_idx = 0; mesh_idx < model.model->materialCount; mesh_idx++) {
+                const RayCollision collision = GetRayCollisionMesh(ray, model.model->meshes[mesh_idx], transform);
+                if(!collision.hit || closest_collision.distance <= collision.distance) continue;
+                closest_collision = collision;
+            }
         }
     );
     return closest_collision;

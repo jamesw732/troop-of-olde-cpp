@@ -31,8 +31,13 @@ inline void load_all_models(std::unordered_map<std::string, ModelAsset>& loaded_
     /* loaded_models["sample_world"] = {LoadModel((MODEL_DIR "sample_world.glb"))}; */
     for (int i = 1; i < 16; i++) {
         std::string roomname = "room_" + std::to_string(i);
-        loaded_models[roomname] = {LoadModel((ROOM_DIR + roomname + ".obj").c_str())};
+        
+        Model room = LoadModel((ROOM_DIR + roomname + ".obj").c_str());
+        room.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
+        room.materials[1].maps[MATERIAL_MAP_DIFFUSE].color = MAGENTA;
+        loaded_models[roomname] = {room};
     }
+    loaded_models["test-triangles"] = {LoadModel((MODEL_DIR "test-triangles.obj"))};
     loaded_models["cube"] = {LoadModel((MODEL_DIR "cube.glb"))};
     loaded_models["quad"] = {LoadModel((MODEL_DIR "quad.glb"))};
 
